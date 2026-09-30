@@ -76,6 +76,8 @@ select {
   background: var(--surface); color: var(--ink);
   border: 1px solid var(--line); border-radius: 8px; max-width: 100%;
 }
+.theme-note { margin: 0; padding: 8px 12px; font-size: 0.85rem; color: var(--muted); background: var(--accent-soft); border-left: 3px solid var(--gold); border-radius: 6px; }
+.selects { display: flex; flex-wrap: wrap; gap: 10px; }
 .count { color: var(--muted); font-size: 0.9rem; margin: 6px 0 14px; }
 
 .group { margin-top: 28px; }
@@ -113,6 +115,7 @@ select {
   .brand { gap: 14px; }
   .brand img { width: 76px; }
   .row { grid-template-columns: 1fr; }
+  .selects { flex-direction: column; }
   select { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -135,8 +138,13 @@ select {
   </header>
 
   <div class="controls">
+    <div class="chips" id="themes" role="group" aria-label="ธีมพิเศษ"></div>
+    <p class="theme-note" id="themeNote" hidden></p>
     <div class="chips" id="sectors" role="group" aria-label="กลุ่มอุตสาหกรรม"></div>
-    <select id="issuer" aria-label="กรองตามผู้ออก DR"></select>
+    <div class="selects">
+      <select id="country" aria-label="กรองตามประเทศ"></select>
+      <select id="issuer" aria-label="กรองตามผู้ออก DR"></select>
+    </div>
   </div>
   <div class="count" id="count" aria-live="polite"></div>
 
@@ -161,6 +169,17 @@ const COUNTRY = {
   TH: "ไทย", NL: "เนเธอร์แลนด์", CH: "สวิตเซอร์แลนด์", IL: "อิสราเอล", DE: "เยอรมนี",
   IN: "อินเดีย", KR: "เกาหลีใต้", TW: "ไต้หวัน", IE: "ไอร์แลนด์", SE: "สวีเดน",
   DK: "เดนมาร์ก", FR: "ฝรั่งเศส", IT: "อิตาลี", UY: "อุรุกวัย", CA: "แคนาดา", WW: "ทั่วโลก"
+};
+
+// ธีมพิเศษ: กรองข้ามกลุ่มอุตสาหกรรมตามชื่อย่อหุ้น เพิ่มธีมใหม่ได้ที่นี่
+const THEMES = {
+  mag7: { name: "7 นางฟ้า", tk: ["AAPL", "MSFT", "GOOGL", "GOOG", "AMZN", "NVDA", "META", "TSLA"] },
+  // หุ้นร้อนแรง: รายชื่อคัดเอง แก้ tk กับ note ได้ตามต้องการ
+  hot: {
+    name: "หุ้นร้อนแรง",
+    tk: ["MICRON", "SNDK", "NVDA", "AMD", "SPACEX", "MRVL", "GOOG", "META", "ALAB", "AMAT", "ASML", "AVGO", "COHR", "CRDO", "INTEL", "KIOXIA", "KLAC", "LITE", "LRCX", "MURATA", "QCOM", "SEAGATE", "SOXX", "TEL", "WDC", "HPE", "NET", "PLTR", "SNOW", "HOOD", "NBIS", "RKLB", "ASTS", "ZAI", "BE", "AMGN", "LLY", "CAT", "ETN", "VRT", "ANET"],
+    note: "รายชื่อที่ผู้ดูแลเว็บคัดไว้ ไม่ใช่ข้อมูลสดและไม่ได้จัดอันดับจากราคาหรือวอลุ่ม ไม่ใช่คำแนะนำการลงทุน"
+  }
 };
 
 const RAW = `
@@ -553,18 +572,28 @@ RAW.split("\n").forEach(line => {
 // ---- ตัวช่วย ----
 const $ = id => document.getElementById(id);
 const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const state = { q: "", sector: "all", issuer: "all" };
+const state = { q: "", sector: "all", issuer: "all", country: "all", theme: "all" };
 const total = g => g.rows.reduce((n, r) => n + r[3].length, 0);
 
 // ---- วาดตัวกรอง ----
 function drawControls() {
   const all = DATA.reduce((n, g) => n + total(g), 0);
   const items = [{ id: "all", name: "ทั้งหมด", n: all }, ...DATA.map(g => ({ id: g.id, name: g.name, n: total(g) }))];
+  const themeN = id => DATA.reduce((n, g) => n + g.rows.filter(r => THEMES[id].tk.includes(r[0])).reduce((m, r) => m + r[3].length, 0), 0);
+  $("themes").innerHTML = Object.entries(THEMES).map(([id, t]) =>
+    `<button class="chip" type="button" data-t="${id}" aria-pressed="${state.theme === id}" title="${esc(t.tk.join(", "))}">${esc(t.name)}<span class="n">${themeN(id)}</span></button>`
+  ).join("");
   $("sectors").innerHTML = items.map(s =>
     `<button class="chip" type="button" data-s="${s.id}" aria-pressed="${state.sector === s.id}">${esc(s.name)}<span class="n">${s.n}</span></button>`
   ).join("");
   $("issuer").innerHTML = `<option value="all">ผู้ออก DR ทั้งหมด</option>` +
     Object.entries(ISSUERS).map(([k, v]) => `<option value="${k}">${k} · ${esc(v)}</option>`).join("");
+  const byCty = {};
+  DATA.forEach(g => g.rows.forEach(r => { byCty[r[1]] = (byCty[r[1]] || 0) + r[3].length; }));
+  $("country").innerHTML = `<option value="all">ทุกประเทศ</option>` +
+    Object.entries(byCty).sort((a, b) => b[1] - a[1])
+      .map(([c, n]) => `<option value="${c}">${esc(COUNTRY[c] || c)} (${n})</option>`).join("");
+  $("country").value = state.country;
   $("issuer").value = state.issuer;
   $("legend").innerHTML = Object.entries(ISSUERS).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
   const refs = DATA.reduce((n, g) => n + g.rows.length, 0);
@@ -576,7 +605,9 @@ function render() {
   const q = state.q.trim().toLowerCase();
   let shownRefs = 0, shownDRs = 0;
   const html = DATA.filter(g => state.sector === "all" || g.id === state.sector).map(g => {
-    const rows = g.rows.filter(([tk, , name, codes]) => {
+    const rows = g.rows.filter(([tk, cty, name, codes]) => {
+      if (state.theme !== "all" && !THEMES[state.theme].tk.includes(tk)) return false;
+      if (state.country !== "all" && cty !== state.country) return false;
       if (state.issuer !== "all" && !codes.includes(state.issuer)) return false;
       if (!q) return true;
       return tk.toLowerCase().includes(q) || name.toLowerCase().includes(q) ||
@@ -606,13 +637,26 @@ function render() {
 
 // ---- events ----
 $("q").addEventListener("input", e => { state.q = e.target.value; render(); });
+$("country").addEventListener("change", e => { state.country = e.target.value; render(); });
 $("issuer").addEventListener("change", e => { state.issuer = e.target.value; render(); });
+$("themes").addEventListener("click", e => {
+  const b = e.target.closest("button[data-t]"); if (!b) return;
+  state.theme = state.theme === b.dataset.t ? "all" : b.dataset.t;
+  document.querySelectorAll("#themes .chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.t === state.theme));
+  const t = THEMES[state.theme];
+  $("themeNote").textContent = t && t.note ? t.note : "";
+  $("themeNote").hidden = !(t && t.note);
+  render();
+});
 $("sectors").addEventListener("click", e => {
   const b = e.target.closest("button[data-s]"); if (!b) return;
   state.sector = b.dataset.s;
   document.querySelectorAll("#sectors .chip").forEach(c => c.setAttribute("aria-pressed", c === b));
   render();
 });
+
+const qp = new URLSearchParams(location.search).get("q");
+if (qp) { state.q = qp; $("q").value = qp; }
 
 drawControls();
 render();
