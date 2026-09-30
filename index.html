@@ -596,8 +596,7 @@ function drawControls() {
   $("country").value = state.country;
   $("issuer").value = state.issuer;
   $("legend").innerHTML = Object.entries(ISSUERS).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
-  const refs = DATA.reduce((n, g) => n + g.rows.length, 0);
-  $("note").textContent = `รวม ${all} DR จาก ${refs} หุ้นอ้างอิง ข้อมูลจากบทความ "สรุป DR ทั้งหมดในไทย" ส่วนที่ 1-5 ของ Dime! ณ วันที่ 28 ก.ย. 69 (ที่มา: SETSMART) รายชื่อ DR เปลี่ยนได้เมื่อมีตัวใหม่เข้าเทรด ควรเช็กกับ SET อีกรอบก่อนใช้อ้างอิง`;
+  $("note").textContent = "ข้อมูล ณ วันที่ 28 ก.ย. 69 (ที่มา: SETSMART)";
 }
 
 // ---- วาดรายการ ----
