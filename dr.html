@@ -106,6 +106,8 @@ h1 { font-size: clamp(1.55rem, 4.6vw, 2.3rem); font-weight: 700; line-height: 1.
 .tile-n { font-size: 0.85rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .tile-sub { font-size: 0.8rem; color: var(--muted); overflow-wrap: anywhere; }
 .tile .st { color: var(--gold); }
+.acct { margin: 10px 0 0; font-size: 0.85rem; color: var(--muted); }
+.acct b { color: var(--ink); font-weight: 600; }
 .theme-note { margin: 10px 0 0; padding: 8px 12px; font-size: 0.85rem; color: var(--muted); background: var(--accent-soft); border-left: 3px solid var(--gold); border-radius: 6px; }
 
 /* ---------- filters ---------- */
@@ -210,6 +212,7 @@ button.dr { font: inherit; font-size: 0.85rem; font-weight: 500; border: 0; curs
 
   <section class="tiles" id="themes" aria-label="ชุดหุ้นแนะนำ"></section>
   <p class="theme-note" id="themeNote" hidden></p>
+  <p class="acct" id="acct" hidden></p>
 
   <div class="controls">
     <div class="fgroup" role="group" aria-label="กลุ่มอุตสาหกรรม"><span class="flabel">กลุ่ม</span><div class="fgroup" id="sectors"></div></div>
@@ -288,7 +291,47 @@ function setData(raw) {
   validKeys = new Set(allRows.map(r => rowKey(r[0], r[2])));
   try { stars = new Set((JSON.parse(localStorage.getItem(STAR_KEY) || "[]") || []).filter(k => validKeys.has(k))); } catch (e) {}
 }
-const saveStars = () => { try { localStorage.setItem(STAR_KEY, JSON.stringify([...stars])); } catch (e) {} };
+const saveLocal = () => { try { localStorage.setItem(STAR_KEY, JSON.stringify([...stars])); } catch (e) {} };
+let cloudTimer = null;
+function pushCloud() {   // ซิงก์ Watchlist ขึ้น Firestore ของบัญชีนี้ (หน่วง 1 วินาทีเผื่อกดหลายตัวติดกัน)
+  clearTimeout(cloudTimer);
+  cloudTimer = setTimeout(async () => {
+    try {
+      const N = window.NLP, u = N && N.auth && N.auth.currentUser; if (!u) return;
+      await N.F.setDoc(N.F.doc(N.db, "watchlists", u.uid), { items: [...stars].slice(0, 500), updatedAt: N.F.serverTimestamp() });
+    } catch (e) {}
+  }, 1000);
+}
+const saveStars = () => { saveLocal(); pushCloud(); };
+async function loadCloudStars() {   // ถ้ามีของเดิมบนคลาวด์ ใช้ตามคลาวด์ ถ้ายังไม่มีและในเครื่องมี ส่งขึ้นไป
+  try {
+    const N = window.NLP, u = N.auth.currentUser; if (!u) return;
+    const s = await N.F.getDoc(N.F.doc(N.db, "watchlists", u.uid));
+    if (s.exists()) { stars = new Set((s.data().items || []).filter(k => validKeys.has(k))); saveLocal(); }
+    else if (stars.size) pushCloud();
+  } catch (e) {}
+}
+function renderAcct() {
+  const N = window.NLP, u = N && N.auth && N.auth.currentUser, el = $("acct");
+  if (!u) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = u.isAnonymous
+    ? 'Watchlist เก็บในเครื่องนี้ ถ้าล้างข้อมูลเบราว์เซอร์หรือเปลี่ยนเครื่องจะหาย <button class="linkbtn" id="linkG" type="button">ผูกบัญชี Google เพื่อเก็บถาวร</button>'
+    : 'Watchlist บันทึกกับบัญชี <b>' + esc(u.email || "Google") + '</b> ใช้ได้ทุกเครื่อง <button class="linkbtn" id="outG" type="button">ออกจากระบบ</button>';
+}
+$("acct").addEventListener("click", async e => {
+  const N = window.NLP;
+  if (e.target.id === "outG") { await N.A.signOut(N.auth); location.reload(); return; }
+  if (e.target.id !== "linkG") return;
+  try {
+    await N.A.linkWithPopup(N.auth.currentUser, new N.A.GoogleAuthProvider());   // ผูกกับตัวตนเดิม สิทธิ์สมาชิกและ Watchlist ไม่หาย
+    saveLocal(); pushCloud(); renderAcct();
+  } catch (err) {
+    if (err && err.code === "auth/credential-already-in-use") {   // บัญชี Google นี้เคยผูกไว้แล้ว (เช่นบนเครื่องอื่น) เข้าด้วยตัวตนเดิมนั้นแทน
+      try { await N.A.signInWithCredential(N.auth, N.A.GoogleAuthProvider.credentialFromError(err)); location.reload(); } catch (e2) { alert("เข้าสู่ระบบไม่สำเร็จ: " + (e2.code || e2.message)); }
+    } else if (!err || err.code !== "auth/popup-closed-by-user") alert("ผูกบัญชีไม่สำเร็จ: " + ((err && (err.code || err.message)) || err));
+  }
+});
 const starN = () => allRows.filter(r => stars.has(rowKey(r[0], r[2]))).reduce((n, r) => n + r[3].length, 0);
 
 const themeMatch = (id, tk, key) => id === "star" ? stars.has(key) : THEMES[id].tk.includes(tk);
@@ -512,11 +555,13 @@ async function boot() {
   if (!snap.exists()) { $("out").innerHTML = '<div class="list"><div class="empty">ยังไม่มีข้อมูล DR ให้ผู้ดูแลอัปโหลดที่หลังบ้าน</div></div>'; return; }
   const d = snap.data();
   setData(d.raw || "");
+  await loadCloudStars();
   if (Array.isArray(d.hotTk) && d.hotTk.length) THEMES.hot = { name: "หุ้นร้อนแรง", tk: d.hotTk, note: d.hotNote || "" };
   $("note").textContent = "ข้อมูล" + (d.asOf ? " ณ วันที่ " + d.asOf : "") + " (ที่มา: SETSMART)";
   readParams();
   initControls();
   render();
+  renderAcct();
 }
 boot();
 

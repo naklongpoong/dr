@@ -56,8 +56,19 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
 .seg button { font: inherit; font-size: 0.9rem; cursor: pointer; border: 0; background: transparent; color: var(--ink); padding: 4px 16px; border-radius: 999px; }
 .seg button[aria-pressed="true"] { background: var(--gold); color: var(--gold-ink); font-weight: 600; }
 .items { margin-top: 8px; }
+.pitem { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px 12px; margin: 10px 0; background: var(--bg); }
+.pitem input, .pitem textarea { background: var(--surface); }
+.pitem textarea { min-height: 64px; }
+.prow { display: flex; gap: 8px; align-items: center; }
+.prow input { font-weight: 700; text-transform: uppercase; max-width: 220px; }
+.pctl { display: flex; gap: 4px; margin-left: auto; flex: none; }
+.pctl button { font: inherit; font-size: 0.85rem; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 2px 10px; }
+.pctl button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.pctl .del { color: var(--err); }
+.mv { font: inherit; font-size: 0.8rem; padding: 1px 4px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); width: auto; max-width: 118px; }
 .it { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 0.92rem; }
 .it span { overflow-wrap: anywhere; } .it small { color: var(--muted); }
+.it > span:last-child { text-align: right; flex: none; }
 .drop { border: 2px dashed var(--line); border-radius: 12px; padding: 14px; text-align: center; color: var(--muted); font-size: 0.9rem; }
 .drop.over { border-color: var(--gold); background: var(--accent-soft); }
 .prev { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
@@ -101,11 +112,12 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
     <!-- ข่าว & งบ -->
     <section class="card" id="p-news">
       <h2>แปะข่าว / รายงานงบ</h2>
-      <div class="seg" role="group" aria-label="ประเภท"><button type="button" id="nTypeNews" aria-pressed="true">ข่าว</button><button type="button" id="nTypePrev" aria-pressed="false">พรีวิวงบ</button><button type="button" id="nTypeRes" aria-pressed="false">งบจริง</button></div>
+      <div class="stat warn" id="nEditBar" hidden>กำลังแก้ไข: <b id="nEditTitle"></b> · <button class="linkbtn" id="nCancel" type="button">ยกเลิกการแก้ไข</button></div>
+      <div class="seg" role="group" aria-label="ประเภท"><button type="button" id="nTypeNews" aria-pressed="true">ข่าว</button><button type="button" id="nTypePrev" aria-pressed="false">พรีวิวงบ</button><button type="button" id="nTypeRes" aria-pressed="false">งบหุ้นรายตัว</button></div>
       <label for="nText">ข้อความ (แปะจากเฟสได้เลย)</label>
       <textarea id="nText" maxlength="5000"></textarea>
       <div class="grid2">
-        <div><label for="nTickers">ชื่อหุ้น คั่นด้วยคอมมา (พรีวิวงบ/งบจริงต้องมีอย่างน้อย 1 ตัว)</label><input id="nTickers" type="text" placeholder="NVDA, AMD" autocomplete="off"></div>
+        <div><label for="nTickers">ชื่อหุ้น คั่นด้วยคอมมา (พรีวิวงบ/งบหุ้นรายตัวต้องมีอย่างน้อย 1 ตัว)</label><input id="nTickers" type="text" placeholder="NVDA, AMD" autocomplete="off"></div>
         <div id="nPerBox" hidden><label for="nPeriod">งวดงบ เช่น Q3/2026</label><input id="nPeriod" type="text" maxlength="20" autocomplete="off"></div>
         <div><label for="nLink">ลิงก์ต้นฉบับ (ไม่ใส่ก็ได้)</label><input id="nLink" type="url" placeholder="https://" autocomplete="off"></div>
       </div>
@@ -118,6 +130,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
     <!-- บทความ -->
     <section class="card" id="p-art" hidden>
       <h2>เขียนบทความ / บทวิเคราะห์</h2>
+      <div class="stat warn" id="aEditBar" hidden>กำลังแก้ไข: <b id="aEditTitle"></b> · <button class="linkbtn" id="aCancel" type="button">ยกเลิกการแก้ไข</button></div>
       <div class="grid2">
         <div><label for="aType">ประเภท</label><select id="aType"><option value="article">บทความ</option><option value="analysis">บทวิเคราะห์</option></select></div>
         <div><label for="aDate">วันที่</label><input id="aDate" type="date"></div>
@@ -158,8 +171,12 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
     <!-- หุ้นน่าสนใจ -->
     <section class="card" id="p-picks" hidden>
       <h2>หุ้นน่าสนใจ</h2>
-      <p class="help">ขึ้นเป็นการ์ดบนหน้าข่าว แต่ละใบมีลิงก์ไปกราฟบน Finviz พิมพ์บรรทัดละตัว รูปแบบ <b>ชื่อย่อ | หมายเหตุสั้นๆ</b> (หมายเหตุไม่ใส่ก็ได้) Finviz มีเฉพาะหุ้นที่จดทะเบียนในสหรัฐฯ ใช้สัญลักษณ์ตามตลาดสหรัฐฯ เช่น NVDA, BRK-B</p>
-      <textarea id="pText" class="big" spellcheck="false" placeholder="NVDA | หมายเหตุสั้นๆ&#10;AMD"></textarea>
+      <p class="help">ขึ้นบนหน้าข่าวเป็นแถบชื่อหุ้น กดชื่อเพื่อกรองข่าว กด ↗ เพื่อไปกราฟบน Finviz (Finviz มีเฉพาะหุ้นสหรัฐฯ ใช้สัญลักษณ์ตลาดสหรัฐฯ เช่น NVDA, BRK-B)</p>
+      <label for="pTitle">ชื่อส่วน</label><input id="pTitle" type="text" maxlength="100" placeholder="หุ้นน่าสนใจ" autocomplete="off">
+      <label for="pNote">ที่มา / วิธีกรอง (เอามาจากไหน กรองยังไง ไม่ใส่ก็ได้)</label>
+      <textarea id="pNote" maxlength="800" style="min-height:80px" placeholder="เช่น คัดจากสกรีนเนอร์ Finviz ตามเงื่อนไข ... / มาจากบทความ ..."></textarea>
+      <label for="pTickers">ชื่อหุ้น วางทีเดียวได้ คั่นด้วยเว้นวรรค คอมมา หรือขึ้นบรรทัดใหม่ (สูงสุด 100 ตัว)</label>
+      <textarea id="pTickers" class="big" spellcheck="false" placeholder="NVDA AMD MSFT BRK-B"></textarea>
       <div class="stat" id="pSum" hidden></div>
       <p class="msg" id="pMsg" role="alert" hidden></p>
       <button class="btn alt" id="pLoad" type="button">โหลดรายการปัจจุบัน</button><button class="btn" id="pSave" type="button">บันทึก</button>
@@ -190,6 +207,8 @@ const fmtTime = ts => { const d = ts && ts.toDate ? ts.toDate() : null; return d
 const fmtCode = c => (c.match(/.{1,4}/g) || []).join("-");
 let N = null;
 const loaded = {};
+let editing = null;   // {id, createdAt, imgCreatedAt} เมื่อกำลังแก้ไขบทความเดิม
+const artCache = {};
 
 function note(id, text, ok) { const m = $(id); m.textContent = text || ""; m.hidden = !text; m.classList.toggle("ok", !!ok); }
 function fail(id, e) { note(id, e && e.code === "permission-denied" ? "บัญชีนี้ไม่มีสิทธิ์ หรือยังไม่ได้ตั้ง firestore.rules" : "ผิดพลาด: " + ((e && (e.code || e.message)) || e)); }
@@ -200,6 +219,7 @@ async function init() {
   N.A.onAuthStateChanged(N.auth, u => {
     const ok = u && u.provider !== "anonymous" && !u.isAnonymous;
     $("loginBox").hidden = !!ok; $("panel").hidden = !ok;
+    try { if (ok) localStorage.setItem("nlp_admin", "1"); else localStorage.removeItem("nlp_admin"); } catch (e) {}   // เครื่องนี้ไม่นับยอดดู
     if (ok) { $("who").textContent = u.email || u.displayName || ""; if (!loaded.news) { loaded.news = true; loadNews(); } }
   });
 }
@@ -214,19 +234,81 @@ $("tabs").addEventListener("click", e => {
   if (!loaded[b.dataset.p]) { loaded[b.dataset.p] = true; ({ art: loadArticles, dr: loadDr, picks: loadPicks, code: loadCode })[b.dataset.p](); }
 });
 
+// ---------- ย้ายหมวด ----------
+const KIND_LABEL = { news: "ข่าว", preview: "พรีวิวงบ", result: "งบหุ้นรายตัว", article: "บทความ", analysis: "บทวิเคราะห์" };
+const kindOf = (col, d) => col === "news" ? "news" : (col === "earnings" ? (d.kind === "preview" ? "preview" : "result") : (d.type === "analysis" ? "analysis" : "article"));
+const moveSelect = (col, id, d) => `<select class="mv" data-mv="${col}/${esc(id)}" aria-label="ย้ายหมวด"><option value="">ย้ายไป…</option>${Object.entries(KIND_LABEL).filter(([k]) => k !== kindOf(col, d)).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select>`;
+const ymd = ts => { const d = ts && ts.toDate ? ts.toDate() : new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+async function moveItem(col, id, d, to) {
+  const toCol = to === "news" ? "news" : (to === "preview" || to === "result") ? "earnings" : "articles";
+  if (toCol === col) {   // อยู่ที่เก็บเดียวกัน (พรีวิว↔งบ หรือ บทความ↔บทวิเคราะห์) แค่เปลี่ยนประเภท
+    await N.F.setDoc(N.F.doc(N.db, col, id), toCol === "earnings" ? { kind: to, updatedAt: N.F.serverTimestamp() } : { type: to, updatedAt: N.F.serverTimestamp() }, { merge: true });
+    return;
+  }
+  const views = d.views || 0, createdAt = d.createdAt, tickers = d.tickers || [];
+  const link = col === "articles" ? (d.url || "") : (d.link || "");
+  const text = col === "articles" ? ((d.title || "") + (d.body ? "\n\n" + d.body : "")).slice(0, 10000) : (d.text || "");
+  let data;
+  if (toCol === "news") data = { text, link, tickers, createdAt, views };
+  else if (toCol === "earnings") {
+    if (!tickers.length) throw new Error("ต้องมีชื่อหุ้นอย่างน้อย 1 ตัวก่อนย้ายเป็นพรีวิวงบ/งบหุ้นรายตัว กดแก้ไขใส่ชื่อหุ้นก่อน");
+    data = { text, link, tickers, period: "", kind: to, createdAt, views };
+  } else {
+    const t = (d.text || "").trim(), first = (t.split("\n").find(l => l.trim()) || "(ไม่มีหัวข้อ)").trim();
+    data = { type: to, date: ymd(createdAt), title: first.slice(0, 200), summary: "", body: t.slice(0, 20000), tickers, url: link.slice(0, 1000), thumb: "", hasImages: false, createdAt, views };
+  }
+  const batch = N.F.writeBatch(N.db);
+  batch.set(N.F.doc(N.F.collection(N.db, toCol)), data);
+  batch.delete(N.F.doc(N.db, col, id));
+  if (col === "articles" && d.hasImages) batch.delete(N.F.doc(N.db, "articleImages", id));
+  await batch.commit();
+}
+document.addEventListener("change", async e => {
+  const sel = e.target.closest(".mv"); if (!sel || !sel.value) return;
+  const to = sel.value, [col, id] = sel.dataset.mv.split("/"), d = col === "articles" ? artCache[id] : nCache[col + "/" + id];
+  sel.value = ""; if (!d) return;
+  const from = kindOf(col, d), warn = [];
+  if (col === "articles" && to !== "article" && to !== "analysis") { warn.push("หัวข้อจะรวมกับเนื้อหาเป็นข้อความเดียว"); if (d.hasImages) warn.push("รูปประกอบจะหาย (ข่าวและงบไม่รองรับรูป)"); }
+  if (col !== "articles" && (to === "article" || to === "analysis")) warn.push("หัวข้อจะใช้บรรทัดแรกของข้อความ");
+  if (col === "earnings" && to !== "preview" && to !== "result") warn.push("งวดงบจะหาย");
+  if (!confirm(`ย้ายจาก "${KIND_LABEL[from]}" ไป "${KIND_LABEL[to]}"?` + (warn.length ? "\n\n" + warn.join("\n") : "") + "\n\nวันที่เดิมและยอดดูจะยังอยู่")) return;
+  try {
+    await moveItem(col, id, d, to);
+    if (nEditing && nEditing.id === id) resetNews();
+    if (editing && editing.id === id) resetArticleForm();
+    note(col === "articles" ? "aMsg" : "nMsg", `ย้ายไป "${KIND_LABEL[to]}" แล้ว`, true); loadNews(); if (loaded.art) loadArticles();
+  } catch (err) { fail(col === "articles" ? "aMsg" : "nMsg", err); }
+});
+
 // ---------- ข่าว & งบ ----------
-let nType = "news";
+let nType = "news", nEditing = null;   // nEditing = {col, id, createdAt} เมื่อกำลังแก้ไขรายการเดิม
+const nCache = {};
 function setNType(t) { nType = t; $("nTypeNews").setAttribute("aria-pressed", t === "news"); $("nTypePrev").setAttribute("aria-pressed", t === "preview"); $("nTypeRes").setAttribute("aria-pressed", t === "result"); $("nPerBox").hidden = t === "news"; }
+function lockTypes() {   // ตอนแก้ไข สลับระหว่าง "ข่าว" กับ "พรีวิว/งบ" ไม่ได้ (อยู่คนละที่เก็บ) แต่สลับพรีวิว↔งบหุ้นรายตัวได้
+  $("nTypeNews").disabled = !!nEditing && nEditing.col === "earnings";
+  $("nTypePrev").disabled = !!nEditing && nEditing.col === "news";
+  $("nTypeRes").disabled = !!nEditing && nEditing.col === "news";
+}
 $("nTypeNews").onclick = () => setNType("news"); $("nTypePrev").onclick = () => setNType("preview"); $("nTypeRes").onclick = () => setNType("result");
+function resetNews() {
+  ["nText", "nTickers", "nPeriod", "nLink"].forEach(i => $(i).value = "");
+  nEditing = null; $("nEditBar").hidden = true; $("nPost").textContent = "โพสต์"; lockTypes(); setNType("news");
+}
+$("nCancel").onclick = () => { resetNews(); note("nMsg", ""); };
 $("nPost").onclick = async () => {
   const text = $("nText").value.trim(), tickers = parseTk($("nTickers").value), earn = nType !== "news";
   if (!text) return note("nMsg", "แปะข้อความก่อน");
-  if (earn && !tickers.length) return note("nMsg", "พรีวิวงบ/งบจริงต้องใส่ชื่อหุ้นอย่างน้อย 1 ตัว");
-  const doc = { text, link: safeUrl($("nLink").value.trim()), tickers, createdAt: N.F.serverTimestamp() };
-  if (earn) { doc.period = $("nPeriod").value.trim().slice(0, 20); doc.kind = nType; }
+  if (earn && !tickers.length) return note("nMsg", "พรีวิวงบ/งบหุ้นรายตัวต้องใส่ชื่อหุ้นอย่างน้อย 1 ตัว");
+  const isEdit = !!nEditing;
+  const docData = { text, link: safeUrl($("nLink").value.trim()), tickers, createdAt: isEdit ? nEditing.createdAt : N.F.serverTimestamp() };
+  if (earn) { docData.period = $("nPeriod").value.trim().slice(0, 20); docData.kind = nType; }
+  if (isEdit) docData.updatedAt = N.F.serverTimestamp();
   note("nMsg", ""); $("nPost").disabled = true;
-  try { await N.F.addDoc(N.F.collection(N.db, earn ? "earnings" : "news"), doc); ["nText", "nTickers", "nPeriod", "nLink"].forEach(i => $(i).value = ""); note("nMsg", "โพสต์แล้ว", true); loadNews(); }
-  catch (e) { fail("nMsg", e); }
+  try {
+    if (isEdit) await N.F.setDoc(N.F.doc(N.db, nEditing.col, nEditing.id), docData, { merge: true });   // merge = ยอดดูเดิมไม่หาย
+    else await N.F.addDoc(N.F.collection(N.db, earn ? "earnings" : "news"), docData);
+    resetNews(); note("nMsg", isEdit ? "บันทึกการแก้ไขแล้ว" : "โพสต์แล้ว", true); loadNews();
+  } catch (e) { fail("nMsg", e); }
   $("nPost").disabled = false;
 };
 async function loadNews() {
@@ -235,13 +317,25 @@ async function loadNews() {
     const [n, e] = await Promise.all([q("news"), q("earnings")]);
     const rows = [...n.docs.map(d => ({ col: "news", id: d.id, ...d.data() })), ...e.docs.map(d => ({ col: "earnings", id: d.id, ...d.data() }))]
       .sort((a, b) => (b.createdAt && b.createdAt.toDate ? b.createdAt.toDate() : 0) - (a.createdAt && a.createdAt.toDate ? a.createdAt.toDate() : 0));
-    $("nList").innerHTML = rows.map(r => `<div class="it"><span><small>${r.col === "earnings" ? (r.kind === "preview" ? "พรีวิวงบ" : "งบจริง") : "ข่าว"} · ${esc(fmtTime(r.createdAt))}</small><br>${esc((r.tickers || []).join(", "))} ${esc((r.text || "").slice(0, 90))}</span><button class="linkbtn" type="button" data-del="${r.col}/${esc(r.id)}">ลบ</button></div>`).join("") || "<p class='help'>ยังไม่มีรายการ</p>";
+    rows.forEach(r => { nCache[r.col + "/" + r.id] = r; });
+    $("nList").innerHTML = rows.map(r => `<div class="it"><span><small>${r.col === "earnings" ? (r.kind === "preview" ? "พรีวิวงบ" : "งบหุ้นรายตัว") : "ข่าว"} · ${esc(fmtTime(r.createdAt))} · ดู ${r.views || 0}</small><br>${esc((r.tickers || []).join(", "))} ${esc((r.text || "").slice(0, 90))}</span><span><button class="linkbtn" type="button" data-edit="${r.col}/${esc(r.id)}">แก้ไข</button> · <button class="linkbtn" type="button" data-del="${r.col}/${esc(r.id)}">ลบ</button><br>${moveSelect(r.col, r.id, r)}</span></div>`).join("") || "<p class='help'>ยังไม่มีรายการ</p>";
   } catch (e) { fail("nMsg", e); }
 }
 $("nList").addEventListener("click", async e => {
+  const ed = e.target.closest("[data-edit]");
+  if (ed) {
+    const r = nCache[ed.dataset.edit]; if (!r) return;
+    if (nEditing && !confirm("ทิ้งการแก้ไขที่ค้างอยู่แล้วเปิดรายการนี้แทน?")) return;
+    note("nMsg", ""); nEditing = { col: r.col, id: r.id, createdAt: r.createdAt };
+    setNType(r.col === "news" ? "news" : (r.kind === "preview" ? "preview" : "result")); lockTypes();
+    $("nText").value = r.text || ""; $("nTickers").value = (r.tickers || []).join(", "); $("nPeriod").value = r.period || ""; $("nLink").value = r.link || "";
+    $("nEditTitle").textContent = ((r.tickers || []).join(", ") + " " + (r.text || "")).trim().slice(0, 40); $("nEditBar").hidden = false; $("nPost").textContent = "บันทึกการแก้ไข";
+    $("nText").scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
   const b = e.target.closest("[data-del]"); if (!b || !confirm("ลบรายการนี้?")) return;
   const [c, id] = b.dataset.del.split("/");
-  try { await N.F.deleteDoc(N.F.doc(N.db, c, id)); loadNews(); } catch (err) { fail("nMsg", err); }
+  try { await N.F.deleteDoc(N.F.doc(N.db, c, id)); if (nEditing && nEditing.id === id) resetNews(); loadNews(); } catch (err) { fail("nMsg", err); }
 });
 
 // ---------- บทความ + รูป ----------
@@ -289,30 +383,60 @@ document.addEventListener("paste", e => { if ($("p-art").hidden) return; const f
 $("aDrop").addEventListener("drop", e => addFiles([...e.dataTransfer.files]));
 $("aDate").value = new Date().toISOString().slice(0, 10);
 
+function resetArticleForm() {
+  ["aTitle", "aSummary", "aBody", "aTickers", "aUrl"].forEach(i => $(i).value = ""); imgs.length = 0; drawPrev();
+  editing = null; $("aEditBar").hidden = true; $("aPost").textContent = "โพสต์บทความ";
+}
+$("aCancel").onclick = () => { resetArticleForm(); note("aMsg", ""); };
 $("aPost").onclick = async () => {
   const title = $("aTitle").value.trim(), date = $("aDate").value;
   if (!title) return note("aMsg", "ใส่หัวข้อก่อน");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return note("aMsg", "เลือกวันที่ก่อน");
   note("aMsg", ""); $("aPost").disabled = true;
+  const isEdit = !!editing;
   try {
-    const ref = N.F.doc(N.F.collection(N.db, "articles"));
+    const ref = isEdit ? N.F.doc(N.db, "articles", editing.id) : N.F.doc(N.F.collection(N.db, "articles"));
     const thumb = imgs.length ? await makeThumb(imgs[0]) : "";
-    if (imgs.length) await N.F.setDoc(N.F.doc(N.db, "articleImages", ref.id), { images: imgs.slice(), createdAt: N.F.serverTimestamp() });
-    await N.F.setDoc(ref, { type: $("aType").value, date, title, summary: $("aSummary").value.trim(), body: $("aBody").value.trim(), tickers: parseTk($("aTickers").value), url: safeUrl($("aUrl").value.trim()), thumb, hasImages: imgs.length > 0, createdAt: N.F.serverTimestamp() });
-    ["aTitle", "aSummary", "aBody", "aTickers", "aUrl"].forEach(i => $(i).value = ""); imgs.length = 0; drawPrev();
-    note("aMsg", "โพสต์บทความแล้ว", true); loadArticles();
+    if (imgs.length) await N.F.setDoc(N.F.doc(N.db, "articleImages", ref.id), { images: imgs.slice(), createdAt: isEdit && editing.imgCreatedAt ? editing.imgCreatedAt : N.F.serverTimestamp() });
+    else if (isEdit) await N.F.deleteDoc(N.F.doc(N.db, "articleImages", ref.id));
+    const docData = { type: $("aType").value, date, title, summary: $("aSummary").value.trim(), body: $("aBody").value.trim(), tickers: parseTk($("aTickers").value), url: safeUrl($("aUrl").value.trim()), thumb, hasImages: imgs.length > 0, createdAt: isEdit ? editing.createdAt : N.F.serverTimestamp() };
+    if (isEdit) docData.updatedAt = N.F.serverTimestamp();
+    await N.F.setDoc(ref, docData);
+    resetArticleForm();
+    note("aMsg", isEdit ? "บันทึกการแก้ไขแล้ว" : "โพสต์บทความแล้ว", true); loadArticles();
   } catch (e) { fail("aMsg", e); }
   $("aPost").disabled = false;
 };
 async function loadArticles() {
   try {
     const s = await N.F.getDocs(N.F.query(N.F.collection(N.db, "articles"), N.F.orderBy("createdAt", "desc"), N.F.limit(50)));
-    $("aList").innerHTML = s.docs.map(d => { const a = d.data(); return `<div class="it"><span><small>${a.type === "analysis" ? "บทวิเคราะห์" : "บทความ"} · ${esc(a.date)}${a.hasImages ? " · มีรูป" : ""}</small><br>${esc(a.title)}</span><button class="linkbtn" type="button" data-del="${esc(d.id)}">ลบ</button></div>`; }).join("") || "<p class='help'>ยังไม่มีบทความ</p>";
+    s.docs.forEach(d => { artCache[d.id] = d.data(); });
+    $("aList").innerHTML = s.docs.map(d => { const a = d.data(); return `<div class="it"><span><small>${a.type === "analysis" ? "บทวิเคราะห์" : "บทความ"} · ${esc(a.date)}${a.hasImages ? " · มีรูป" : ""} · ดู ${a.views || 0}</small><br>${esc(a.title)}</span><span><button class="linkbtn" type="button" data-edit="${esc(d.id)}">แก้ไข</button> · <button class="linkbtn" type="button" data-del="${esc(d.id)}">ลบ</button><br>${moveSelect("articles", d.id, a)}</span></div>`; }).join("") || "<p class='help'>ยังไม่มีบทความ</p>";
   } catch (e) { fail("aMsg", e); }
 }
 $("aList").addEventListener("click", async e => {
+  const ed = e.target.closest("[data-edit]"); if (!ed) return;
+  const id = ed.dataset.edit, a = artCache[id]; if (!a) return;
+  if (editing && !confirm("ทิ้งการแก้ไขที่ค้างอยู่แล้วเปิดบทความนี้แทน?")) return;
+  note("aMsg", ""); let old = [], imgCreated = null;
+  if (a.hasImages) {
+    try { const s = await N.F.getDoc(N.F.doc(N.db, "articleImages", id)); if (s.exists()) { old = s.data().images || []; imgCreated = s.data().createdAt; } }
+    catch (err) { return fail("aMsg", err); }
+  }
+  editing = { id, createdAt: a.createdAt, imgCreatedAt: imgCreated };
+  $("aType").value = a.type; $("aDate").value = a.date; $("aTitle").value = a.title; $("aSummary").value = a.summary || ""; $("aBody").value = a.body || "";
+  $("aTickers").value = (a.tickers || []).join(", "); $("aUrl").value = a.url || "";
+  imgs.length = 0; old.forEach(s => imgs.push(s)); drawPrev();
+  $("aEditTitle").textContent = a.title; $("aEditBar").hidden = false; $("aPost").textContent = "บันทึกการแก้ไข";
+  $("aTitle").scrollIntoView({ behavior: "smooth", block: "center" });
+});
+$("aList").addEventListener("click", async e => {
   const b = e.target.closest("[data-del]"); if (!b || !confirm("ลบบทความนี้ (รวมรูป)?")) return;
-  try { await N.F.deleteDoc(N.F.doc(N.db, "articles", b.dataset.del)); await N.F.deleteDoc(N.F.doc(N.db, "articleImages", b.dataset.del)); loadArticles(); } catch (err) { fail("aMsg", err); }
+  try {
+    await N.F.deleteDoc(N.F.doc(N.db, "articles", b.dataset.del)); await N.F.deleteDoc(N.F.doc(N.db, "articleImages", b.dataset.del));
+    if (editing && editing.id === b.dataset.del) resetArticleForm();
+    loadArticles();
+  } catch (err) { fail("aMsg", err); }
 });
 
 // ---------- ข้อมูล DR ----------
@@ -368,36 +492,44 @@ async function loadDr() {
 $("dLoad").onclick = loadDr;
 
 // ---------- หุ้นน่าสนใจ ----------
+const PICKS_MAX = 100;
 function parsePicks(text) {
-  const items = [], bad = [];
-  String(text).split("\n").forEach((line, i) => {
-    line = line.trim(); if (!line) return;
-    const k = line.indexOf("|"), t = (k < 0 ? line : line.slice(0, k)).trim().toUpperCase(), n = (k < 0 ? "" : line.slice(k + 1)).trim().slice(0, 120);
-    if (!TK_OK.test(t)) bad.push(i + 1); else if (!items.some(x => x.t === t)) items.push({ t, note: n });
+  const out = [], bad = [], dup = [];
+  String(text).split(/[\s,;]+/).forEach(w => {
+    w = w.trim().toUpperCase(); if (!w) return;
+    if (!TK_OK.test(w)) { bad.push(w); return; }
+    if (out.includes(w)) { dup.push(w); return; }
+    out.push(w);
   });
-  return { items, bad };
+  return { out, bad, dup };
 }
 function pCheck() {
-  const r = parsePicks($("pText").value), s = $("pSum"); s.hidden = false; s.classList.toggle("warn", r.bad.length > 0 || r.items.length > 30);
-  s.textContent = `พบ ${r.items.length} ตัว` + (r.items.length > 30 ? " (เกิน 30 ตัว บันทึกไม่ได้)" : "") + (r.bad.length ? ` · บรรทัดที่ชื่อหุ้นไม่ถูกต้อง: ${r.bad.join(", ")}` : "");
+  const r = parsePicks($("pTickers").value), s = $("pSum"); s.hidden = false;
+  s.classList.toggle("warn", r.bad.length > 0 || r.out.length > PICKS_MAX);
+  s.innerHTML = `พบ ${r.out.length} ตัว` + (r.out.length > PICKS_MAX ? ` (เกิน ${PICKS_MAX} ตัว บันทึกไม่ได้)` : "") +
+    (r.bad.length ? `<br>ชื่อที่ไม่ถูกต้อง (จะถูกข้าม): ${esc(r.bad.slice(0, 10).join(", "))}` : "") + (r.dup.length ? `<br>ซ้ำ (เก็บตัวแรก): ${esc(r.dup.slice(0, 10).join(", "))}` : "");
   return r;
 }
-$("pText").addEventListener("input", pCheck);
+$("pTickers").addEventListener("input", pCheck);
 async function loadPicks() {
   try {
-    const s = await N.F.getDoc(N.F.doc(N.db, "content", "picks"));
-    $("pText").value = s.exists() ? (s.data().items || []).map(x => x.note ? `${x.t} | ${x.note}` : x.t).join("\n") : "";
+    const s = await N.F.getDoc(N.F.doc(N.db, "content", "picks")), d = s.exists() ? s.data() : {};
+    $("pTitle").value = d.title || ""; $("pNote").value = d.note || d.intro || "";
+    $("pTickers").value = (d.tickers || (d.items || []).map(x => x.t) || []).join(" ");
     if (s.exists()) pCheck();
   } catch (e) { fail("pMsg", e); }
 }
 $("pLoad").onclick = loadPicks;
 $("pSave").onclick = async () => {
   const r = pCheck();
-  if (r.items.length > 30) return note("pMsg", "ใส่ได้ไม่เกิน 30 ตัว");
-  if (r.bad.length && !confirm("มีบรรทัดที่ชื่อหุ้นไม่ถูกต้อง " + r.bad.length + " บรรทัด (จะถูกข้าม) บันทึกต่อไหม?")) return;
+  if (!r.out.length) return note("pMsg", "ใส่ชื่อหุ้นก่อน");
+  if (r.out.length > PICKS_MAX) return note("pMsg", `ใส่ได้ไม่เกิน ${PICKS_MAX} ตัว`);
+  if (r.bad.length && !confirm("มีชื่อที่ไม่ถูกต้อง " + r.bad.length + " ตัว (จะถูกข้าม) บันทึกต่อไหม?")) return;
   note("pMsg", ""); $("pSave").disabled = true;
-  try { await N.F.setDoc(N.F.doc(N.db, "content", "picks"), { items: r.items, updatedAt: N.F.serverTimestamp() }); note("pMsg", "บันทึกแล้ว", true); }
-  catch (e) { fail("pMsg", e); }
+  try {
+    await N.F.setDoc(N.F.doc(N.db, "content", "picks"), { title: $("pTitle").value.trim().slice(0, 100), note: $("pNote").value.trim().slice(0, 800), tickers: r.out, updatedAt: N.F.serverTimestamp() });
+    note("pMsg", "บันทึกแล้ว", true);
+  } catch (e) { fail("pMsg", e); }
   $("pSave").disabled = false;
 };
 

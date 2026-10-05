@@ -24,6 +24,20 @@
     });
   };
   NLP.norm = function (s) { return String(s || "").replace(/[\s\-]/g, "").toUpperCase(); };
+  // นับคนดู: +1 ครั้งแรกที่เครื่องนี้เห็นรายการนั้น (เก็บรายการที่นับแล้วไว้ในเครื่อง) ผู้ดูแลไม่นับ
+  NLP.trackView = function (col, id) {
+    try {
+      var u = NLP.auth && NLP.auth.currentUser;
+      if (!u) return Promise.resolve(false);
+      try { if (localStorage.getItem("nlp_admin") === "1") return Promise.resolve(false); } catch (e) {}   // เครื่องของผู้ดูแลไม่นับ
+      var key = col + "/" + id, seen = [];
+      try { seen = JSON.parse(localStorage.getItem("nlp_viewed") || "[]"); } catch (e) {}
+      if (seen.indexOf(key) >= 0) return Promise.resolve(false);
+      seen.push(key); if (seen.length > 800) seen = seen.slice(-800);
+      try { localStorage.setItem("nlp_viewed", JSON.stringify(seen)); } catch (e) {}
+      return NLP.F.updateDoc(NLP.F.doc(NLP.db, col, id), { views: NLP.F.increment(1) }).then(function () { return true; }, function () { return false; });
+    } catch (e) { return Promise.resolve(false); }
+  };
   if (window.NLP_NO_GATE) return;   // หน้า admin ใช้ล็อกอินของตัวเอง
 
   var resolveReady, reloadAfter = false;
@@ -41,7 +55,8 @@
     "#gate button{margin-top:12px;font:inherit;font-weight:700;cursor:pointer;width:100%;padding:12px;border:0;border-radius:12px;background:#f5b301;color:#14213d;font-size:1rem}" +
     "#gate button:disabled{opacity:.6;cursor:default}#gate button:focus-visible{outline:3px solid #fff;outline-offset:2px}" +
     "#gate .err{margin-top:12px;color:#ff9b92;font-size:.92rem;min-height:1.2em}" +
-    "#gate .hint{margin-top:18px;font-size:.8rem;color:#8fa0c8}";
+    "#gate .hint{margin-top:18px;font-size:.8rem;color:#8fa0c8}" +
+    "#gate button.alt{background:transparent;color:#c9d5f2;border:1px solid rgba(255,255,255,.3);font-weight:500;font-size:.9rem;margin-top:16px}";
   var st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
 
   var gate, logoSrc = "";
@@ -63,9 +78,16 @@
       '<input id="gateCode" type="text" inputmode="text" autocapitalize="characters" spellcheck="false" placeholder="รหัสสมาชิก" required>' +
       '<button type="submit" id="gateBtn">เข้าสู่ระบบ</button></form>' +
       '<div class="err" id="gateErr" role="alert">' + esc(note || "") + "</div>" +
+      '<button type="button" class="alt" id="gateGoogle">เคยผูกบัญชี Google ไว้แล้ว? เข้าสู่ระบบด้วย Google</button>' +
       '<div class="hint">รหัสเปลี่ยนทุกเดือน ขอรหัสล่าสุดจากแอดมิน</div>');
     var f = document.getElementById("gateForm"), inp = document.getElementById("gateCode");
     inp.focus();
+    document.getElementById("gateGoogle").addEventListener("click", function () {
+      var err = document.getElementById("gateErr"); err.textContent = "";
+      NLP.A.signInWithPopup(NLP.auth, new NLP.A.GoogleAuthProvider()).then(function () { return isMember(); })
+        .then(function (ok) { if (ok) open(); else showCode("เข้าสู่ระบบแล้ว แต่ยังไม่มีสิทธิ์ ใส่รหัสประจำเดือนของเดือนนี้"); })
+        .catch(function (e) { if (e && e.code === "auth/popup-closed-by-user") return; err.textContent = "เข้าสู่ระบบไม่สำเร็จ: " + ((e && (e.code || e.message)) || e); });
+    });
     f.addEventListener("submit", function (e) {
       e.preventDefault();
       var code = NLP.norm(inp.value); if (!code) return;

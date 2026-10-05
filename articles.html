@@ -89,8 +89,16 @@ h1 { font-size: clamp(1.55rem, 4.6vw, 2.2rem); font-weight: 700; line-height: 1.
 .tab[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: var(--navy); font-weight: 600; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tab[aria-pressed="true"] { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); } }
 .tab .n { opacity: .65; margin-left: 5px; font-size: .85em; }
-.tickers { display: flex; gap: 6px; margin-top: 10px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
-.tickers::-webkit-scrollbar { display: none; }
+.tickers { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 10px; }
+.tb-label { font-size: 0.8rem; color: var(--muted); }
+.tb-more { font: inherit; font-size: 0.85rem; cursor: pointer; border: 1px dashed var(--line); background: transparent; color: var(--accent); padding: 2px 12px; border-radius: 999px; }
+.tb-more:hover { border-color: var(--accent); }
+.tb-more[aria-expanded="true"] { background: var(--accent-soft); border-style: solid; }
+.tb-more:focus-visible, .tb-search:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tb-panel { flex-basis: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px; box-shadow: var(--shadow); }
+.tb-search { width: 100%; font: inherit; font-size: 0.95rem; padding: 7px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); margin-bottom: 8px; }
+.tb-list { display: flex; flex-wrap: wrap; gap: 6px; max-height: 190px; overflow-y: auto; padding: 2px; }
+.tb-none { color: var(--muted); font-size: 0.88rem; padding: 4px; }
 .chip { flex: none; font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; padding: 2px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--accent); }
 .chip:hover { border-color: var(--accent); }
 .chip[aria-pressed="true"] { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); }
@@ -100,6 +108,23 @@ h1 { font-size: clamp(1.55rem, 4.6vw, 2.2rem); font-weight: 700; line-height: 1.
 .count { color: var(--muted); font-size: 0.9rem; }
 .linkbtn { font: inherit; font-size: 0.88rem; background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-decoration: underline; white-space: nowrap; }
 
+.alist { display: flex; flex-direction: column; gap: 12px; }
+.arow { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 16px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 16px; padding: 12px 16px 12px 12px; box-shadow: var(--shadow); }
+.arow.analysis { border-left-color: var(--navy); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .arow.analysis { border-left-color: var(--accent); } }
+.cover { display: block; width: 100%; aspect-ratio: 16 / 10; border-radius: 10px; object-fit: cover; background: var(--accent-soft); }
+.cv-ph { position: relative; overflow: hidden; background: var(--navy); color: var(--gold); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; text-decoration: none; border: 1px solid rgba(255,255,255,.1); }
+.cv-ph::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 55%; opacity: .22; pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='120' viewBox='0 0 320 120' preserveAspectRatio='none'%3E%3Cpolyline fill='none' stroke='%23f5b301' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' points='0,100 40,84 80,92 120,60 160,70 200,38 240,48 280,14 320,22'/%3E%3C/svg%3E") no-repeat center bottom / 100% 100%; }
+.cv-ph b { position: relative; z-index: 1; font-size: 1.5rem; letter-spacing: .03em; line-height: 1.15; max-width: 92%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cv-ph small { position: relative; z-index: 1; font-size: 0.72rem; color: #c9d5f2; }
+.cv-ph svg { position: relative; z-index: 1; width: 34px; height: 34px; }
+.abody { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.abody h3 { font-size: 1.1rem; font-weight: 700; line-height: 1.4; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.abody h3 a { color: inherit; text-decoration: none; }
+.abody h3 a:hover { text-decoration: underline; }
+.abody .sum { -webkit-line-clamp: 2; }
+.afoot2 { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 2px; }
+.more-tk { font-size: 0.8rem; color: var(--muted); }
 .agrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
 .acard { display: flex; flex-direction: column; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px 16px; box-shadow: var(--shadow); border-top: 4px solid var(--gold); }
 .acard.analysis { border-top-color: var(--navy); }
@@ -118,6 +143,10 @@ h1 { font-size: clamp(1.55rem, 4.6vw, 2.2rem); font-weight: 700; line-height: 1.
 .ntk[aria-pressed="true"] { background: var(--gold); color: var(--gold-ink); }
 .read { margin-left: auto; font-size: 0.9rem; font-weight: 600; color: var(--accent); text-decoration: none; }
 .read:hover { text-decoration: underline; }
+.new { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: .05em; line-height: 1.5; color: #fff; background: #e03131; border-radius: 999px; padding: 0 8px; margin-left: 8px; vertical-align: middle; }
+.views { display: inline-flex; align-items: center; gap: 4px; margin-left: 10px; font-size: 0.78rem; color: var(--muted); white-space: nowrap; vertical-align: middle; }
+.views svg { width: 14px; height: 14px; }
+.views b { font-weight: 600; font-variant-numeric: tabular-nums; }
 .athumb { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 10px; background: var(--accent-soft); margin-bottom: 2px; }
 .reader { margin-top: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px 24px; box-shadow: var(--shadow); }
 .back { margin-bottom: 10px; }
@@ -135,6 +164,10 @@ h1 { font-size: clamp(1.55rem, 4.6vw, 2.2rem); font-weight: 700; line-height: 1.
   .brand { gap: 14px; }
   .brand img { width: 72px; }
   .agrid { grid-template-columns: 1fr; }
+  .arow { grid-template-columns: 104px minmax(0, 1fr); gap: 12px; padding: 10px 12px 10px 10px; }
+  .cover { aspect-ratio: 1 / 1; }
+  .cv-ph b { font-size: 1.05rem; }
+  .abody h3 { font-size: 1rem; -webkit-line-clamp: 4; }
 }
 </style>
 </head>
@@ -164,7 +197,7 @@ h1 { font-size: clamp(1.55rem, 4.6vw, 2.2rem); font-weight: 700; line-height: 1.
     <button class="linkbtn" id="copyLink" type="button">คัดลอกลิงก์ตัวกรองนี้</button>
   </div>
 
-  <div class="agrid" id="list"></div>
+  <div class="alist" id="list"></div>
   <div class="empty" id="empty" hidden></div>
   <article class="reader" id="reader" hidden></article>
 </main>
@@ -177,6 +210,8 @@ const safeUrl = u => /^https?:\/\//i.test(u || "") ? u : "";
 const IMG_OK = s => typeof s === "string" && /^data:image\/(jpeg|png|webp);base64,/.test(s);
 const TK_OK = /^[A-Z0-9.\-]{1,12}$/;
 const linkify = t => t.replace(/https?:\/\/(?:[^\s<&]|&amp;)*(?:[^\s<&.,;:!?)\]]|&amp;)/g, u => `<a href="${u}" target="_blank" rel="noopener noreferrer">${u}</a>`);
+const newPill = ts => (window.isNew && isNew(ts)) ? '<span class="new">NEW</span>' : "";
+const viewsHtml = p => { const v = p.views || 0; return `<span class="views" title="ดู ${v} ครั้ง" aria-label="ดู ${v} ครั้ง"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><b>${v}</b></span>`; };
 const fmtDate = iso => { const d = new Date(String(iso) + "T00:00:00"); return isNaN(d) ? "" : d.toLocaleDateString("th-TH", { dateStyle: "medium" }); };
 
 let N = null, items = [];
@@ -197,6 +232,29 @@ function writeParams() {
   try { history.replaceState(null, "", sp.toString() ? "?" + sp : location.pathname); } catch (e) {}
 }
 
+// ---- แถบกรองชื่อหุ้น: โชว์ 6 ตัวที่พบบ่อยสุด + ปุ่มเปิดกล่องค้นหา/เลื่อนดูทั้งหมด ----
+let tbOpen = false, tbQ = "", tbList = [];
+const tbChip = (t, n) => `<button class="chip" type="button" data-tk="${esc(t)}" aria-pressed="${state.ticker === t}">${esc(t)}<span class="n">${n}</span></button>`;
+function tbFill() {
+  const q = tbQ.trim().toUpperCase(), rows = tbList.filter(([t]) => !q || t.includes(q));
+  const box = $("tbList"); if (box) box.innerHTML = rows.map(([t, n]) => tbChip(t, n)).join("") || '<span class="tb-none">ไม่พบชื่อหุ้นนี้</span>';
+}
+function renderTickerBar(list) {
+  tbList = list; const box = $("tickers");
+  box.hidden = !list.length; if (!list.length) return;
+  let quick = list.slice(0, 6);
+  if (state.ticker && !quick.some(x => x[0] === state.ticker)) { const sel = list.find(x => x[0] === state.ticker); if (sel) quick = [sel, ...quick.slice(0, 5)]; }
+  box.innerHTML = `<span class="tb-label">หุ้น</span>` + quick.map(([t, n]) => tbChip(t, n)).join("") +
+    (list.length > quick.length ? `<button class="tb-more" id="tbMore" type="button" aria-expanded="${tbOpen}" aria-controls="tbPanel">หุ้นทั้งหมด (${list.length}) ${tbOpen ? "▴" : "▾"}</button>` : "") +
+    `<div class="tb-panel" id="tbPanel" ${tbOpen && list.length > quick.length ? "" : "hidden"}><input class="tb-search" id="tbSearch" type="search" placeholder="ค้นหาชื่อหุ้น" aria-label="ค้นหาชื่อหุ้น" autocomplete="off" value="${esc(tbQ)}"><div class="tb-list" id="tbList"></div></div>`;
+  tbFill();
+}
+document.addEventListener("click", e => {
+  if (e.target.closest("#tbMore")) { tbOpen = !tbOpen; renderTickerBar(tbList); if (tbOpen) $("tbSearch").focus(); }
+});
+document.addEventListener("input", e => { if (e.target.id === "tbSearch") { tbQ = e.target.value; tbFill(); } });
+
+const DOC_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg>';
 function renderList() {
   const q = state.q.trim().toLowerCase();
   const base = items.filter(a => (!state.ticker || (a.tickers || []).includes(state.ticker)) &&
@@ -207,21 +265,23 @@ function renderList() {
   const cnt = {};
   items.forEach(a => (a.tickers || []).forEach(t => { cnt[t] = (cnt[t] || 0) + 1; }));
   const tk = Object.entries(cnt).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-  $("tickers").hidden = !tk.length;
-  $("tickers").innerHTML = tk.map(([t, n]) => `<button class="chip" type="button" data-tk="${esc(t)}" aria-pressed="${state.ticker === t}">${esc(t)}<span class="n">${n}</span></button>`).join("");
+  renderTickerBar(tk);
   $("filters").hidden = !items.length;
   $("list").innerHTML = list.map(a => {
-    const isA = a.type === "analysis", href = "articles.html?id=" + encodeURIComponent(a.id);
-    return `<article class="acard${isA ? " analysis" : ""}">
-      ${IMG_OK(a.thumb) ? `<a href="${href}" data-open="${esc(a.id)}" tabindex="-1" aria-hidden="true"><img class="athumb" src="${a.thumb}" alt="" loading="lazy"></a>` : ""}
-      <div class="ameta"><span class="badge">${esc(TYPES[a.type] || "บทความ")}</span><span>${esc(fmtDate(a.date))}</span></div>
-      <h3><a href="${href}" data-open="${esc(a.id)}">${esc(a.title)}</a></h3>
-      ${a.summary ? `<p class="sum">${esc(a.summary)}</p>` : ""}
-      <div class="afoot">
-        ${(a.tickers || []).map(t => `<button class="ntk" type="button" data-tk="${esc(t)}" aria-pressed="${state.ticker === t}">${esc(t)}</button>`).join("")}
-        <a class="read" href="${href}" data-open="${esc(a.id)}">อ่านต่อ ›</a>
-      </div>
-    </article>`;
+    const isA = a.type === "analysis", href = "articles.html?id=" + encodeURIComponent(a.id), tks = a.tickers || [], shown = tks.slice(0, 3), rest = tks.length - shown.length;
+    const cover = IMG_OK(a.thumb)
+      ? `<a href="${href}" data-open="${esc(a.id)}" tabindex="-1" aria-hidden="true"><img class="cover" src="${a.thumb}" alt="" loading="lazy"></a>`
+      : `<a class="cover cv-ph" href="${href}" data-open="${esc(a.id)}" tabindex="-1" aria-hidden="true">${tks[0] ? `<b>${esc(tks[0])}</b>` : DOC_SVG}<small>${esc(TYPES[a.type] || "บทความ")}</small></a>`;
+    return `<article class="arow${isA ? " analysis" : ""}">${cover}
+      <div class="abody">
+        <div class="ameta"><span class="badge">${esc(TYPES[a.type] || "บทความ")}</span><span>${esc(fmtDate(a.date))}${newPill(a.createdAt)}${viewsHtml(a)}</span></div>
+        <h3><a href="${href}" data-open="${esc(a.id)}">${esc(a.title)}</a></h3>
+        ${a.summary ? `<p class="sum">${esc(a.summary)}</p>` : ""}
+        <div class="afoot2">
+          ${shown.map(t => `<button class="ntk" type="button" data-tk="${esc(t)}" aria-pressed="${state.ticker === t}">${esc(t)}</button>`).join("")}${rest > 0 ? `<span class="more-tk">+${rest}</span>` : ""}
+          <a class="read" href="${href}" data-open="${esc(a.id)}">อ่านต่อ ›</a>
+        </div>
+      </div></article>`;
   }).join("");
   $("list").hidden = !list.length;
   $("empty").hidden = list.length > 0;
@@ -248,7 +308,7 @@ async function showReader(id) {
   const u = safeUrl(a.url), isA = a.type === "analysis";
   document.title = a.title + " | นักลงพุง";
   r.innerHTML = `<button class="linkbtn back" type="button" data-back>‹ กลับไปรายการ</button>
-    <div class="ameta"><span class="badge" style="${isA ? "background:var(--navy);color:#fff" : ""}">${esc(TYPES[a.type] || "บทความ")}</span><span>${esc(fmtDate(a.date))}</span></div>
+    <div class="ameta"><span class="badge" style="${isA ? "background:var(--navy);color:#fff" : ""}">${esc(TYPES[a.type] || "บทความ")}</span><span>${esc(fmtDate(a.date))}${newPill(a.createdAt)}${viewsHtml(a)}</span></div>
     <h2>${esc(a.title)}</h2>
     <div class="afoot">${(a.tickers || []).map(t => `<a class="ntk" style="text-decoration:none" href="articles.html?ticker=${encodeURIComponent(t)}">${esc(t)}</a>`).join("")}</div>
     ${a.summary ? `<p class="sum" style="-webkit-line-clamp:unset;margin-top:10px">${esc(a.summary)}</p>` : ""}
@@ -258,6 +318,12 @@ async function showReader(id) {
       ${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ ›</a>` : ""}
       ${(a.tickers || []).map(t => `<a href="dr.html?q=${encodeURIComponent(t)}">ดู DR ของ ${esc(t)} ›</a>`).join("")}
     </div>`;
+  // นับคนดู: เปิดอ่านบทความครั้งแรกของเครื่องนี้ +1
+  if (window.NLP && NLP.trackView) NLP.trackView("articles", id).then(ok => {
+    if (!ok) return;
+    a.views = (a.views || 0) + 1; const b = r.querySelector(".views b"); if (b) b.textContent = a.views;
+    const it = items.find(x => x.id === id); if (it) it.views = a.views;
+  });
 }
 function hideReader() {
   $("reader").hidden = true; document.querySelector(".countbar").hidden = false; document.querySelector(".search").hidden = false; document.title = "บทความ & บทวิเคราะห์ | นักลงพุง";
@@ -272,7 +338,7 @@ document.addEventListener("click", e => {
   const tab = e.target.closest("[data-tab]");
   if (tab) { state.tab = tab.dataset.tab; writeParams(); renderList(); return; }
   const tk = e.target.closest("[data-tk]");
-  if (tk) { state.ticker = state.ticker === tk.dataset.tk ? "" : tk.dataset.tk; writeParams(); renderList(); }
+  if (tk) { tbOpen = false; tbQ = ""; state.ticker = state.ticker === tk.dataset.tk ? "" : tk.dataset.tk; writeParams(); renderList(); }
 });
 $("q").addEventListener("input", e => { state.q = e.target.value; writeParams(); renderList(); });
 addEventListener("popstate", route);

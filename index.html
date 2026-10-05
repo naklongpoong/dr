@@ -97,6 +97,7 @@ a.card:hover .go { text-decoration: underline; }
 .card.off { opacity: .7; border-style: dashed; box-shadow: none; }
 .card.off .go { color: var(--muted); }
 .soon { position: absolute; top: 16px; right: 16px; font-size: 0.75rem; font-weight: 600; color: var(--gold-ink, #14213d); background: var(--gold); border-radius: 999px; padding: 0 10px; }
+.new { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: .05em; line-height: 1.5; color: #fff; background: #e03131; border-radius: 999px; padding: 0 8px; margin-left: 8px; vertical-align: middle; }
 .foot { margin: 36px 0 0; text-align: center; color: var(--muted); font-size: 0.82rem; }
 
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
@@ -128,18 +129,34 @@ a.card:hover .go { text-decoration: underline; }
 var ICON = {
   dr: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>',
   articles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg>',
+  etf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M16 3.5A9 9 0 0 1 20.5 8H16z"/></svg>',
   news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-8 4 16 3-8h6"/></svg>'
 };
 var PAGES = [
   { key: "dr", href: "dr.html", on: true, title: "รวม DR ในตลาดหุ้นไทย", desc: "ค้นหาและกรอง DR ทุกตัว ตามหุ้น ประเทศ กลุ่มอุตสาหกรรม และผู้ออก กดดูราคาบนเว็บ SET ได้ทันที", go: "เข้าดูรายการ DR ›" },
   { key: "articles", href: "articles.html", on: SITE.articles, title: "บทความ & บทวิเคราะห์", desc: "บทความและบทวิเคราะห์หุ้นต่างประเทศจากนักลงพุง กรองตามประเภทและชื่อหุ้นได้", go: "เข้าอ่านบทความ ›" },
-  { key: "news", href: "news.html", on: SITE.news, hidden: !SITE.news, title: "ข่าว & งบ", desc: "ข่าว พรีวิวงบ งบจริง และหุ้นน่าสนใจ กรองตามชื่อหุ้นได้", go: "เข้าดูข่าว ›" }
+  { key: "news", href: "news.html", on: SITE.news, hidden: !SITE.news, title: "ข่าว & งบ", desc: "ข่าว พรีวิวงบ งบหุ้นรายตัว และหุ้นน่าสนใจ กรองตามชื่อหุ้นได้", go: "เข้าดูข่าว ›" },
+  { key: "etf", href: "etf.html", on: true, hidden: !SITE.etf, badge: "Coming Soon", title: "ETF", desc: "รวมข้อมูลและบทวิเคราะห์ ETF", go: "ดูหน้า ETF ›" }
 ];
 document.getElementById("cards").innerHTML = PAGES.filter(function (p) { return !p.hidden; }).map(function (p) {
   var inner = '<span class="ico" aria-hidden="true">' + ICON[p.key] + '</span><h2>' + p.title + '</h2><p>' + p.desc + '</p>' +
-    (p.on ? '<span class="go">' + p.go + '</span>' : '<span class="go">ยังไม่เปิดให้เข้า</span><span class="soon">เร็วๆ นี้</span>');
-  return p.on ? '<a class="card" href="' + p.href + '">' + inner + '</a>' : '<div class="card off" aria-disabled="true">' + inner + '</div>';
+    (p.on ? '<span class="go">' + p.go + '</span>' + (p.badge ? '<span class="soon">' + p.badge + '</span>' : '') : '<span class="go">ยังไม่เปิดให้เข้า</span><span class="soon">Coming Soon</span>');
+  return p.on ? '<a class="card" data-key="' + p.key + '" href="' + p.href + '">' + inner + '</a>' : '<div class="card off" data-key="' + p.key + '" aria-disabled="true">' + inner + '</div>';
 }).join("");
+
+// ป้าย NEW บนการ์ด: ดูโพสต์ล่าสุดของแต่ละหมวด (อ่านหมวดละ 1 รายการ)
+if (window.NLP && NLP.ready) NLP.ready.then(function (N) {
+  var latest = function (col) {
+    return N.F.getDocs(N.F.query(N.F.collection(N.db, col), N.F.orderBy("createdAt", "desc"), N.F.limit(1)))
+      .then(function (s) { return s.docs.length ? isNew(s.docs[0].data().createdAt) : false; }, function () { return false; });
+  };
+  var mark = function (key) {
+    var h = document.querySelector('.card[data-key="' + key + '"] h2');
+    if (h && !h.querySelector(".new")) h.insertAdjacentHTML("beforeend", '<span class="new">NEW</span>');
+  };
+  if (SITE.news) Promise.all([latest("news"), latest("earnings")]).then(function (r) { if (r[0] || r[1]) mark("news"); });
+  if (SITE.articles) latest("articles").then(function (v) { if (v) mark("articles"); });
+}).catch(function () {});
 
 // ใช้โลโก้เป็น favicon
 var fav = document.createElement("link"); fav.rel = "icon"; fav.href = document.querySelector(".logo").src; document.head.appendChild(fav);
