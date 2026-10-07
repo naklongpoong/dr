@@ -10,8 +10,8 @@
 <meta property="og:site_name" content="นักลงพุง">
 <meta property="og:title" content="ข่าว | นักลงพุง">
 <meta property="og:description" content="ข่าวและหุ้นน่าสนใจจากนักลงพุง กรองตามชื่อหุ้นได้">
-<meta property="og:url" content="https://naklongpoong.github.io/news.html">
-<meta property="og:image" content="https://naklongpoong.github.io/og-home.png">
+<meta property="og:url" content="https://naklongpoong.github.io/dr/news.html">
+<meta property="og:image" content="https://naklongpoong.github.io/dr/og-home.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -142,7 +142,7 @@ textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); 
 .empty { padding: 28px 16px; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; }
 
 /* earnings cards */
-.egrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 480px), 1fr)); gap: 16px; }
+.egrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap: 16px; }
 .ecard { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; }
 .ehead { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--navy); border-bottom: 3px solid var(--gold); padding: 10px 14px; }
 .esym { font-size: 1.35rem; font-weight: 700; letter-spacing: .02em; color: var(--gold); line-height: 1.2; }
@@ -205,11 +205,16 @@ textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); 
 .kind { font-size: 0.75rem; font-weight: 600; color: var(--navy); background: var(--gold); border-radius: 999px; padding: 0 9px; }
 .kind.res { background: #8ff0b8; }
 .ehead .tail { display: flex; align-items: center; gap: 8px; }
+.pop { position: fixed; z-index: 50; min-width: 230px; max-width: calc(100vw - 16px); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(15,30,70,.22); padding: 6px; }
+.pop a { display: flex; flex-direction: column; padding: 8px 12px; border-radius: 8px; color: var(--ink); text-decoration: none; }
+.pop a:hover, .pop a:focus-visible { background: var(--accent-soft); outline: none; }
+.pop a b { font-size: 0.95rem; font-weight: 600; }
+.pop a small { color: var(--muted); font-size: 0.8rem; }
 /* รูปประกอบ */
 .nimgs { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 6px 0 8px; }
 .nimgs.multi { grid-template-columns: 1fr 1fr; }
-.nimgs.multi img:last-child:nth-child(odd) { grid-column: 1 / -1; }
-.nimgs img { display: block; width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--line); cursor: zoom-in; background: var(--bg); }
+.nimgs img { display: block; max-width: min(100%, 460px); max-height: 340px; width: auto; height: auto; border-radius: 8px; border: 1px solid var(--line); cursor: zoom-in; background: var(--bg); }
+.nimgs.multi img { max-width: 100%; max-height: 240px; }
 .nimgs.ph { min-height: 140px; border-radius: 8px; background: var(--bg); border: 1px dashed var(--line); }
 #lb { position: fixed; inset: 0; z-index: 50; background: rgba(5,10,25,.9); display: flex; align-items: center; justify-content: center; padding: 16px; cursor: zoom-out; }
 #lb img { max-width: 100%; max-height: 100%; border-radius: 8px; }
@@ -255,14 +260,14 @@ textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); 
   <section class="sec" id="secP" hidden>
     <div class="sec-h"><h2 id="pTitle">หุ้นน่าสนใจ</h2><small id="pUpd"></small></div>
     <p class="p-note" id="pNote" hidden></p>
-    <p class="p-legend">กดชื่อหุ้นเพื่อดู DR · “ข่าว” กรองข่าวของหุ้นตัวนั้นในหน้านี้ · “กราฟ Finviz ↗” เปิดกราฟบนเว็บ Finviz</p>
+    <p class="p-legend">กดชื่อหุ้นเพื่อเลือกดู DR บทความ ข่าว งบ · “ข่าว” กรองข่าวในหน้านี้ · “กราฟ Finviz ↗” เปิดกราฟบนเว็บ Finviz</p>
     <div class="pchips" id="listP"></div>
   </section>
 
   <section class="sec" id="secA" hidden>
     <div class="sec-h"><h2 id="aTitle">แอดมินแนะนำ</h2><small id="aUpd"></small></div>
     <p class="p-note" id="aNote" hidden></p>
-    <p class="p-legend" id="legendA" hidden>กดชื่อหุ้นเพื่อดู DR · “ข่าว” กรองข่าวของหุ้นตัวนั้นในหน้านี้ · “กราฟ Finviz ↗” เปิดกราฟบนเว็บ Finviz</p>
+    <p class="p-legend" id="legendA" hidden>กดชื่อหุ้นเพื่อเลือกดู DR บทความ ข่าว งบ · “ข่าว” กรองข่าวในหน้านี้ · “กราฟ Finviz ↗” เปิดกราฟบนเว็บ Finviz</p>
     <div class="pchips" id="listA"></div>
   </section>
 
@@ -291,6 +296,7 @@ textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); 
   </section>
 </main>
 
+<div class="pop" id="pop" role="menu" hidden></div>
 <div id="lb" hidden role="dialog" aria-label="ดูรูปขยาย"><img id="lbImg" alt=""></div>
 <script>
 const PAGE = document.body.dataset.page === "earnings" ? "earnings" : "news", COLS = [PAGE];   // หน้า news = ข่าว+หุ้นแนะนำ, หน้า earnings = พรีวิวงบ+งบรายตัว
@@ -519,11 +525,41 @@ document.addEventListener("input", e => { if (e.target.id === "tbSearch") { tbQ 
 // ---- กล่องหุ้นน่าสนใจ / แอดมินแนะนำ: กดชื่อหุ้น -> ไปหน้า DR (ถ้าไม่มี DR กรองข่าวในหน้านี้แทน) ----
 const pchip = (t, dr) => {
   const has = !dr || dr.has(t);
-  const name = has
-    ? `<a class="ptk" href="dr.html?q=${encodeURIComponent(t)}" title="ดู DR ของ ${esc(t)}">${esc(t)}</a>`
-    : `<button class="ptk ptk-b" type="button" data-tk="${esc(t)}" title="ยังไม่มี DR ของ ${esc(t)} กดเพื่อดูข่าวของหุ้นตัวนี้">${esc(t)}</button>`;
-  return `<span class="pchip">${name}<button class="pn" type="button" data-tk="${esc(t)}" aria-pressed="${state.ticker === t}" title="กรองข่าวของ ${esc(t)} ในหน้านี้">ข่าว</button><a class="fv" href="https://finviz.com/quote.ashx?t=${encodeURIComponent(t)}" target="_blank" rel="noopener noreferrer" aria-label="ดูกราฟ ${esc(t)} บน Finviz" title="กราฟ ${esc(t)} บน Finviz">กราฟ Finviz ↗</a></span>`;
+  return `<span class="pchip"><button class="ptk ptk-b" type="button" data-pop="${esc(t)}" data-dr="${has ? 1 : 0}" aria-haspopup="menu" aria-expanded="false" title="กดเพื่อเลือกดู ${esc(t)}">${esc(t)}</button><button class="pn" type="button" data-tk="${esc(t)}" aria-pressed="${state.ticker === t}" title="กรองข่าวของ ${esc(t)} ในหน้านี้">ข่าว</button><a class="fv" href="https://finviz.com/quote.ashx?t=${encodeURIComponent(t)}" target="_blank" rel="noopener noreferrer" aria-label="ดูกราฟ ${esc(t)} บน Finviz" title="กราฟ ${esc(t)} บน Finviz">กราฟ Finviz ↗</a></span>`;
 };
+// ---- เมนูเลือกเมื่อกดชื่อหุ้น (แบบเดียวกับหน้า DR) ----
+let popBtn = null, popY = 0;
+function closePop(restore) {
+  const p = $("pop"); if (p.hidden) return;
+  p.hidden = true;
+  if (popBtn) { popBtn.setAttribute("aria-expanded", "false"); if (restore) popBtn.focus(); }
+  popBtn = null;
+}
+function openPop(btn) {
+  closePop(false);
+  const tk = btn.dataset.pop, q = encodeURIComponent(tk), p = $("pop"), items = [];
+  if (btn.dataset.dr === "1") items.push(`<a role="menuitem" href="dr.html?q=${q}"><b>ดู DR ของ ${esc(tk)}</b><small>รวม DR ในตลาดหุ้นไทย</small></a>`);
+  if (window.SITE && SITE.articles) items.push(`<a role="menuitem" href="articles.html?ticker=${q}"><b>อ่านบทความเกี่ยวกับ ${esc(tk)}</b><small>บทความและบทวิเคราะห์</small></a>`);
+  items.push(`<a role="menuitem" href="news.html?ticker=${q}" data-pick-news="${esc(tk)}"><b>ดูข่าวของ ${esc(tk)}</b><small>ข่าวและหุ้นน่าสนใจ</small></a>`);
+  if (window.SITE && SITE.earnings) items.push(`<a role="menuitem" href="earnings.html?ticker=${q}"><b>ดูงบของ ${esc(tk)}</b><small>พรีวิวงบและงบหุ้นรายตัว</small></a>`);
+  p.innerHTML = items.join("");
+  p.style.visibility = "hidden"; p.hidden = false;
+  const r = btn.getBoundingClientRect(), w = p.offsetWidth, h = p.offsetHeight;
+  let top = r.bottom + 6; if (top + h > innerHeight - 8) top = Math.max(8, r.top - h - 6);
+  p.style.top = top + "px"; p.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + "px";
+  p.style.visibility = "";
+  btn.setAttribute("aria-expanded", "true"); popBtn = btn; popY = scrollY;
+  p.querySelector("a").focus();
+}
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closePop(true);
+  if ((e.key === "ArrowDown" || e.key === "ArrowUp") && !$("pop").hidden) {
+    const links = [...$("pop").querySelectorAll("a")], i = links.indexOf(document.activeElement);
+    links[(i + (e.key === "ArrowDown" ? 1 : -1) + links.length) % links.length].focus(); e.preventDefault();
+  }
+});
+addEventListener("scroll", () => { if (!$("pop").hidden && Math.abs(scrollY - popY) > 8) closePop(false); }, { passive: true });
+addEventListener("resize", () => closePop(false));
 function fillPicks(k, b, def) {
   const m = b.meta; $(k + "Title").textContent = m.title || def;
   const n = $(k + "Note"); n.hidden = !m.note;
@@ -584,6 +620,11 @@ function render() {
 }
 
 document.addEventListener("click", e => {
+  const pn = e.target.closest("[data-pick-news]");   // ในเมนู: "ดูข่าวของ X" กรองในหน้านี้เลย ไม่ต้องโหลดหน้าใหม่
+  if (pn) { e.preventDefault(); closePop(false); setTicker(pn.dataset.pickNews); const t = $("secN").hidden ? $("filters") : $("secN"); t.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  const pp = e.target.closest("[data-pop]");
+  if (pp) { if (popBtn === pp) closePop(true); else openPop(pp); return; }
+  if (!e.target.closest("#pop")) closePop(false);
   const im = e.target.closest(".nimgs img");
   if (im) { $("lbImg").src = im.src; $("lb").hidden = false; return; }
   if (e.target.closest("#lb")) { $("lb").hidden = true; return; }
@@ -594,7 +635,7 @@ document.addEventListener("click", e => {
   if (tk) {
     tbOpen = false; tbQ = "";
     setTicker(state.ticker === tk.dataset.tk ? "" : tk.dataset.tk);
-    if ((tk.classList.contains("pn") || tk.classList.contains("ptk-b")) && state.ticker) (($("secN").hidden ? $("filters") : $("secN"))).scrollIntoView({ behavior: "smooth", block: "start" });
+    if (tk.classList.contains("pn") && state.ticker) (($("secN").hidden ? $("filters") : $("secN"))).scrollIntoView({ behavior: "smooth", block: "start" });
     return;
   }
   const rd = e.target.closest("[data-read]");
