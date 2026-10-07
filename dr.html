@@ -10,8 +10,8 @@
 <meta property="og:site_name" content="นักลงพุง">
 <meta property="og:title" content="รวม DR ในตลาดหุ้นไทย | นักลงพุง">
 <meta property="og:description" content="ค้นหาและกรอง DR ทุกตัวในตลาดหุ้นไทย ตามชื่อหุ้น ประเทศ กลุ่มอุตสาหกรรม และผู้ออก DR กดดูราคาบนเว็บ SET ได้ทันที">
-<meta property="og:url" content="https://naklongpoong.github.io/dr/dr.html">
-<meta property="og:image" content="https://naklongpoong.github.io/dr/og.png">
+<meta property="og:url" content="https://naklongpoong.github.io/dr.html">
+<meta property="og:image" content="https://naklongpoong.github.io/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -466,7 +466,8 @@ function openPop(btn) {
   const code = btn.dataset.code, tk = btn.dataset.tk, p = $("pop");
   const items = [`<a role="menuitem" href="${SET_URL(code)}" target="_blank" rel="noopener noreferrer"><b>ดูราคาบน SET</b><small>${esc(code)}</small></a>`];
   if (window.SITE && SITE.articles) items.push(`<a role="menuitem" href="articles.html?ticker=${encodeURIComponent(tk)}"><b>อ่านบทความเกี่ยวกับ ${esc(tk)}</b><small>บทความและบทวิเคราะห์</small></a>`);
-  if (window.SITE && SITE.news) items.push(`<a role="menuitem" href="news.html?ticker=${encodeURIComponent(tk)}"><b>ดูข่าวของ ${esc(tk)}</b><small>ข่าวและรายงานงบ</small></a>`);
+  if (window.SITE && SITE.news) items.push(`<a role="menuitem" href="news.html?ticker=${encodeURIComponent(tk)}"><b>ดูข่าวของ ${esc(tk)}</b><small>ข่าวและหุ้นน่าสนใจ</small></a>`);
+  if (window.SITE && SITE.earnings) items.push(`<a role="menuitem" href="earnings.html?ticker=${encodeURIComponent(tk)}"><b>ดูงบของ ${esc(tk)}</b><small>พรีวิวงบและงบหุ้นรายตัว</small></a>`);
   p.innerHTML = items.join("");
   p.style.visibility = "hidden"; p.hidden = false;
   const r = btn.getBoundingClientRect(), w = p.offsetWidth, h = p.offsetHeight;
@@ -547,13 +548,16 @@ async function boot() {
   $("out").innerHTML = '<div class="list"><div class="empty">กำลังโหลดข้อมูล...</div></div>';
   const N = await NLP.ready;
   let snap;
-  try { snap = await N.F.getDoc(N.F.doc(N.db, "content", "dr")); }
+  let d = window.cacheGet ? cacheGet("dr", (SITE.cacheMinutes || 0) * 5) : null;   // ข้อมูล DR เปลี่ยนไม่บ่อย จำนานกว่าข่าว 5 เท่า
+  try { if (!d) { snap = await N.F.getDoc(N.F.doc(N.db, "content", "dr")); } }
   catch (e) {
     if (e && e.code === "permission-denied") return NLP.relock();
     $("out").innerHTML = '<div class="list"><div class="empty">โหลดข้อมูลไม่สำเร็จ ลองรีเฟรชอีกครั้ง</div></div>'; return;
   }
-  if (!snap.exists()) { $("out").innerHTML = '<div class="list"><div class="empty">ยังไม่มีข้อมูล DR ให้ผู้ดูแลอัปโหลดที่หลังบ้าน</div></div>'; return; }
-  const d = snap.data();
+  if (!d) {
+    if (!snap.exists()) { $("out").innerHTML = '<div class="list"><div class="empty">ยังไม่มีข้อมูล DR ให้ผู้ดูแลอัปโหลดที่หลังบ้าน</div></div>'; return; }
+    d = snap.data(); if (window.cachePut) cachePut("dr", d);
+  }
   setData(d.raw || "");
   await loadCloudStars();
   if (Array.isArray(d.hotTk) && d.hotTk.length) THEMES.hot = { name: "หุ้นร้อนแรง", tk: d.hotTk, note: d.hotNote || "" };

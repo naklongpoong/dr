@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>นักลงพุง | เครื่องมือและบทวิเคราะห์สำหรับนักลงทุนหุ้นต่างประเทศ</title>
-<meta name="description" content="นักลงพุง รวมเครื่องมือและบทวิเคราะห์สำหรับนักลงทุนหุ้นต่างประเทศ เลือกดูรวม DR ในตลาดหุ้นไทย บทความและบทวิเคราะห์">
+<meta name="description" content="นักลงพุง ข่าว พรีวิวงบ บทความ บทวิเคราะห์ และรวม DR ในตลาดหุ้นไทย สำหรับนักลงทุนหุ้นต่างประเทศ">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="th_TH">
 <meta property="og:site_name" content="นักลงพุง">
 <meta property="og:title" content="นักลงพุง">
-<meta property="og:description" content="เครื่องมือและบทวิเคราะห์สำหรับนักลงทุนหุ้นต่างประเทศ เลือกดูรวม DR ในตลาดหุ้นไทย บทความและบทวิเคราะห์">
-<meta property="og:url" content="https://naklongpoong.github.io/dr/">
-<meta property="og:image" content="https://naklongpoong.github.io/dr/og-home.png">
+<meta property="og:description" content="ข่าว พรีวิวงบ บทความ บทวิเคราะห์ และรวม DR ในตลาดหุ้นไทย สำหรับนักลงทุนหุ้นต่างประเทศ">
+<meta property="og:url" content="https://naklongpoong.github.io/">
+<meta property="og:image" content="https://naklongpoong.github.io/og-home.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -130,12 +130,14 @@ var ICON = {
   dr: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>',
   articles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg>',
   etf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M16 3.5A9 9 0 0 1 20.5 8H16z"/></svg>',
+  earnings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4zM4 10h16M10 4v16"/></svg>',
   news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-8 4 16 3-8h6"/></svg>'
 };
 var PAGES = [
   { key: "dr", href: "dr.html", on: true, title: "รวม DR ในตลาดหุ้นไทย", desc: "ค้นหาและกรอง DR ทุกตัว ตามหุ้น ประเทศ กลุ่มอุตสาหกรรม และผู้ออก กดดูราคาบนเว็บ SET ได้ทันที", go: "เข้าดูรายการ DR ›" },
   { key: "articles", href: "articles.html", on: SITE.articles, title: "บทความ & บทวิเคราะห์", desc: "บทความและบทวิเคราะห์หุ้นต่างประเทศจากนักลงพุง กรองตามประเภทและชื่อหุ้นได้", go: "เข้าอ่านบทความ ›" },
-  { key: "news", href: "news.html", on: SITE.news, hidden: !SITE.news, title: "ข่าว & งบ", desc: "ข่าว พรีวิวงบ งบหุ้นรายตัว และหุ้นน่าสนใจ กรองตามชื่อหุ้นได้", go: "เข้าดูข่าว ›" },
+  { key: "news", href: "news.html", on: SITE.news, hidden: !SITE.news, title: "ข่าว", desc: "ข่าวและหุ้นน่าสนใจ กรองตามชื่อหุ้นได้", go: "เข้าดูข่าว ›" },
+  { key: "earnings", href: "earnings.html", on: SITE.earnings, hidden: !SITE.earnings, title: "พรีวิวงบ & งบ", desc: "พรีวิวงบและงบหุ้นรายตัว กรองตามชื่อหุ้นได้", go: "เข้าดูงบ ›" },
   { key: "etf", href: "etf.html", on: true, hidden: !SITE.etf, badge: "Coming Soon", title: "ETF", desc: "รวมข้อมูลและบทวิเคราะห์ ETF", go: "ดูหน้า ETF ›" }
 ];
 document.getElementById("cards").innerHTML = PAGES.filter(function (p) { return !p.hidden; }).map(function (p) {
@@ -154,7 +156,8 @@ if (window.NLP && NLP.ready) NLP.ready.then(function (N) {
     var h = document.querySelector('.card[data-key="' + key + '"] h2');
     if (h && !h.querySelector(".new")) h.insertAdjacentHTML("beforeend", '<span class="new">NEW</span>');
   };
-  if (SITE.news) Promise.all([latest("news"), latest("earnings")]).then(function (r) { if (r[0] || r[1]) mark("news"); });
+  if (SITE.news) latest("news").then(function (v) { if (v) mark("news"); });
+  if (SITE.earnings) latest("earnings").then(function (v) { if (v) mark("earnings"); });
   if (SITE.articles) latest("articles").then(function (v) { if (v) mark("articles"); });
 }).catch(function () {});
 

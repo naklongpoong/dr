@@ -1,0 +1,183 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+
+    // ผู้ดูแล = บัญชี Google ของคุณ (แก้ YOUR_EMAIL@gmail.com เป็นอีเมลจริง ตัวพิมพ์เล็กทั้งหมด)
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.firebase.sign_in_provider == 'google.com'
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'YOUR_EMAIL@gmail.com';
+    }
+
+    // รหัสสมาชิกปัจจุบัน (เก็บที่ settings/invite อ่านได้เฉพาะผู้ดูแล แต่ rules อ่านเช็กให้ได้)
+    function curCode() { return get(/databases/$(database)/documents/settings/invite).data.code; }
+
+    // สมาชิก = เครื่องที่ใส่รหัสตรงกับรหัสปัจจุบัน (พอเปลี่ยนรหัส สถานะนี้หมดทันที) หรือผู้ดูแล
+    function isMember() {
+      return signedIn() && (isAdmin()
+        || (exists(/databases/$(database)/documents/sessions/$(request.auth.uid))
+            && get(/databases/$(database)/documents/sessions/$(request.auth.uid)).data.code == curCode()));
+    }
+
+    // ---------- รหัสสมาชิก ----------
+    match /settings/{docId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin()
+        && request.resource.data.keys().hasOnly(['code', 'changedAt'])
+        && request.resource.data.code is string
+        && request.resource.data.code.size() >= 8 && request.resource.data.code.size() <= 64;
+    }
+
+    match /sessions/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['code', 'createdAt'])
+        && request.resource.data.code is string
+        && request.resource.data.code == curCode()
+        && request.resource.data.createdAt == request.time;
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
+    // ---------- ข้อมูล DR (เอกสารเดียว) และ content/ping ที่ใช้เช็กว่าเป็นสมาชิก ----------
+    function drValid() {
+      return request.resource.data.keys().hasOnly(['raw', 'hotTk', 'hotNote', 'asOf', 'updatedAt'])
+        && request.resource.data.raw is string && request.resource.data.raw.size() <= 200000
+        && request.resource.data.hotTk is list && request.resource.data.hotTk.size() <= 100
+        && request.resource.data.hotNote is string && request.resource.data.hotNote.size() <= 1000
+        && request.resource.data.asOf is string && request.resource.data.asOf.size() <= 60;
+    }
+    function picksValid() {
+      return request.resource.data.keys().hasOnly(['title', 'note', 'tickers', 'drTk', 'updatedAt'])
+        && request.resource.data.title is string && request.resource.data.title.size() <= 100
+        && request.resource.data.note is string && request.resource.data.note.size() <= 800
+        && request.resource.data.tickers is list && request.resource.data.tickers.size() <= 100
+        && (!('drTk' in request.resource.data) || (request.resource.data.drTk is list && request.resource.data.drTk.size() <= 100));
+    }
+
+    match /content/{docId} {
+      allow get: if isMember();
+      allow create, update: if isAdmin()
+        && ((docId == 'dr' && drValid()) || (docId in ['picks', 'adminPicks'] && picksValid()));
+      allow delete: if isAdmin();
+    }
+
+    // ---------- นับคนดู ----------
+    // สมาชิกเพิ่มได้เฉพาะฟิลด์ views ทีละ 1 เท่านั้น (แก้เนื้อหาอย่างอื่นไม่ได้)
+    function isViewBump() {
+      return isMember()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
+        && request.resource.data.views is int
+        && request.resource.data.views == resource.data.get('views', 0) + 1;
+    }
+
+    // ---------- ข่าว / พรีวิวงบ / งบหุ้นรายตัว (พรีวิวกับงบอยู่ที่ earnings แยกด้วยฟิลด์ kind) ----------
+    function postFields() {
+      let d = request.resource.data;
+      return d.text is string && d.text.size() > 0 && d.text.size() <= 20000
+        && d.link is string && d.link.size() <= 1000
+        && d.tickers is list && d.tickers.size() <= 10
+        && (!('hasImages' in d) || d.hasImages is bool)
+        && (!('imgCount' in d) || (d.imgCount is int && d.imgCount <= 6));
+    }
+    function earnFields() {
+      return request.resource.data.period is string && request.resource.data.period.size() <= 20
+        && request.resource.data.kind in ['preview', 'result']
+        && request.resource.data.tickers.size() >= 1;
+    }
+
+    match /news/{id} {
+      allow get: if isMember();
+      allow list: if isMember() && request.query.limit <= 50;
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['text', 'link', 'tickers', 'hasImages', 'imgCount', 'createdAt', 'views'])
+        && postFields() && request.resource.data.createdAt is timestamp;
+      allow update: if (isAdmin()
+          && request.resource.data.keys().hasOnly(['text', 'link', 'tickers', 'hasImages', 'imgCount', 'createdAt', 'updatedAt', 'views'])
+          && postFields() && request.resource.data.createdAt == resource.data.createdAt)
+        || isViewBump();
+      allow delete: if isAdmin();
+    }
+
+    match /earnings/{id} {
+      allow get: if isMember();
+      allow list: if isMember() && request.query.limit <= 50;
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['text', 'link', 'tickers', 'period', 'kind', 'hasImages', 'imgCount', 'createdAt', 'views'])
+        && postFields() && earnFields() && request.resource.data.createdAt is timestamp;
+      allow update: if (isAdmin()
+          && request.resource.data.keys().hasOnly(['text', 'link', 'tickers', 'period', 'kind', 'hasImages', 'imgCount', 'createdAt', 'updatedAt', 'views'])
+          && postFields() && earnFields() && request.resource.data.createdAt == resource.data.createdAt)
+        || isViewBump();
+      allow delete: if isAdmin();
+    }
+
+    // ---------- บทความ (ตัวบทความ + รูปเต็มแยกเอกสาร เพื่อให้หน้ารายการโหลดเบา) ----------
+    function articleValid() {
+      return request.resource.data.keys().hasOnly(['type', 'date', 'title', 'summary', 'body', 'tickers', 'url', 'thumb', 'hasImages', 'createdAt', 'updatedAt', 'views'])
+        && request.resource.data.type in ['article', 'analysis']
+        && request.resource.data.date is string && request.resource.data.date.size() == 10
+        && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 200
+        && request.resource.data.summary is string && request.resource.data.summary.size() <= 500
+        && request.resource.data.body is string && request.resource.data.body.size() <= 20000
+        && request.resource.data.tickers is list && request.resource.data.tickers.size() <= 10
+        && request.resource.data.url is string && request.resource.data.url.size() <= 1000
+        && request.resource.data.thumb is string && request.resource.data.thumb.size() <= 80000
+        && request.resource.data.hasImages is bool;
+    }
+    function imagesValid() {
+      return request.resource.data.keys().hasOnly(['images', 'createdAt'])
+        && request.resource.data.images is list && request.resource.data.images.size() <= 6;
+    }
+
+    match /articles/{id} {
+      allow get: if isMember();
+      allow list: if isMember() && request.query.limit <= 50;
+      // createdAt เป็นเวลาที่ผู้ดูแลกำหนดได้ (ใช้ตอนย้ายหมวดแล้วคงวันที่เดิมไว้)
+      allow create: if isAdmin() && articleValid() && request.resource.data.createdAt is timestamp;
+      // แก้ไขได้ แต่ห้ามเปลี่ยนเวลาที่สร้างเดิม / สมาชิกเพิ่มยอดดูได้อย่างเดียว
+      allow update: if (isAdmin() && articleValid() && request.resource.data.createdAt == resource.data.createdAt)
+        || isViewBump();
+      allow delete: if isAdmin();
+    }
+
+    match /articleImages/{id} {
+      allow get: if isMember();
+      allow create: if isAdmin() && imagesValid() && request.resource.data.createdAt == request.time;
+      allow update: if isAdmin() && imagesValid() && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAdmin();
+    }
+
+    // รูปของข่าวและงบ (กฎเดียวกับ articleImages)
+    match /newsImages/{id} {
+      allow get: if isMember();
+      allow create: if isAdmin() && imagesValid() && request.resource.data.createdAt == request.time;
+      allow update: if isAdmin() && imagesValid() && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAdmin();
+    }
+
+    match /earningsImages/{id} {
+      allow get: if isMember();
+      allow create: if isAdmin() && imagesValid() && request.resource.data.createdAt == request.time;
+      allow update: if isAdmin() && imagesValid() && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAdmin();
+    }
+
+    // ---------- Watchlist ส่วนตัว (เจ้าของเท่านั้น) ----------
+    match /watchlists/{uid} {
+      // อ่านได้เฉพาะเจ้าของที่ยังเป็นสมาชิก (รหัสปัจจุบัน) คนที่หมดสิทธิ์อ่านไม่ได้แม้เป็นของตัวเอง
+      allow get: if isMember() && request.auth.uid == uid;
+      allow create, update: if isMember() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['items', 'updatedAt'])
+        && request.resource.data.items is list && request.resource.data.items.size() <= 500;
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
+    // อย่างอื่นปิดหมด
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
