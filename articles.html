@@ -216,6 +216,10 @@ const fmtDate = iso => { const d = new Date(String(iso) + "T00:00:00"); return i
 
 let N = null, items = [];
 const state = { tab: "all", ticker: "", q: "", id: "" };
+window.SITE_MENU = { here: "articles", onHere: t => {
+  if (state.id) { location.href = "articles.html?ticker=" + encodeURIComponent(t); return; }   // อยู่ในหน้าอ่านบทความ -> กลับไปรายการที่กรองหุ้นตัวนี้
+  tbOpen = false; tbQ = ""; state.ticker = t; writeParams(); renderList(); window.scrollTo({ top: 0, behavior: "smooth" });
+} };
 
 function readParams() {
   const sp = new URLSearchParams(location.search);
@@ -278,7 +282,7 @@ function renderList() {
         <h3><a href="${href}" data-open="${esc(a.id)}">${esc(a.title)}</a></h3>
         ${a.summary ? `<p class="sum">${esc(a.summary)}</p>` : ""}
         <div class="afoot2">
-          ${shown.map(t => `<button class="ntk" type="button" data-tk="${esc(t)}" aria-pressed="${state.ticker === t}">${esc(t)}</button>`).join("")}${rest > 0 ? `<span class="more-tk">+${rest}</span>` : ""}
+          ${shown.map(t => `<button class="ntk" type="button" data-tkmenu="${esc(t)}" aria-haspopup="menu" aria-expanded="false" title="กดเพื่อเลือกดู ${esc(t)}">${esc(t)}</button>`).join("")}${rest > 0 ? `<span class="more-tk">+${rest}</span>` : ""}
           <a class="read" href="${href}" data-open="${esc(a.id)}">อ่านต่อ ›</a>
         </div>
       </div></article>`;
@@ -310,13 +314,12 @@ async function showReader(id) {
   r.innerHTML = `<button class="linkbtn back" type="button" data-back>‹ กลับไปรายการ</button>
     <div class="ameta"><span class="badge" style="${isA ? "background:var(--navy);color:#fff" : ""}">${esc(TYPES[a.type] || "บทความ")}</span><span>${esc(fmtDate(a.date))}${newPill(a.createdAt)}${viewsHtml(a)}</span></div>
     <h2>${esc(a.title)}</h2>
-    <div class="afoot">${(a.tickers || []).map(t => `<a class="ntk" style="text-decoration:none" href="articles.html?ticker=${encodeURIComponent(t)}">${esc(t)}</a>`).join("")}</div>
+    <div class="afoot">${(a.tickers || []).map(t => `<button class="ntk" type="button" data-tkmenu="${esc(t)}" aria-haspopup="menu" aria-expanded="false" title="กดเพื่อเลือกดู ${esc(t)}">${esc(t)}</button>`).join("")}</div>
     ${a.summary ? `<p class="sum" style="-webkit-line-clamp:unset;margin-top:10px">${esc(a.summary)}</p>` : ""}
     <div class="rimgs">${imgs.map((s, i) => `<img src="${s}" alt="รูปประกอบบทความ ${i + 1}" loading="lazy">`).join("")}</div>
     ${a.body ? `<div class="rbody">${linkify(esc(a.body))}</div>` : ""}
     <div class="rlinks">
       ${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ ›</a>` : ""}
-      ${(a.tickers || []).map(t => `<a href="dr.html?q=${encodeURIComponent(t)}">ดู DR ของ ${esc(t)} ›</a>`).join("")}
     </div>`;
   // นับคนดู: เปิดอ่านบทความครั้งแรกของเครื่องนี้ +1
   if (window.NLP && NLP.trackView) NLP.trackView("articles", id).then(ok => {
