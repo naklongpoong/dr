@@ -400,6 +400,11 @@ function syncControls() {
 }
 
 // ---- วาดรายการ ----
+function wordStart(text, q) {
+  const t = String(text).toLowerCase();
+  for (let i = t.indexOf(q); i >= 0; i = t.indexOf(q, i + 1)) { if (i === 0 || !/[a-z0-9\u0e00-\u0e7f]/.test(t[i - 1])) return true; }
+  return false;
+}
 function render() {
   const q = state.q.trim().toLowerCase();
   let shownRefs = 0, shownDRs = 0;
@@ -409,7 +414,9 @@ function render() {
       if (state.country !== "all" && cty !== state.country) return false;
       if (state.issuer !== "all" && !codes.includes(state.issuer)) return false;
       if (!q) return true;
-      return tk.toLowerCase().includes(q) || name.toLowerCase().includes(q) || codes.some(c => (tk + c).toLowerCase().includes(q));
+      if (state.exact) return tk.toLowerCase() === q || codes.some(c => c.toLowerCase() === q || (tk + c).toLowerCase() === q);   // มาจากการกดชื่อหุ้น: ตรงตัวเท่านั้น (PENG ไม่ดึง SPENGY/XPENG)
+      // ค้นจากต้นคำเท่านั้น: ชื่อย่อขึ้นต้นด้วยคำค้น หรือคำในชื่อบริษัทขึ้นต้นด้วยคำค้น (PENG ไม่ดึง SPENGY/XPENG, UNIQLO ยังเจอ Fast Retailing (UNIQLO))
+      return tk.toLowerCase().startsWith(q) || wordStart(name, q) || codes.some(c => (tk + c).toLowerCase().startsWith(q) || c.toLowerCase().startsWith(q));
     });
     if (!rows.length) return "";
     const drCount = rows.reduce((n, r) => n + (state.issuer === "all" ? r[3].length : 1), 0);
@@ -438,7 +445,7 @@ function render() {
 
   const emptyMsg = state.theme === "star" && !stars.size
     ? "Watchlist ยังว่าง กด ☆ ข้างชื่อหุ้นเพื่อเพิ่มหุ้นที่สนใจ"
-    : (state.q.trim() ? `ไม่พบ DR ที่ตรงกับ "${esc(state.q)}" ลองใช้ชื่อย่อหุ้นหรือเอาตัวกรองออก` : "ไม่พบ DR ที่ตรงกับตัวกรอง ลองเอาตัวกรองออก");
+    : (state.q.trim() && state.exact ? `ยังไม่พบ DR ของ ${esc(state.q.trim().toUpperCase())} ในรายการนี้ <button class="linkbtn" type="button" id="exactWide">ลองค้นแบบกว้าง</button>` : state.q.trim() ? `ไม่พบ DR ที่ตรงกับ "${esc(state.q)}" ลองใช้ชื่อย่อหุ้นหรือเอาตัวกรองออก` : "ไม่พบ DR ที่ตรงกับตัวกรอง ลองเอาตัวกรองออก");
   $("out").innerHTML = html || `<div class="list"><div class="empty">${emptyMsg}</div></div>`;
   $("clearBtn").hidden = !(state.q.trim() || state.sector !== "all" || state.issuer !== "all" || state.country !== "all" || (state.theme !== "all" && state.theme !== "star"));
   $("count").textContent = html ? `พบ ${shownDRs} DR จาก ${shownRefs} หุ้นอ้างอิง` : "";
@@ -466,8 +473,7 @@ function openPop(btn) {
   const code = btn.dataset.code, tk = btn.dataset.tk, p = $("pop");
   const items = [`<a role="menuitem" href="${SET_URL(code)}" target="_blank" rel="noopener noreferrer"><b>ดูราคาบน SET</b><small>${esc(code)}</small></a>`];
   if (window.SITE && SITE.articles) items.push(`<a role="menuitem" href="articles.html?ticker=${encodeURIComponent(tk)}"><b>อ่านบทความเกี่ยวกับ ${esc(tk)}</b><small>บทความและบทวิเคราะห์</small></a>`);
-  if (window.SITE && SITE.news) items.push(`<a role="menuitem" href="news.html?ticker=${encodeURIComponent(tk)}"><b>ดูข่าวของ ${esc(tk)}</b><small>ข่าวและหุ้นน่าสนใจ</small></a>`);
-  if (window.SITE && SITE.earnings) items.push(`<a role="menuitem" href="earnings.html?ticker=${encodeURIComponent(tk)}"><b>ดูงบของ ${esc(tk)}</b><small>พรีวิวงบและงบหุ้นรายตัว</small></a>`);
+  if (window.SITE && SITE.news) items.push(`<a role="menuitem" href="news.html?ticker=${encodeURIComponent(tk)}"><b>ดูข่าวของ ${esc(tk)}</b><small>ข่าวและรายงานงบ</small></a>`);
   p.innerHTML = items.join("");
   p.style.visibility = "hidden"; p.hidden = false;
   const r = btn.getBoundingClientRect(), w = p.offsetWidth, h = p.offsetHeight;
@@ -490,7 +496,8 @@ addEventListener("resize", () => closePop(false));
 
 // ---- events ----
 function setState(k, v) { state[k] = v; syncControls(); render(); }
-$("q").addEventListener("input", e => { state.q = e.target.value; render(); });
+$("q").addEventListener("input", e => { state.q = e.target.value; state.exact = false; render(); });
+document.addEventListener("click", e => { if (e.target.id === "exactWide") { state.exact = false; render(); } });
 $("country").addEventListener("change", e => setState("country", e.target.value));
 $("themes").addEventListener("click", e => {
   const b = e.target.closest("[data-theme]"); if (!b) return;
@@ -515,7 +522,7 @@ $("out").addEventListener("click", e => {
 });
 $("clearBtn").addEventListener("click", () => {   // ล้างทุกตัวกรอง ยกเว้นมุมมอง Watchlist (และรายการใน Watchlist ไม่ถูกแตะ)
   closePop(false);
-  state.q = ""; $("q").value = ""; state.sector = "all"; state.issuer = "all"; state.country = "all"; $("country").value = "all";
+  state.q = ""; state.exact = false; $("q").value = ""; state.sector = "all"; state.issuer = "all"; state.country = "all"; $("country").value = "all";
   if (state.theme !== "star") state.theme = "all";
   syncControls(); render();
 });
@@ -540,7 +547,7 @@ function readParams() {
     theme: v => Object.prototype.hasOwnProperty.call(THEMES, v)
   };
   Object.keys(ok).forEach(k => { const v = sp.get(k); if (v && ok[k](v)) state[k] = v; });
-  const q = sp.get("q"); if (q) { state.q = q; $("q").value = q; }
+  const q = sp.get("q"); if (q) { state.q = q; state.exact = true; $("q").value = q; }
 }
 
 async function boot() {
@@ -548,16 +555,13 @@ async function boot() {
   $("out").innerHTML = '<div class="list"><div class="empty">กำลังโหลดข้อมูล...</div></div>';
   const N = await NLP.ready;
   let snap;
-  let d = window.cacheGet ? cacheGet("dr", (SITE.cacheMinutes || 0) * 5) : null;   // ข้อมูล DR เปลี่ยนไม่บ่อย จำนานกว่าข่าว 5 เท่า
-  try { if (!d) { snap = await N.F.getDoc(N.F.doc(N.db, "content", "dr")); } }
+  try { snap = await N.F.getDoc(N.F.doc(N.db, "content", "dr")); }
   catch (e) {
     if (e && e.code === "permission-denied") return NLP.relock();
     $("out").innerHTML = '<div class="list"><div class="empty">โหลดข้อมูลไม่สำเร็จ ลองรีเฟรชอีกครั้ง</div></div>'; return;
   }
-  if (!d) {
-    if (!snap.exists()) { $("out").innerHTML = '<div class="list"><div class="empty">ยังไม่มีข้อมูล DR ให้ผู้ดูแลอัปโหลดที่หลังบ้าน</div></div>'; return; }
-    d = snap.data(); if (window.cachePut) cachePut("dr", d);
-  }
+  if (!snap.exists()) { $("out").innerHTML = '<div class="list"><div class="empty">ยังไม่มีข้อมูล DR ให้ผู้ดูแลอัปโหลดที่หลังบ้าน</div></div>'; return; }
+  const d = snap.data();
   setData(d.raw || "");
   await loadCloudStars();
   if (Array.isArray(d.hotTk) && d.hotTk.length) THEMES.hot = { name: "หุ้นร้อนแรง", tk: d.hotTk, note: d.hotNote || "" };
