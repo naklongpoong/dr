@@ -97,6 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var p = ensure(), tk = b.getAttribute("data-tkmenu"), q = encodeURIComponent(tk), cfg = window.SITE_MENU || {}, it = [];
     function item(href, title, sub, extra) { return '<a role="menuitem" href="' + href + '"' + (extra || "") + "><b>" + title + "</b><small>" + sub + "</small></a>"; }
     function here(k) { return cfg.here === k ? ' data-here="' + esc(tk) + '"' : ""; }
+    if (cfg.current !== tk) it.push(item("stock.html?t=" + q, "เปิด dashboard ของ " + esc(tk) + " ↗", "กราฟ Finviz + ข่าว งบ บทความ ในหน้าเดียว", ' target="_blank" rel="noopener"'));
     if (b.getAttribute("data-dr") !== "0") it.push(item("dr.html?q=" + q, "ดู DR ของ " + esc(tk), "รวม DR ในตลาดหุ้นไทย"));
     it.push(item("https://finviz.com/quote.ashx?t=" + q, "ดูกราฟ " + esc(tk) + " บน Finviz ↗", "เปิดในแท็บใหม่", ' target="_blank" rel="noopener noreferrer"'));
     if (SITE.articles) it.push(item("articles.html?ticker=" + q, "อ่านบทความเกี่ยวกับ " + esc(tk), "บทความและบทวิเคราะห์", here("articles")));

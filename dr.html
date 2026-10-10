@@ -434,7 +434,7 @@ function render() {
         </div>
         <div class="drs">${codes.map(c => {
           const col = (ISSUERS[c] || {}).color || "#2a6fdb";
-          return `<button type="button" class="dr${state.issuer !== "all" && c !== state.issuer ? " dim" : ""}" style="--c:${col}" data-code="${esc(tk + c)}" data-tk="${esc(tk)}" aria-haspopup="menu" aria-expanded="false" title="${esc((ISSUERS[c] || {}).name || c)} · กดเพื่อเลือกดู">${esc(tk + c)}</button>`;
+          return `<button type="button" class="dr${state.issuer !== "all" && c !== state.issuer ? " dim" : ""}" style="--c:${col}" data-code="${esc(tk + c)}" data-tk="${esc(tk)}" data-cty="${esc(cty)}" aria-haspopup="menu" aria-expanded="false" title="${esc((ISSUERS[c] || {}).name || c)} · กดเพื่อเลือกดู">${esc(tk + c)}</button>`;
         }).join("")}</div>
       </div>`;
     }).join("");
@@ -472,6 +472,7 @@ function openPop(btn) {
   closePop(false);
   const code = btn.dataset.code, tk = btn.dataset.tk, p = $("pop");
   const items = [`<a role="menuitem" href="${SET_URL(code)}" target="_blank" rel="noopener noreferrer"><b>ดูราคาบน SET</b><small>${esc(code)}</small></a>`];
+  if (btn.dataset.cty === "US") items.push(`<a role="menuitem" href="stock.html?t=${encodeURIComponent(tk)}" target="_blank" rel="noopener"><b>เปิด dashboard ของ ${esc(tk)} ↗</b><small>กราฟ Finviz + ข่าว งบ บทความ ในหน้าเดียว</small></a>`);
   if (window.SITE && SITE.articles) items.push(`<a role="menuitem" href="articles.html?ticker=${encodeURIComponent(tk)}"><b>อ่านบทความเกี่ยวกับ ${esc(tk)}</b><small>บทความและบทวิเคราะห์</small></a>`);
   if (window.SITE && SITE.news) items.push(`<a role="menuitem" href="news.html?ticker=${encodeURIComponent(tk)}"><b>ดูข่าวของ ${esc(tk)}</b><small>ข่าวและรายงานงบ</small></a>`);
   p.innerHTML = items.join("");
