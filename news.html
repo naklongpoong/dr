@@ -564,7 +564,7 @@ function render() {
   const list = Object.entries(cnt).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   renderTickerBar(list);
   $("active").hidden = !state.ticker;
-  $("active").innerHTML = state.ticker ? `<span>กรองหุ้น <b>${esc(state.ticker)}</b></span><a href="dr.html?q=${encodeURIComponent(state.ticker)}">ดู DR ของ ${esc(state.ticker)} ›</a><a href="articles.html?ticker=${encodeURIComponent(state.ticker)}">อ่านบทความ ›</a>${PAGE === "news" ? `<a href="earnings.html?ticker=${encodeURIComponent(state.ticker)}">ดูงบของ ${esc(state.ticker)} ›</a>` : `<a href="news.html?ticker=${encodeURIComponent(state.ticker)}">ดูข่าวของ ${esc(state.ticker)} ›</a>`}<button class="linkbtn" type="button" data-tk="">ล้างตัวกรอง</button>` : "";
+  $("active").innerHTML = state.ticker ? `<span>กรองหุ้น <b>${esc(state.ticker)}</b></span><a href="stock.html?t=${encodeURIComponent(state.ticker)}" target="_blank" rel="noopener"><b>เปิด dashboard ↗</b></a><a href="dr.html?q=${encodeURIComponent(state.ticker)}">ดู DR ของ ${esc(state.ticker)} ›</a><a href="articles.html?ticker=${encodeURIComponent(state.ticker)}">อ่านบทความ ›</a>${PAGE === "news" ? `<a href="earnings.html?ticker=${encodeURIComponent(state.ticker)}">ดูงบของ ${esc(state.ticker)} ›</a>` : `<a href="news.html?ticker=${encodeURIComponent(state.ticker)}">ดูข่าวของ ${esc(state.ticker)} ›</a>`}<button class="linkbtn" type="button" data-tk="">ล้างตัวกรอง</button>` : "";
 
   // หุ้นน่าสนใจ + แอดมินแนะนำ (แสดงในแท็บ "ทั้งหมด")
   const pk = data.picks, ap = data.apicks;
