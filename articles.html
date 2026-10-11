@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610111358"></script>
-<script src="gate.js?v=202610111358"></script>
+<script src="site.js?v=202610111359"></script>
+<script src="gate.js?v=202610111359"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -268,7 +268,7 @@ function renderList() {
   document.title = (lg ? "Legends" : "บทความ & บทวิเคราะห์") + " | นักลงพุง";
   if (window.buildNav) buildNav(lg ? "legend" : "articles");
   const q = state.q.trim().toLowerCase();
-  const base = items.filter(a => (!state.ticker || (a.tickers || []).includes(state.ticker)) &&
+  const base = items.filter(a => (!state.ticker || (a.tickers || []).some(x => tkAlias(state.ticker).includes(x))) &&
     (!q || (a.title || "").toLowerCase().includes(q) || (a.summary || "").toLowerCase().includes(q) || (a.tickers || []).some(t => t.toLowerCase().includes(q))));
   const list = base.filter(a => state.tab === "all" || a.type === state.tab);
   $("tabs").innerHTML = [["all", "ทั้งหมด", base.length], ["article", "บทความ", base.filter(a => a.type === "article").length], ["analysis", "บทวิเคราะห์", base.filter(a => a.type === "analysis").length], ["legend", "Legends", base.filter(a => a.type === "legend").length]]

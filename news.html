@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610111358"></script>
-<script src="gate.js?v=202610111358"></script>
+<script src="site.js?v=202610111359"></script>
+<script src="gate.js?v=202610111359"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -426,13 +426,13 @@ async function loadMore(col) {
 // กรองตามชื่อหุ้น: ดึงโพสต์เก่าของหุ้นตัวนั้นเพิ่ม (ถ้าไม่มี index จะถอยไปใช้แบบไม่เรียงก่อนแล้วเรียงในเครื่อง)
 async function loadTicker(t) {
   const N = NLP, F = N.F;
-  await Promise.all(COLS.map(async col => {
-    const base = [F.collection(N.db, col), F.where("tickers", "array-contains", t)];
+  await Promise.all(COLS.flatMap(col => tkAlias(t).map(async tk => {   // GOOGL กับ GOOG นับเป็นหุ้นเดียวกัน
+    const base = [F.collection(N.db, col), F.where("tickers", "array-contains", tk)];
     let s;
     try { s = await F.getDocs(F.query(...base, F.orderBy("createdAt", "desc"), F.limit(30))); }
     catch (e) { if (e && e.code === "permission-denied") throw e; s = await F.getDocs(F.query(...base, F.limit(50))); }
     merge(col, docRows(s));
-  }));
+  })));
   tkLoaded.add(t);
 }
 function ensureTicker(t) {
@@ -553,7 +553,7 @@ function fillPicks(k, b, def) {
 function render() {
   const any = data.news.length + data.earnings.length;
   $("filters").hidden = !any;
-  const match = p => !state.ticker || (p.tickers || []).includes(state.ticker);
+  const match = p => !state.ticker || (p.tickers || []).some(x => tkAlias(state.ticker).includes(x));
   const N = data.news.filter(match);
   const V = data.earnings.filter(p => p.kind === "preview" && match(p)), R = data.earnings.filter(p => p.kind !== "preview" && match(p));
   $("tabs").hidden = PAGE === "news";
