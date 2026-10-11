@@ -23,7 +23,7 @@ window.buildNav = function (current) {
   var el = document.getElementById("nav");
   if (!el) return;
   var items = [["index", "index.html", "หน้าแรก"], ["dr", "dr.html", "รวม DR"]];
-  if (SITE.articles) { items.push(["articles", "articles.html", "บทความ"]); items.push(["legend", "articles.html?type=legend", "เซียนโลก"]); }
+  if (SITE.articles) { items.push(["articles", "articles.html", "บทความ"]); items.push(["legend", "articles.html?type=legend", "Legends"]); }
   if (SITE.news) items.push(["news", "news.html", "ข่าว"]);
   if (SITE.earnings) items.push(["earnings", "earnings.html", "งบ"]);
   if (SITE.etf) items.push(["etf", "etf.html", "ETF"]);

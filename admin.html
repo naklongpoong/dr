@@ -135,7 +135,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <h2>เขียนบทความ / บทวิเคราะห์</h2>
       <div class="stat warn" id="aEditBar" hidden>กำลังแก้ไข: <b id="aEditTitle"></b> · <button class="linkbtn" id="aCancel" type="button">ยกเลิกการแก้ไข</button></div>
       <div class="grid2">
-        <div><label for="aType">ประเภท</label><select id="aType"><option value="article">บทความ</option><option value="analysis">บทวิเคราะห์</option><option value="legend">เซียนโลก (นักลงทุน/เทรดเดอร์ระดับโลก)</option></select></div>
+        <div><label for="aType">ประเภท</label><select id="aType"><option value="article">บทความ</option><option value="analysis">บทวิเคราะห์</option><option value="legend">Legends (นักลงทุน/เทรดเดอร์ระดับโลก)</option></select></div>
         <div><label for="aDate">วันที่</label><input id="aDate" type="date"></div>
       </div>
       <label for="aTitle">หัวข้อ</label><input id="aTitle" type="text" maxlength="200" autocomplete="off">
@@ -240,7 +240,7 @@ $("tabs").addEventListener("click", e => {
 });
 
 // ---------- ย้ายหมวด ----------
-const KIND_LABEL = { news: "ข่าว", preview: "พรีวิวงบ", result: "งบหุ้นรายตัว", article: "บทความ", analysis: "บทวิเคราะห์", legend: "เซียนโลก" };
+const KIND_LABEL = { news: "ข่าว", preview: "พรีวิวงบ", result: "งบหุ้นรายตัว", article: "บทความ", analysis: "บทวิเคราะห์", legend: "Legends" };
 const kindOf = (col, d) => col === "news" ? "news" : (col === "earnings" ? (d.kind === "preview" ? "preview" : "result") : (d.type === "analysis" ? "analysis" : d.type === "legend" ? "legend" : "article"));
 const moveSelect = (col, id, d) => `<select class="mv" data-mv="${col}/${esc(id)}" aria-label="ย้ายหมวด"><option value="">ย้ายไป…</option>${Object.entries(KIND_LABEL).filter(([k]) => k !== kindOf(col, d)).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select>`;
 const ymd = ts => { const d = ts && ts.toDate ? ts.toDate() : new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
@@ -448,7 +448,7 @@ async function loadArticles() {
   try {
     const s = await N.F.getDocs(N.F.query(N.F.collection(N.db, "articles"), N.F.orderBy("createdAt", "desc"), N.F.limit(50)));
     s.docs.forEach(d => { artCache[d.id] = d.data(); });
-    $("aList").innerHTML = s.docs.map(d => { const a = d.data(); return `<div class="it"><span><small>${a.type === "analysis" ? "บทวิเคราะห์" : a.type === "legend" ? "เซียนโลก" : "บทความ"} · ${esc(a.date)}${a.hasImages ? " · มีรูป" : ""} · ดู ${a.views || 0}</small><br>${esc(a.title)}</span><span><button class="linkbtn" type="button" data-edit="${esc(d.id)}">แก้ไข</button> · <button class="linkbtn" type="button" data-del="${esc(d.id)}">ลบ</button><br>${moveSelect("articles", d.id, a)}</span></div>`; }).join("") || "<p class='help'>ยังไม่มีบทความ</p>";
+    $("aList").innerHTML = s.docs.map(d => { const a = d.data(); return `<div class="it"><span><small>${a.type === "analysis" ? "บทวิเคราะห์" : a.type === "legend" ? "Legends" : "บทความ"} · ${esc(a.date)}${a.hasImages ? " · มีรูป" : ""} · ดู ${a.views || 0}</small><br>${esc(a.title)}</span><span><button class="linkbtn" type="button" data-edit="${esc(d.id)}">แก้ไข</button> · <button class="linkbtn" type="button" data-del="${esc(d.id)}">ลบ</button><br>${moveSelect("articles", d.id, a)}</span></div>`; }).join("") || "<p class='help'>ยังไม่มีบทความ</p>";
   } catch (e) { fail("aMsg", e); }
 }
 $("aList").addEventListener("click", async e => {

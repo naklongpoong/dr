@@ -205,7 +205,7 @@ h1 { font-size: clamp(1.55rem, 4.6vw, 2.2rem); font-weight: 700; line-height: 1.
 </main>
 
 <script>
-const TYPES = { article: "บทความ", analysis: "บทวิเคราะห์", legend: "เซียนโลก" };
+const TYPES = { article: "บทความ", analysis: "บทวิเคราะห์", legend: "Legends" };
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const safeUrl = u => /^https?:\/\//i.test(u || "") ? u : "";
@@ -263,15 +263,15 @@ document.addEventListener("input", e => { if (e.target.id === "tbSearch") { tbQ 
 const DOC_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg>';
 function renderList() {
   const lg = state.tab === "legend";
-  $("pgTitle").textContent = lg ? "เซียนโลก" : "บทความ & บทวิเคราะห์";
-  $("pgLede").textContent = lg ? "ความคิดและบทเรียนจากนักลงทุนและเทรดเดอร์ระดับตำนาน คัดมาเล่าเป็นภาษาไทย" : "บทความและบทวิเคราะห์หุ้นต่างประเทศจากนักลงพุง";
-  document.title = (lg ? "เซียนโลก" : "บทความ & บทวิเคราะห์") + " | นักลงพุง";
+  $("pgTitle").textContent = lg ? "Legends" : "บทความ & บทวิเคราะห์";
+  $("pgLede").textContent = lg ? "บทความจากนักลงทุนและเทรดเดอร์ระดับโลก" : "บทความและบทวิเคราะห์หุ้นต่างประเทศจากนักลงพุง";
+  document.title = (lg ? "Legends" : "บทความ & บทวิเคราะห์") + " | นักลงพุง";
   if (window.buildNav) buildNav(lg ? "legend" : "articles");
   const q = state.q.trim().toLowerCase();
   const base = items.filter(a => (!state.ticker || (a.tickers || []).includes(state.ticker)) &&
     (!q || (a.title || "").toLowerCase().includes(q) || (a.summary || "").toLowerCase().includes(q) || (a.tickers || []).some(t => t.toLowerCase().includes(q))));
   const list = base.filter(a => state.tab === "all" || a.type === state.tab);
-  $("tabs").innerHTML = [["all", "ทั้งหมด", base.length], ["article", "บทความ", base.filter(a => a.type === "article").length], ["analysis", "บทวิเคราะห์", base.filter(a => a.type === "analysis").length], ["legend", "เซียนโลก", base.filter(a => a.type === "legend").length]]
+  $("tabs").innerHTML = [["all", "ทั้งหมด", base.length], ["article", "บทความ", base.filter(a => a.type === "article").length], ["analysis", "บทวิเคราะห์", base.filter(a => a.type === "analysis").length], ["legend", "Legends", base.filter(a => a.type === "legend").length]]
     .map(([k, v, n]) => `<button class="tab" type="button" data-tab="${k}" aria-pressed="${state.tab === k}">${v}<span class="n">${n}</span></button>`).join("");
   const cnt = {};
   items.forEach(a => (a.tickers || []).forEach(t => { cnt[t] = (cnt[t] || 0) + 1; }));
