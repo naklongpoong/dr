@@ -668,7 +668,7 @@ function renderLinks() {
     [`https://finviz.com/quote.ashx?t=${q(T)}`, "Finviz", "ตัวเลขพื้นฐานและกราฟเต็ม"],
     [`https://finance.yahoo.com/quote/${q(T)}/`, "Yahoo Finance: ภาพรวม", "ราคา ตัวเลขสำคัญ และข่าว"],
     [`https://finance.yahoo.com/quote/${q(T)}/financials/`, "Yahoo Finance: งบการเงิน", "งบกำไรขาดทุน งบดุล กระแสเงินสด"],
-    [`https://finance.yahoo.com/quote/${q(T)}/sec-filings/`, "SEC filings (ผ่าน Yahoo Finance)", "รายงานทางการที่ยื่นต่อ ก.ล.ต. สหรัฐฯ เช่น 10-K 10-Q 8-K"],
+    [`https://finance.yahoo.com/quote/${q(T)}/sec-filings/`, "เอกสารที่ยื่นต่อ ก.ล.ต. สหรัฐฯ (Yahoo Finance)", "รายการ 10-K 10-Q 8-K ที่ Yahoo รวมไว้ให้ ไม่ใช่เว็บ SEC โดยตรง"],
     [`https://www.google.com/search?q=${q(T + " investor relations")}`, "หน้า Investor Relations", "ไม่มีลิงก์ตรง ค้นหาให้ผ่าน Google", true],
     [`https://www.google.com/search?q=${q(T + " earnings call transcript")}`, "ถอดเสียงประชุมงบ", "ไม่มีลิงก์ตรง ค้นหาให้ผ่าน Google", true],
     [`https://www.google.com/search?q=${q(T + " stock")}&tbm=nws`, "ข่าวล่าสุดจาก Google News", "ข่าวจากหลายสำนักนอกเว็บเรา", true]
