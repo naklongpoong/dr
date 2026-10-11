@@ -26,6 +26,7 @@ window.buildNav = function (current) {
   if (SITE.articles) items.push(["articles", "articles.html", "บทความ"]);
   if (SITE.news) items.push(["news", "news.html", "ข่าว"]);
   if (SITE.earnings) items.push(["earnings", "earnings.html", "งบ"]);
+  items.push(["feed", "feed.html", "ฟีดของฉัน"]);
   if (SITE.articles) items.push(["legend", "articles.html?type=legend", "Legends"]);
   if (SITE.etf) items.push(["etf", "etf.html", "ETF"]);
   el.innerHTML = items.map(function (i) {

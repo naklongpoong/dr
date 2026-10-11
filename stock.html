@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js"></script>
-<script src="gate.js"></script>
+<script src="site.js?v=202610111114"></script>
+<script src="gate.js?v=202610111114"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -500,7 +500,7 @@ function renderWL() {
   if (cloud === "denied") acct = "ซิงก์ข้ามเครื่องยังไม่เปิดใช้ ตอนนี้เก็บในเครื่องนี้ก่อน";
   else if (u && u.isAnonymous) acct = 'Watchlist และโน้ตเก็บตามเครื่องนี้ ถ้าอยากเปิดจากมือถือหรือเครื่องอื่นได้ <button class="linkbtn" id="linkG" type="button">ผูกบัญชี Google</button>';
   else if (u) acct = `ซิงก์กับบัญชี <b>${esc(u.email || "Google")}</b> ใช้ได้ทุกเครื่อง <button class="linkbtn" id="outG" type="button">ออกจากระบบ</button>`;
-  box.innerHTML = `<span class="wl-t">Watchlist ของฉัน</span>` +
+  box.innerHTML = `<span class="wl-t">Watchlist ของฉัน</span>` + (w.length ? '<a class="linkbtn" href="feed.html">ดูข่าวทั้งหมดของ Watchlist</a>' : "") +
     (w.length ? w.map(t => `<a class="wlc" href="stock.html?t=${q(t)}"${t === T ? ' aria-current="page"' : ""}>${esc(t)}<button type="button" data-wldel="${esc(t)}" aria-label="เอา ${esc(t)} ออกจาก Watchlist">×</button></a>`).join("") : '<span class="wl-empty">ยังไม่มีหุ้น กด + Watchlist ที่หุ้นที่สนใจ</span>') +
     (acct ? `<div class="wl-acct">${acct}</div>` : "");
 }
