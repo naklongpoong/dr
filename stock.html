@@ -230,6 +230,7 @@ h2 { font-size: 1.2rem; font-weight: 700; margin: 0; padding-left: 10px; border-
 .linklist a:hover b { text-decoration: underline; }
 .linklist b { font-weight: 600; }
 .linklist small { color: var(--muted); font-size: .85rem; }
+.linklist .lk-g { font-size: .68rem; font-weight: 600; margin-left: 8px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); vertical-align: 1px; }
 
 /* โมดัล + toast */
 #lb, #fs { position: fixed; inset: 0; z-index: 80; background: rgba(5,10,25,.9); display: flex; align-items: center; justify-content: center; padding: 16px; cursor: zoom-out; }
@@ -662,15 +663,19 @@ function noteSaved() { const s = $("saved"); s.textContent = "บันทึก
 
 // ---- ลิงก์ศึกษาต่อ ----
 function renderLinks() {
+  // ลิงก์ตรงไปหน้าข้อมูลจริงก่อน ส่วนที่ไม่มีหน้าตรงให้ค้นผ่าน Google ใส่ป้ายบอกชัดว่าเป็นผลค้นหา (g = true)
+  const sec = ty => `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${q(T)}&type=${ty}&dateb=&owner=include&count=40`;
   const L = [
     [`https://finviz.com/quote.ashx?t=${q(T)}`, "Finviz", "ตัวเลขพื้นฐานและกราฟเต็ม"],
-    [`https://finance.yahoo.com/quote/${q(T)}/`, "Yahoo Finance", "ราคา งบการเงิน และข่าว"],
-    [`https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${q(T)}&type=&dateb=&owner=include&count=40`, "SEC filings", "รายงานทางการของบริษัท เช่น 10-K และ 10-Q"],
-    [`https://www.google.com/search?q=${q(T + " investor relations")}`, "หน้า Investor Relations", "ค้นหาหน้านักลงทุนสัมพันธ์ของบริษัท"],
-    [`https://www.google.com/search?q=${q(T + " earnings call transcript")}`, "ถอดเสียงประชุมงบ", "ค้นหา transcript ของการประชุมล่าสุด"],
-    [`https://www.google.com/search?q=${q(T + " stock")}&tbm=nws`, "ข่าวจาก Google", "ข่าวล่าสุดของหุ้นตัวนี้"]
+    [`https://finance.yahoo.com/quote/${q(T)}/`, "Yahoo Finance: ภาพรวม", "ราคา ตัวเลขสำคัญ และข่าว"],
+    [`https://finance.yahoo.com/quote/${q(T)}/financials/`, "Yahoo Finance: งบการเงิน", "งบกำไรขาดทุน งบดุล กระแสเงินสด"],
+    [sec("10-K"), "SEC: รายงานประจำปี (10-K)", "รายงานทางการที่บริษัทยื่นต่อ ก.ล.ต. สหรัฐฯ"],
+    [sec("10-Q"), "SEC: รายงานรายไตรมาส (10-Q)", "รายงานทางการรายไตรมาส"],
+    [`https://www.google.com/search?q=${q(T + " investor relations")}`, "หน้า Investor Relations", "ไม่มีลิงก์ตรง ค้นหาให้ผ่าน Google", true],
+    [`https://www.google.com/search?q=${q(T + " earnings call transcript")}`, "ถอดเสียงประชุมงบ", "ไม่มีลิงก์ตรง ค้นหาให้ผ่าน Google", true],
+    [`https://www.google.com/search?q=${q(T + " stock")}&tbm=nws`, "ข่าวล่าสุดจาก Google News", "ข่าวจากหลายสำนักนอกเว็บเรา", true]
   ];
-  $("linkList").innerHTML = L.map(([h, t, d]) => `<li><a href="${h}" target="_blank" rel="noopener noreferrer"><b>${t} ↗</b><small>${d}</small></a></li>`).join("");
+  $("linkList").innerHTML = L.map(([h, t, d, g]) => `<li><a href="${h}" target="_blank" rel="noopener noreferrer"><b>${t} ↗${g ? '<span class="lk-g">ค้นด้วย Google</span>' : ""}</b><small>${d}</small></a></li>`).join("");
 }
 
 // ---- รูปประกอบ: ดึงเมื่อการ์ดเลื่อนมาใกล้จอเท่านั้น (1 อ่านต่อโพสต์) ----
