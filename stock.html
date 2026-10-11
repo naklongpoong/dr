@@ -664,13 +664,11 @@ function noteSaved() { const s = $("saved"); s.textContent = "บันทึก
 // ---- ลิงก์ศึกษาต่อ ----
 function renderLinks() {
   // ลิงก์ตรงไปหน้าข้อมูลจริงก่อน ส่วนที่ไม่มีหน้าตรงให้ค้นผ่าน Google ใส่ป้ายบอกชัดว่าเป็นผลค้นหา (g = true)
-  const sec = ty => `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${q(T)}&type=${ty}&dateb=&owner=include&count=40`;
   const L = [
     [`https://finviz.com/quote.ashx?t=${q(T)}`, "Finviz", "ตัวเลขพื้นฐานและกราฟเต็ม"],
     [`https://finance.yahoo.com/quote/${q(T)}/`, "Yahoo Finance: ภาพรวม", "ราคา ตัวเลขสำคัญ และข่าว"],
     [`https://finance.yahoo.com/quote/${q(T)}/financials/`, "Yahoo Finance: งบการเงิน", "งบกำไรขาดทุน งบดุล กระแสเงินสด"],
-    [sec("10-K"), "SEC: รายงานประจำปี (10-K)", "รายงานทางการที่บริษัทยื่นต่อ ก.ล.ต. สหรัฐฯ"],
-    [sec("10-Q"), "SEC: รายงานรายไตรมาส (10-Q)", "รายงานทางการรายไตรมาส"],
+    [`https://finance.yahoo.com/quote/${q(T)}/sec-filings/`, "SEC filings (ผ่าน Yahoo Finance)", "รายงานทางการที่ยื่นต่อ ก.ล.ต. สหรัฐฯ เช่น 10-K 10-Q 8-K"],
     [`https://www.google.com/search?q=${q(T + " investor relations")}`, "หน้า Investor Relations", "ไม่มีลิงก์ตรง ค้นหาให้ผ่าน Google", true],
     [`https://www.google.com/search?q=${q(T + " earnings call transcript")}`, "ถอดเสียงประชุมงบ", "ไม่มีลิงก์ตรง ค้นหาให้ผ่าน Google", true],
     [`https://www.google.com/search?q=${q(T + " stock")}&tbm=nws`, "ข่าวล่าสุดจาก Google News", "ข่าวจากหลายสำนักนอกเว็บเรา", true]
