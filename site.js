@@ -18,6 +18,14 @@ firebase: {
 }
 };
 
+// หุ้นที่ถือเป็นบริษัทเดียวกัน (คนละ class หรือคนละชื่อย่อ) หน้า dashboard ฟีด และค้นหาจะนับรวมกัน เพิ่มกลุ่มใหม่ได้ เช่น ["BRK-A", "BRK-B"]
+window.TK_ALIAS = [["GOOGL", "GOOG"]];
+window.tkAlias = function (t) {
+  t = String(t || "").toUpperCase();
+  for (var i = 0; i < TK_ALIAS.length; i++) if (TK_ALIAS[i].indexOf(t) >= 0) return TK_ALIAS[i].slice();
+  return [t];
+};
+
 // สร้างเมนูบนหัวหน้า ใช้กับทุกหน้าที่มี <nav id="nav">
 window.buildNav = function (current) {
   var el = document.getElementById("nav");
@@ -201,7 +209,8 @@ document.addEventListener("DOMContentLoaded", function () {
     var html = "", up = raw.toUpperCase();
     if (TK.test(up)) html += '<div class="g">หุ้น</div><a href="stock.html?t=' + encodeURIComponent(up) + '" target="_blank" rel="noopener"><b>เปิด dashboard ของ ' + esc(up) + ' ↗</b><small>กราฟ Finviz ข่าว งบ บทความ ในหน้าเดียว</small></a>';
     if (!data) { out.innerHTML = html + '<div class="hint">กำลังโหลดข้อมูล…</div>'; return; }
-    function has(arr) { return arr.some(function (x) { return String(x || "").toLowerCase().indexOf(q) >= 0; }); }
+    var terms = TK.test(up) ? tkAlias(up).map(function (x) { return x.toLowerCase(); }) : [q];
+    function has(arr) { return arr.some(function (x) { x = String(x || "").toLowerCase(); return terms.some(function (t) { return x.indexOf(t) >= 0; }); }); }
     var dr = data.dr.filter(function (r) { return has([r.tk, r.name, r.grp].concat(r.codes)); }).slice(0, 6);
     if (dr.length) html += '<div class="g">DR</div>' + dr.map(function (r) { return '<a href="dr.html?q=' + encodeURIComponent(r.tk) + '"><b>' + esc(r.tk) + " · " + esc(r.name) + "</b><small>" + esc(r.codes.join(", ")) + (r.grp ? " · " + esc(r.grp) : "") + "</small></a>"; }).join("");
     var art = data.articles.filter(function (a) { return has([a.title, a.summary].concat(a.tickers || [])); }).slice(0, 6);

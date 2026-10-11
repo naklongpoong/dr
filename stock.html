@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610111114"></script>
-<script src="gate.js?v=202610111114"></script>
+<script src="site.js?v=202610111352"></script>
+<script src="gate.js?v=202610111352"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -403,12 +403,19 @@ const dateTh = t => new Date(t).toLocaleDateString("th-TH", { dateStyle: "medium
 
 // ---- ดึงข้อมูลของหุ้นตัวนี้ ----
 // เหมือนหน้าข่าว: ลองเรียงตามเวลาก่อน ถ้ายังไม่มี index จะถอยไปดึงแบบไม่เรียงแล้วเรียงในเครื่อง
+const GROUP = () => window.tkAlias ? tkAlias(T) : [T];   // เช่น GOOGL กับ GOOG นับเป็นหุ้นเดียวกัน
 async function byTicker(col) {
-  const F = NLP.F, base = [F.collection(NLP.db, col), F.where("tickers", "array-contains", T)];
-  let s;
-  try { s = await F.getDocs(F.query(...base, F.orderBy("createdAt", "desc"), F.limit(LIST_N))); }
-  catch (e) { if (e && e.code === "permission-denied") throw e; s = await F.getDocs(F.query(...base, F.limit(50))); }
-  return docRows(s).sort(byNew).slice(0, LIST_N);
+  const F = NLP.F;
+  const one = async tk => {
+    const base = [F.collection(NLP.db, col), F.where("tickers", "array-contains", tk)];
+    let s;
+    try { s = await F.getDocs(F.query(...base, F.orderBy("createdAt", "desc"), F.limit(LIST_N))); }
+    catch (e) { if (e && e.code === "permission-denied") throw e; s = await F.getDocs(F.query(...base, F.limit(50))); }
+    return docRows(s);
+  };
+  const seen = new Set(), rows = [];
+  (await Promise.all(GROUP().map(one))).flat().forEach(r => { if (!seen.has(r.id)) { seen.add(r.id); rows.push(r); } });
+  return rows.sort(byNew).slice(0, LIST_N);
 }
 const soft = p => p.then(s => (s.exists() ? s.data() : null)).catch(() => null);   // ข้อมูลเสริม ถ้าอ่านไม่ได้ข้ามไปเฉยๆ
 function findDR(raw) {   // content/dr: @id|ชื่อกลุ่ม ขึ้นกลุ่มใหม่ / ชื่อย่อ|ประเทศ|ชื่อบริษัท|รหัส DR,รหัส DR
@@ -417,11 +424,11 @@ function findDR(raw) {   // content/dr: @id|ชื่อกลุ่ม ขึ�
     line = line.trim(); if (!line || line[0] === "#") return;
     if (line[0] === "@") { grp = line.slice(1).split("|")[1] || ""; return; }
     const p = line.split("|"); if (p.length < 4) return;
-    if (p[0].trim().toUpperCase() === T) out.push({ group: grp, name: p[2], codes: p[3].split(",").map(x => x.trim()).filter(Boolean) });
+    if (GROUP().includes(p[0].trim().toUpperCase())) out.push({ group: grp, name: p[2], codes: p[3].split(",").map(x => x.trim()).filter(Boolean) });
   });
   return out;
 }
-const inPicks = d => !!d && Array.isArray(d.tickers) && d.tickers.includes(T);
+const inPicks = d => !!d && Array.isArray(d.tickers) && d.tickers.some(x => GROUP().includes(x));
 async function load() {
   const F = NLP.F;
   const [news, earnings, articles, dr, pk, ap] = await Promise.all([
@@ -430,7 +437,7 @@ async function load() {
     soft(F.getDoc(F.doc(NLP.db, "content", "picks"))),
     soft(F.getDoc(F.doc(NLP.db, "content", "adminPicks")))
   ]);
-  return { v: 1, news, earnings, articles, dr: dr ? findDR(dr.raw) : [], picks: inPicks(pk), apicks: inPicks(ap) };
+  return { v: 2, news, earnings, articles, dr: dr ? findDR(dr.raw) : [], picks: inPicks(pk), apicks: inPicks(ap) };
 }
 
 // ---- ป้ายพลิกชื่อหุ้น ----
@@ -569,7 +576,7 @@ function matches(e) {
 }
 const chip = t => `<button class="ntk" type="button" data-tkmenu="${esc(t)}" aria-haspopup="menu" aria-expanded="false" title="กดเพื่อเลือกดู ${esc(t)}">${esc(t)}</button>`;
 function evHtml(e) {
-  const p = e.p, k = e.k, others = (p.tickers || []).filter(x => x !== T);
+  const p = e.p, k = e.k, others = (p.tickers || []).filter(x => !GROUP().includes(x));
   const tag = k === "news" ? '<span class="tag">ข่าว</span>' : k === "preview" ? '<span class="tag preview">พรีวิวงบ</span>' : k === "result" ? '<span class="tag result">งบ</span>' : `<span class="tag art">${p.type === "analysis" ? "วิเคราะห์" : "บทความ"}</span>`;
   const when = `<div class="ev-when"><b>${esc(e.t ? dateTh(e.t) : (p.date || ""))}</b>${tag}${p.period ? `<span>${esc(p.period)}</span>` : ""}${e.t ? `<span>${esc(ago(e.t))}</span>` : ""}${newPill(p.createdAt)}</div>`;
   if (k === "art") return `<li class="ev" data-k="art">${when}<h3 class="atitle"><a href="articles.html?id=${q(p.id)}">${esc(p.title)}</a></h3>${p.summary ? `<p class="asum">${esc(p.summary)}</p>` : ""}</li>`;
@@ -606,7 +613,7 @@ function renderTimeline() {
 }
 function renderRest() {
   const s = snap, dr = s.dr || [];
-  const nm = dr[0] && dr[0].name; $("tkName").hidden = !nm; $("tkName").textContent = nm || "";
+  const nm = dr[0] && dr[0].name, al = GROUP().length > 1 ? "รวมข้อมูล " + GROUP().join(" และ ") : "", nmt = [nm, al].filter(Boolean).join(" · "); $("tkName").hidden = !nmt; $("tkName").textContent = nmt;
   $("badges").innerHTML = (s.apicks ? '<a class="badge gold" href="news.html">แอดมินแนะนำ</a>' : "") + (s.picks ? '<a class="badge gold" href="news.html">หุ้นน่าสนใจ</a>' : "") + (dr.length ? `<a class="badge" href="dr.html?q=${q(T)}">มี DR</a>` : "");
   $("secD").hidden = !dr.length;
   $("listD").innerHTML = dr.map(r => `<div class="drrow"><div class="drname">${esc(r.name)}</div>${r.group ? `<div class="drsec">${esc(r.group)}</div>` : ""}<div class="drcodes">${r.codes.map(c => `<a href="https://www.set.or.th/th/market/product/dr/quote/${q(T + c)}/price" target="_blank" rel="noopener noreferrer" title="ดู ${esc(T + c)} บน SET">${esc(T + c)} ↗</a>`).join("")}</div></div>`).join("");
@@ -784,7 +791,7 @@ async function boot() {
   $("main").hidden = false; watchScroll();
   try {
     snap = window.cacheGet ? cacheGet("stock_" + T, CACHE_MIN) : null;
-    if (!snap || snap.v !== 1) { snap = await load(); if (window.cachePut) cachePut("stock_" + T, snap); }
+    if (!snap || snap.v !== 2) { snap = await load(); if (window.cachePut) cachePut("stock_" + T, snap); }
   } catch (err) {
     if (err && err.code === "permission-denied") return NLP.relock();
     $("tlSkel").hidden = true; $("tlEmpty").hidden = false;

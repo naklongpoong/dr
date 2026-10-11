@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610111114"></script>
-<script src="gate.js?v=202610111114"></script>
+<script src="site.js?v=202610111352"></script>
+<script src="gate.js?v=202610111352"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -331,12 +331,19 @@ const chip = t => `<button class="ntk" type="button" data-tkmenu="${esc(t)}" ari
 
 async function loadWatch() {
   let w = lsGet("nlp_fav", []);
+  const drKey = k => String(k).split("|")[0].trim().toUpperCase();   // Watchlist ของหน้า DR เก็บเป็น "ชื่อย่อ|ชื่อบริษัท" เอาเฉพาะชื่อย่อหุ้น
+  let dr = lsGet("nlp_dr_stars", []).map(drKey);
   try {
     const N = window.NLP, u = N.auth.currentUser;
-    if (u) { const s = await N.F.getDoc(N.F.doc(N.db, "stockboard", u.uid)); if (s.exists()) { const c = (s.data().watch || []); w = [...c, ...w.filter(t => !c.includes(t))]; } }
+    if (u) {
+      const s = await N.F.getDoc(N.F.doc(N.db, "stockboard", u.uid)); if (s.exists()) { const c = (s.data().watch || []); w = [...c, ...w.filter(t => !c.includes(t))]; }
+      try { const d = await N.F.getDoc(N.F.doc(N.db, "watchlists", u.uid)); if (d.exists()) dr = [...(d.data().items || []).map(drKey), ...dr]; } catch (e) {}
+    }
   } catch (e) {}
-  return w.filter(t => typeof t === "string" && TK_OK.test(t)).slice(0, 100);
+  return [...new Set([...w, ...dr])].filter(t => typeof t === "string" && TK_OK.test(t)).slice(0, 150);
 }
+const inW = t => watch.some(w => (window.tkAlias ? tkAlias(w) : [w]).includes(t));   // GOOGL กับ GOOG นับเป็นหุ้นเดียวกัน
+const hitW = (p, w) => (p.tickers || []).some(t => (window.tkAlias ? tkAlias(w) : [w]).includes(t));
 async function loadCol(name) {   // ใช้แคชชุดเดียวกับปุ่มค้นหา (ลดการอ่านซ้ำ)
   const c = window.cacheGet && cacheGet("srch_" + name, CACHE_MIN);
   if (c) return c;
@@ -349,11 +356,11 @@ function build(news, earn, arts) {
   news.forEach(p => out.push({ k: "news", p, t: ms(p.createdAt) }));
   earn.forEach(p => out.push({ k: p.kind === "preview" ? "preview" : "result", p, t: ms(p.createdAt) }));
   arts.forEach(p => out.push({ k: "art", p, t: ms(p.createdAt) }));
-  return out.filter(e => (e.p.tickers || []).some(t => watch.includes(t))).sort((a, b) => b.t - a.t);
+  return out.filter(e => (e.p.tickers || []).some(inW)).sort((a, b) => b.t - a.t);
 }
-const shown = () => items.filter(e => (kind === "all" || group(e.k) === kind) && (!pick || (e.p.tickers || []).includes(pick)));
+const shown = () => items.filter(e => (kind === "all" || group(e.k) === kind) && (!pick || hitW(e.p, pick)));
 function evHtml(e) {
-  const p = e.p, k = e.k, mine = (p.tickers || []).filter(t => watch.includes(t));
+  const p = e.p, k = e.k, mine = (p.tickers || []).filter(inW);
   const tag = k === "news" ? '<span class="tag">ข่าว</span>' : k === "preview" ? '<span class="tag preview">พรีวิวงบ</span>' : k === "result" ? '<span class="tag result">งบ</span>' : `<span class="tag art">${p.type === "analysis" ? "วิเคราะห์" : p.type === "legend" ? "Legends" : "บทความ"}</span>`;
   const fresh = seenAt && e.t > seenAt ? '<span class="since">ใหม่</span>' : "";
   const when = `<div class="ev-when"><b>${esc(e.t ? dateTh(e.t) : (p.date || ""))}</b>${tag}${p.period ? `<span>${esc(p.period)}</span>` : ""}${e.t ? `<span>${esc(ago(e.t))}</span>` : ""}${fresh}</div>`;
@@ -366,11 +373,11 @@ function evHtml(e) {
     <div class="pfoot">${others.map(chip).join("")}${safeUrl(p.link) ? `<a href="${esc(safeUrl(p.link))}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ</a>` : ""}</div></li>`;
 }
 function render() {
-  const n = { all: 0, news: 0, earn: 0, art: 0 }, base = items.filter(e => !pick || (e.p.tickers || []).includes(pick));
+  const n = { all: 0, news: 0, earn: 0, art: 0 }, base = items.filter(e => !pick || hitW(e.p, pick));
   base.forEach(e => { n.all++; n[group(e.k)]++; });
   $("chips").innerHTML = KINDS.map(([k, v]) => `<button class="chip" type="button" data-f="${k}" aria-pressed="${kind === k}">${v}<small>${n[k]}</small></button>`).join("");
-  const cnt = {}; items.forEach(e => (e.p.tickers || []).forEach(t => { if (watch.includes(t)) cnt[t] = (cnt[t] || 0) + 1; }));
-  $("wlpick").innerHTML = watch.filter(t => cnt[t]).map(t => `<button class="chip" type="button" data-pick="${esc(t)}" aria-pressed="${pick === t}">${esc(t)}<small>${cnt[t]}</small></button>`).join("");
+  const cnt = {}, shownW = []; watch.forEach(w => { const al = tkAlias(w); if (shownW.some(x => tkAlias(x).includes(w))) return; shownW.push(w); cnt[w] = items.filter(e => hitW(e.p, w)).length; });
+  $("wlpick").innerHTML = shownW.filter(t => cnt[t]).map(t => `<button class="chip" type="button" data-pick="${esc(t)}" aria-pressed="${pick === t}">${esc(t)}<small>${cnt[t]}</small></button>`).join("");
   const fresh = seenAt ? items.filter(e => e.t > seenAt).length : 0;
   $("summary").textContent = items.length ? `พบ ${items.length} โพสต์จากหุ้นใน Watchlist ${watch.length} ตัว` + (fresh ? ` ใหม่ตั้งแต่ที่คุณเข้ามาครั้งก่อน ${fresh} โพสต์` : "") : "";
   const list = shown();
