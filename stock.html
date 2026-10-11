@@ -310,7 +310,6 @@ h2 { font-size: 1.2rem; font-weight: 700; margin: 0; padding-left: 10px; border-
         <h2 id="chTitle">กราฟ</h2>
         <div class="seg" id="segP" role="group" aria-label="ช่วงเวลา"></div>
         <div class="seg" id="segT" role="group" aria-label="รูปแบบกราฟ"></div>
-        <button class="tog" id="togTA" type="button" aria-pressed="true">ตัวชี้วัด</button>
         <button class="tog" id="btnFull" type="button">ขยายเต็มจอ</button>
       </div>
       <div class="screen" id="screen">
@@ -318,7 +317,7 @@ h2 { font-size: 1.2rem; font-weight: 700; margin: 0; padding-left: 10px; border-
         <img id="chartImg" alt="" referrerpolicy="no-referrer">
       </div>
       <div class="chart-err" id="chartErr" hidden>โหลดกราฟไม่ได้ในตอนนี้ กด "ดูบน Finviz" ด้านบนเพื่อดูกราฟบนเว็บต้นทาง</div>
-      <p class="keys">ปุ่มลัด D รายวัน, W รายสัปดาห์, M รายเดือน, C สลับแท่งเทียนกับเส้น, T เปิดปิดตัวชี้วัด, F ขยายเต็มจอ</p>
+      <p class="keys">ปุ่มลัด D รายวัน, W รายสัปดาห์, M รายเดือน, C สลับแท่งเทียนกับเส้น, F ขยายเต็มจอ</p>
     </section>
 
     <div class="cols">
@@ -383,7 +382,7 @@ const newPill = ts => (window.isNew && isNew(ts)) ? '<span class="new">NEW</span
 const q = encodeURIComponent;
 const REDUCE = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 let T = "", snap = null, filter = "all", query = "";
-const chart = { p: "d", ty: "c", ta: 1 };
+const chart = { p: "d", ty: "c" };
 
 // ---- เก็บค่าในเครื่อง (ไม่ส่งไปไหน) ----
 const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
@@ -541,11 +540,10 @@ async function copyText(s) {
 
 // ---- ชาร์ต ----
 const PER = [["d", "รายวัน"], ["w", "รายสัปดาห์"], ["m", "รายเดือน"]], TYP = [["c", "แท่งเทียน"], ["l", "เส้น"]];
-const chartUrl = () => `https://finviz.com/chart.ashx?t=${q(T)}&ty=${chart.ty}&ta=${chart.ta}&p=${chart.p}&s=l`;
+const chartUrl = () => `https://finviz.com/chart.ashx?t=${q(T)}&ty=${chart.ty}&ta=1&p=${chart.p}&s=l`;
 function renderChart() {
   $("segP").innerHTML = PER.map(([k, v]) => `<button type="button" data-per="${k}" aria-pressed="${chart.p === k}">${v}</button>`).join("");
   $("segT").innerHTML = TYP.map(([k, v]) => `<button type="button" data-typ="${k}" aria-pressed="${chart.ty === k}">${v}</button>`).join("");
-  $("togTA").setAttribute("aria-pressed", chart.ta === 1); $("togTA").title = "เปิดหรือปิดตัวชี้วัด (SMA) บนกราฟ";
   const img = $("chartImg"); $("chartErr").hidden = true; $("screen").hidden = false; $("skel").hidden = false; img.classList.remove("ok");
   img.alt = "กราฟ " + T + " จาก Finviz"; img.src = chartUrl();
   if (!$("fs").hidden) $("fsImg").src = chartUrl();
@@ -713,7 +711,6 @@ document.addEventListener("click", e => {
   let b;
   if ((b = t.closest("[data-per]"))) { chart.p = b.dataset.per; renderChart(); return; }
   if ((b = t.closest("[data-typ]"))) { chart.ty = b.dataset.typ; renderChart(); return; }
-  if (t.closest("#togTA")) { chart.ta = chart.ta ? 0 : 1; renderChart(); toast(chart.ta ? "เปิดตัวชี้วัดแล้ว" : "ปิดตัวชี้วัดแล้ว"); return; }
   if (t.closest("#fsX")) { $("fs").hidden = true; return; }
   if (t.closest("#btnFull")) { openFs(); return; }
   if ((b = t.closest("[data-f]"))) { filter = b.dataset.f; renderTimeline(); return; }
@@ -763,7 +760,6 @@ document.addEventListener("keydown", e => {
   if (!T) return;
   if (k === "d" || k === "w" || k === "m") { chart.p = k; renderChart(); }
   else if (k === "c") { chart.ty = chart.ty === "c" ? "l" : "c"; renderChart(); }
-  else if (k === "t") { chart.ta = chart.ta ? 0 : 1; renderChart(); }
   else if (k === "f") { if ($("fs").hidden) openFs(); else $("fs").hidden = true; }
 });
 
@@ -780,7 +776,7 @@ async function boot() {
   window.SITE_MENU = { here: "stock", current: T };   // เมนูชื่อหุ้นในหน้านี้จะไม่โชว์ตัวเลือก dashboard ของหุ้นตัวเดิม
   document.title = T + " | นักลงพุง";
   const saved = lsGet("nlp_chart", null);
-  if (saved && ["d", "w", "m"].includes(saved.p) && ["c", "l"].includes(saved.ty)) { chart.p = saved.p; chart.ty = saved.ty; chart.ta = saved.ta === 0 ? 0 : 1; }
+  if (saved && ["d", "w", "m"].includes(saved.p) && ["c", "l"].includes(saved.ty)) { chart.p = saved.p; chart.ty = saved.ty }
   lsSet("nlp_recent", [T, ...recents().filter(x => x !== T)].slice(0, 12));
   flap(T); $("sbSym").textContent = T; $("acts").hidden = false; $("fvLink").href = "https://finviz.com/quote.ashx?t=" + q(T);
   $("tlTitle").textContent = "ไทม์ไลน์ของ " + T; $("hwTitle").textContent = "การบ้านของ " + T;
