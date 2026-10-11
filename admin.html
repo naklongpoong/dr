@@ -277,8 +277,8 @@ document.addEventListener("change", async e => {
   const to = sel.value, [col, id] = sel.dataset.mv.split("/"), d = col === "articles" ? artCache[id] : nCache[col + "/" + id];
   sel.value = ""; if (!d) return;
   const from = kindOf(col, d), warn = [];
-  if (col === "articles" && to !== "article" && to !== "analysis") { warn.push("หัวข้อจะรวมกับเนื้อหาเป็นข้อความเดียว"); }
-  if (col !== "articles" && (to === "article" || to === "analysis")) warn.push("หัวข้อจะใช้บรรทัดแรกของข้อความ");
+  if (col === "articles" && !["article", "analysis", "legend"].includes(to)) { warn.push("หัวข้อจะรวมกับเนื้อหาเป็นข้อความเดียว"); }
+  if (col !== "articles" && ["article", "analysis", "legend"].includes(to)) warn.push("หัวข้อจะใช้บรรทัดแรกของข้อความ");
   if (col === "earnings" && to !== "preview" && to !== "result") warn.push("งวดงบจะหาย");
   if (!confirm(`ย้ายจาก "${KIND_LABEL[from]}" ไป "${KIND_LABEL[to]}"?` + (warn.length ? "\n\n" + warn.join("\n") : "") + "\n\nวันที่เดิมและยอดดูจะยังอยู่")) return;
   try {
