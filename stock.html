@@ -241,6 +241,8 @@ h2 { font-size: 1.2rem; font-weight: 700; margin: 0; padding-left: 10px; border-
 .wl-t { font-weight: 700; margin-right: 4px; }
 .wl a.wlc { text-decoration: none; color: var(--ink); font-weight: 600; font-size: .9rem; padding: 2px 4px 2px 12px; border-radius: 999px; background: var(--accent-soft, #e8efff); display: inline-flex; align-items: center; gap: 2px; }
 .wl a.wlc[aria-current="page"] { background: var(--gold); color: var(--gold-ink); }
+.wl a.wlc.dr { padding-right: 10px; }
+.wl a.wlc .wl-dr { font-size: .68rem; font-weight: 700; margin-left: 6px; padding: 0 6px; border-radius: 999px; background: rgba(0,0,0,.14); }
 .wl a.wlc button { all: unset; cursor: pointer; width: 22px; height: 22px; text-align: center; line-height: 22px; border-radius: 50%; opacity: .6; }
 .wl a.wlc button:hover { opacity: 1; background: rgba(0,0,0,.12); }
 .wl-empty { color: var(--muted); font-size: .9rem; }
@@ -500,15 +502,28 @@ async function boardLoad() {
     lsSet("nlp_fav", board.watch);
   } catch (e) { cloud = e && e.code === "permission-denied" ? "denied" : "off"; }
 }
+let drStars = [];   // ดาวจากหน้า DR (อ่านอย่างเดียว เอาออกที่หน้ารวม DR) หน้า DR เก็บเป็น "ชื่อย่อ|ชื่อบริษัท" เอาเฉพาะชื่อย่อ
+async function drLoad() {
+  const drKey = k => String(k).split("|")[0].trim().toUpperCase();
+  let l = lsGet("nlp_dr_stars", []).map(drKey);
+  try {
+    const N = window.NLP, u = N.auth.currentUser;
+    if (u) { const s = await N.F.getDoc(N.F.doc(N.db, "watchlists", u.uid)); if (s.exists()) l = [...(s.data().items || []).map(drKey), ...l]; }
+  } catch (e) {}
+  drStars = [...new Set(l)].filter(t => TK_OK.test(t));
+}
 function renderWL() {
-  const box = $("wl"), w = board.watch, N = window.NLP, u = N && N.auth && N.auth.currentUser;
+  const box = $("wl"), N = window.NLP, u = N && N.auth && N.auth.currentUser;
+  const w = board.watch, al = t => window.tkAlias ? tkAlias(t) : [t];
+  const drOnly = drStars.filter(t => !w.some(x => al(x).includes(t)));   // ตัวที่อยู่ในทั้งสองที่ แสดงเป็นชิปปกติ
   box.hidden = false;
   let acct = "";
   if (cloud === "denied") acct = "ซิงก์ข้ามเครื่องยังไม่เปิดใช้ ตอนนี้เก็บในเครื่องนี้ก่อน";
   else if (u && u.isAnonymous) acct = 'Watchlist และโน้ตเก็บตามเครื่องนี้ ถ้าอยากเปิดจากมือถือหรือเครื่องอื่นได้ <button class="linkbtn" id="linkG" type="button">ผูกบัญชี Google</button>';
   else if (u) acct = `ซิงก์กับบัญชี <b>${esc(u.email || "Google")}</b> ใช้ได้ทุกเครื่อง <button class="linkbtn" id="outG" type="button">ออกจากระบบ</button>`;
-  box.innerHTML = `<span class="wl-t">Watchlist ของฉัน</span>` + (w.length ? '<a class="linkbtn" href="feed.html">ดูข่าวทั้งหมดของ Watchlist</a>' : "") +
-    (w.length ? w.map(t => `<a class="wlc" href="stock.html?t=${q(t)}"${t === T ? ' aria-current="page"' : ""}>${esc(t)}<button type="button" data-wldel="${esc(t)}" aria-label="เอา ${esc(t)} ออกจาก Watchlist">×</button></a>`).join("") : '<span class="wl-empty">ยังไม่มีหุ้น กด + Watchlist ที่หุ้นที่สนใจ</span>') +
+  box.innerHTML = `<span class="wl-t">Watchlist ของฉัน</span>` + (w.length || drOnly.length ? '<a class="linkbtn" href="feed.html">ดูข่าวทั้งหมดของ Watchlist</a>' : "") +
+    (w.length || drOnly.length ? w.map(t => `<a class="wlc" href="stock.html?t=${q(t)}"${t === T ? ' aria-current="page"' : ""}>${esc(t)}<button type="button" data-wldel="${esc(t)}" aria-label="เอา ${esc(t)} ออกจาก Watchlist">×</button></a>`).join("") +
+      drOnly.map(t => `<a class="wlc dr" href="stock.html?t=${q(t)}"${t === T ? ' aria-current="page"' : ""} title="ดาวจากหน้ารวม DR เอาออกที่หน้านั้น">${esc(t)}<span class="wl-dr">DR</span></a>`).join("") : '<span class="wl-empty">ยังไม่มีหุ้น กด + Watchlist ที่หุ้นที่สนใจ</span>') +
     (acct ? `<div class="wl-acct">${acct}</div>` : "");
 }
 
@@ -774,7 +789,7 @@ async function boot() {
   if (window.buildNav) buildNav("");
   const fav = document.createElement("link"); fav.rel = "icon"; fav.href = document.querySelector(".brand img").src; document.head.appendChild(fav);
   const N = await NLP.ready;
-  await boardLoad();
+  await boardLoad(); await drLoad();
   const t = (new URLSearchParams(location.search).get("t") || "").trim().toUpperCase();
   renderTapeIdle(); renderWL();
   if (!t) return;   // ยังไม่ได้เลือกหุ้น: โชว์ช่องค้นหากับรายการที่เปิดล่าสุด
