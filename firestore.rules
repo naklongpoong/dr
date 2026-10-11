@@ -117,7 +117,7 @@ service cloud.firestore {
     // ---------- บทความ (ตัวบทความ + รูปเต็มแยกเอกสาร เพื่อให้หน้ารายการโหลดเบา) ----------
     function articleValid() {
       return request.resource.data.keys().hasOnly(['type', 'date', 'title', 'summary', 'body', 'tickers', 'url', 'thumb', 'hasImages', 'createdAt', 'updatedAt', 'views'])
-        && request.resource.data.type in ['article', 'analysis']
+        && request.resource.data.type in ['article', 'analysis', 'legend']
         && request.resource.data.date is string && request.resource.data.date.size() == 10
         && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 200
         && request.resource.data.summary is string && request.resource.data.summary.size() <= 500
