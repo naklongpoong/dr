@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610111352"></script>
-<script src="gate.js?v=202610111352"></script>
+<script src="site.js?v=202610111358"></script>
+<script src="gate.js?v=202610111358"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -414,7 +414,7 @@ function render() {
       if (state.country !== "all" && cty !== state.country) return false;
       if (state.issuer !== "all" && !codes.includes(state.issuer)) return false;
       if (!q) return true;
-      if (state.exact) return tk.toLowerCase() === q || codes.some(c => c.toLowerCase() === q || (tk + c).toLowerCase() === q);   // มาจากการกดชื่อหุ้น: ตรงตัวเท่านั้น (PENG ไม่ดึง SPENGY/XPENG)
+      if (state.exact) return tk.toLowerCase() === q || (window.tkDrHit && tkDrHit(q, tk, name)) || codes.some(c => c.toLowerCase() === q || (tk + c).toLowerCase() === q);   // มาจากการกดชื่อหุ้น: ตรงตัวเท่านั้น (PENG ไม่ดึง SPENGY/XPENG)
       // ค้นจากต้นคำเท่านั้น: ชื่อย่อขึ้นต้นด้วยคำค้น หรือคำในชื่อบริษัทขึ้นต้นด้วยคำค้น (PENG ไม่ดึง SPENGY/XPENG, UNIQLO ยังเจอ Fast Retailing (UNIQLO))
       return tk.toLowerCase().startsWith(q) || wordStart(name, q) || codes.some(c => (tk + c).toLowerCase().startsWith(q) || c.toLowerCase().startsWith(q));
     });

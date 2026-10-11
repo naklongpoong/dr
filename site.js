@@ -26,6 +26,14 @@ window.tkAlias = function (t) {
   return [t];
 };
 
+// หุ้นที่รายการ DR ใช้ชื่อบริษัทแทนชื่อย่อ: ชื่อย่อ -> คำในชื่อ DR (ตัวพิมพ์เล็กใหญ่ไม่สำคัญ) กดชื่อหุ้นแล้วจะไปเจอ DR นั้น เพิ่มได้ เช่น XYZ: ["ชื่อใน DR"]
+window.TK_DR = { MU: ["micron"], SPCX: ["spacex"] };
+window.tkDrHit = function (T, tk, name) {   // แถว DR (ชื่อย่อ tk / ชื่อบริษัท name) ตรงกับหุ้น T ไหม
+  T = String(T || "").toUpperCase(); tk = String(tk || "").toLowerCase(); name = String(name || "").toLowerCase();
+  if (tk === T.toLowerCase()) return true;
+  return (TK_DR[T] || []).some(function (w) { return tk === w || name.indexOf(w) >= 0; });
+};
+
 // สร้างเมนูบนหัวหน้า ใช้กับทุกหน้าที่มี <nav id="nav">
 window.buildNav = function (current) {
   var el = document.getElementById("nav");
@@ -211,7 +219,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!data) { out.innerHTML = html + '<div class="hint">กำลังโหลดข้อมูล…</div>'; return; }
     var terms = TK.test(up) ? tkAlias(up).map(function (x) { return x.toLowerCase(); }) : [q];
     function has(arr) { return arr.some(function (x) { x = String(x || "").toLowerCase(); return terms.some(function (t) { return x.indexOf(t) >= 0; }); }); }
-    var dr = data.dr.filter(function (r) { return has([r.tk, r.name, r.grp].concat(r.codes)); }).slice(0, 6);
+    var dr = data.dr.filter(function (r) { return has([r.tk, r.name, r.grp].concat(r.codes)) || (TK.test(up) && tkDrHit(up, r.tk, r.name)); }).slice(0, 6);
     if (dr.length) html += '<div class="g">DR</div>' + dr.map(function (r) { return '<a href="dr.html?q=' + encodeURIComponent(r.tk) + '"><b>' + esc(r.tk) + " · " + esc(r.name) + "</b><small>" + esc(r.codes.join(", ")) + (r.grp ? " · " + esc(r.grp) : "") + "</small></a>"; }).join("");
     var art = data.articles.filter(function (a) { return has([a.title, a.summary].concat(a.tickers || [])); }).slice(0, 6);
     if (art.length) html += '<div class="g">บทความ</div>' + art.map(function (a) { return '<a href="articles.html?id=' + encodeURIComponent(a.id) + '"><b>' + snip(a.title, q) + "</b><small>" + snip(a.summary, q) + "</small></a>"; }).join("");

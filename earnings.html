@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610111352"></script>
-<script src="gate.js?v=202610111352"></script>
+<script src="site.js?v=202610111358"></script>
+<script src="gate.js?v=202610111358"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -536,7 +536,7 @@ document.addEventListener("input", e => { if (e.target.id === "tbSearch") { tbQ 
 
 // ---- กล่องหุ้นน่าสนใจ / แอดมินแนะนำ: กดชื่อหุ้น -> ไปหน้า DR (ถ้าไม่มี DR กรองข่าวในหน้านี้แทน) ----
 const pchip = (t, dr) => {
-  const has = !dr || dr.has(t);
+  const has = !dr || dr.has(t) || !!(window.TK_DR && TK_DR[t]);
   return `<span class="pchip"><button class="ptk ptk-b" type="button" data-tkmenu="${esc(t)}" data-dr="${has ? 1 : 0}" aria-haspopup="menu" aria-expanded="false" title="กดเพื่อเลือกดู ${esc(t)}">${esc(t)}</button><button class="pn" type="button" data-tk="${esc(t)}" aria-pressed="${state.ticker === t}" title="กรองข่าวของ ${esc(t)} ในหน้านี้">ข่าว</button><a class="fv" href="https://finviz.com/quote.ashx?t=${encodeURIComponent(t)}" target="_blank" rel="noopener noreferrer" aria-label="ดูกราฟ ${esc(t)} บน Finviz" title="กราฟ ${esc(t)} บน Finviz">กราฟ Finviz ↗</a></span>`;
 };
 window.SITE_MENU = { here: PAGE, onHere: t => { setTicker(t); const el = PAGE === "news" ? ($("secN").hidden ? $("filters") : $("secN")) : $("filters"); el.scrollIntoView({ behavior: "smooth", block: "start" }); } };
