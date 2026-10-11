@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610111411"></script>
-<script src="gate.js?v=202610111411"></script>
+<script src="site.js?v=202610111414"></script>
+<script src="gate.js?v=202610111414"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -296,6 +296,9 @@ button.esym:focus-visible { outline: 2px solid var(--accent); outline-offset: 2p
     <div class="empty" id="emptyR" hidden></div>
     <button class="linkbtn more" id="moreR" type="button" data-more="earnings" hidden></button>
   </section>
+
+  <p class="hint" id="oldHint" hidden style="margin:18px 0 0"></p>
+  <button class="linkbtn more" id="moreAll" type="button" data-more="earnings" hidden style="margin:6px 0 18px"></button>
 
   <section class="sec" id="secN" hidden>
     <div class="sec-h"><h2>ข่าว<small id="cntN"></small></h2></div>
@@ -574,6 +577,12 @@ function render() {
   if (showA) fillPicks("a", ap, "แอดมินแนะนำ");
 
   if (PAGE === "earnings") { earnSection("preview", V, "พรีวิวงบ"); earnSection("result", R, "งบหุ้นรายตัว"); }
+  if (PAGE === "earnings") {   // แท็บ "ทั้งหมด": ปุ่มโหลดงบเก่าที่เก่ากว่า 24 ชั่วโมง (เดิมมีเฉพาะในแท็บพรีวิว/งบรายตัว)
+    const m = more.earnings, on = state.tab === "all" && !state.ticker && !m.done;
+    $("moreAll").hidden = !on; $("oldHint").hidden = !on;
+    $("oldHint").textContent = m.loaded ? "แสดงงบและพรีวิวที่โหลดมาแล้ว" : "ตอนนี้แสดงเฉพาะงบและพรีวิวย้อนหลัง 24 ชั่วโมง อยากดูของเก่ากว่านี้กดปุ่มด้านล่าง หรือกดชื่อหุ้นเพื่อดูงบทั้งหมดของหุ้นตัวนั้น";
+    $("moreAll").disabled = m.busy; $("moreAll").textContent = m.busy ? "กำลังโหลด..." : (m.err ? "โหลดไม่สำเร็จ ลองอีกครั้ง" : "โหลดงบและพรีวิวที่เก่ากว่านี้");
+  }
   const showN = PAGE === "news" && !!any;
   $("secN").hidden = !showN;
   if (showN) {
