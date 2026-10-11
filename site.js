@@ -23,9 +23,10 @@ window.buildNav = function (current) {
   var el = document.getElementById("nav");
   if (!el) return;
   var items = [["index", "index.html", "หน้าแรก"], ["dr", "dr.html", "รวม DR"]];
-  if (SITE.articles) { items.push(["articles", "articles.html", "บทความ"]); items.push(["legend", "articles.html?type=legend", "Legends"]); }
+  if (SITE.articles) items.push(["articles", "articles.html", "บทความ"]);
   if (SITE.news) items.push(["news", "news.html", "ข่าว"]);
   if (SITE.earnings) items.push(["earnings", "earnings.html", "งบ"]);
+  if (SITE.articles) items.push(["legend", "articles.html?type=legend", "Legends"]);
   if (SITE.etf) items.push(["etf", "etf.html", "ETF"]);
   el.innerHTML = items.map(function (i) {
     return '<a href="' + i[1] + '"' + (i[0] === current ? ' aria-current="page"' : "") + ">" + i[2] + "</a>";
