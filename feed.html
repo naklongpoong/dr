@@ -163,6 +163,7 @@ h2 { font-size: 1.2rem; font-weight: 700; margin: 0; padding-left: 10px; border-
 :root[data-theme="dark"] .chip[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .chip[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); } }
 .chip small { opacity: .65; margin-left: 5px; }
+.chip.zero { opacity: .5; cursor: default; }
 .tl-tools input[type="search"] { font: inherit; font-size: .9rem; flex: 1 1 180px; max-width: 260px; margin-left: auto; padding: 5px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
 .rail { list-style: none; margin: 0; padding: 0 0 0 22px; border-left: 2px solid var(--line); }
 .ev { position: relative; padding: 0 0 22px 6px; }
@@ -324,7 +325,7 @@ const dateTh = t => new Date(t).toLocaleDateString("th-TH", { dateStyle: "medium
 let toastT = null;
 function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 1900); }
 
-let watch = [], items = [], kind = "all", pick = "", seenAt = 0;
+let watch = [], items = [], kind = "all", pick = "", seenAt = 0, drSet = new Set();
 const KINDS = [["all", "ทั้งหมด"], ["news", "ข่าว"], ["earn", "งบและพรีวิว"], ["art", "บทความ"]];
 const group = k => k === "preview" || k === "result" ? "earn" : k;
 const chip = t => `<button class="ntk" type="button" data-tkmenu="${esc(t)}" aria-haspopup="menu" aria-expanded="false" title="กดเพื่อเลือกดู ${esc(t)}">${esc(t)}</button>`;
@@ -340,6 +341,7 @@ async function loadWatch() {
       try { const d = await N.F.getDoc(N.F.doc(N.db, "watchlists", u.uid)); if (d.exists()) dr = [...(d.data().items || []).map(drKey), ...dr]; } catch (e) {}
     }
   } catch (e) {}
+  drSet = new Set(dr.filter(t => typeof t === "string" && TK_OK.test(t)));   // เก็บไว้บอกในสรุปว่ามาจากดาวหน้า DR กี่ตัว
   return [...new Set([...w, ...dr])].filter(t => typeof t === "string" && TK_OK.test(t)).slice(0, 150);
 }
 const inW = t => watch.some(w => (window.tkAlias ? tkAlias(w) : [w]).includes(t));   // GOOGL กับ GOOG นับเป็นหุ้นเดียวกัน
@@ -377,9 +379,11 @@ function render() {
   base.forEach(e => { n.all++; n[group(e.k)]++; });
   $("chips").innerHTML = KINDS.map(([k, v]) => `<button class="chip" type="button" data-f="${k}" aria-pressed="${kind === k}">${v}<small>${n[k]}</small></button>`).join("");
   const cnt = {}, shownW = []; watch.forEach(w => { const al = tkAlias(w); if (shownW.some(x => tkAlias(x).includes(w))) return; shownW.push(w); cnt[w] = items.filter(e => hitW(e.p, w)).length; });
-  $("wlpick").innerHTML = shownW.filter(t => cnt[t]).map(t => `<button class="chip" type="button" data-pick="${esc(t)}" aria-pressed="${pick === t}">${esc(t)}<small>${cnt[t]}</small></button>`).join("");
-  const fresh = seenAt ? items.filter(e => e.t > seenAt).length : 0;
-  $("summary").textContent = items.length ? `พบ ${items.length} โพสต์จากหุ้นใน Watchlist ${watch.length} ตัว` + (fresh ? ` ใหม่ตั้งแต่ที่คุณเข้ามาครั้งก่อน ${fresh} โพสต์` : "") : "";
+  $("wlpick").innerHTML = shownW.map(t => cnt[t]
+    ? `<button class="chip" type="button" data-pick="${esc(t)}" aria-pressed="${pick === t}">${esc(t)}<small>${cnt[t]}</small></button>`
+    : `<button class="chip zero" type="button" disabled title="ยังไม่มีโพสต์ของหุ้นนี้ในข่าว งบ บทความล่าสุด">${esc(t)}<small>0</small></button>`).join("");
+  const fresh = seenAt ? items.filter(e => e.t > seenAt).length : 0, nDr = watch.filter(t => drSet.has(t)).length;
+  $("summary").textContent = items.length ? `พบ ${items.length} โพสต์จากหุ้นใน Watchlist ${watch.length} ตัว` + (nDr ? ` (รวมดาวจากหน้า DR ${nDr} ตัว)` : "") + (fresh ? ` ใหม่ตั้งแต่ที่คุณเข้ามาครั้งก่อน ${fresh} โพสต์` : "") : "";
   const list = shown();
   $("tlSkel").hidden = true; $("rail").hidden = !list.length; $("rail").innerHTML = list.map(evHtml).join("");
   const em = $("tlEmpty"); em.hidden = list.length > 0;
