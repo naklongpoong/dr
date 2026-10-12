@@ -98,6 +98,27 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
+// ---- ปุ่ม "คัดลอกข้อความ" ในการ์ดโพสต์ทุกหน้า: ก๊อปเฉพาะข้อความเต็มของโพสต์ (ไม่ต้องกด "อ่านต่อ") ไว้ให้ตัวช่วยอ่านเสียงใช้ ----
+document.addEventListener("click", function (e) {
+  var b = e.target.closest && e.target.closest("[data-copytext]"); if (!b) return;
+  var card = b.closest(".ecard, .npost, .ev, #reader");
+  var el = card && card.querySelector(".etext, .ntext, .ptext, .rbody");
+  var txt = el ? el.textContent.trim() : "";
+  if (!txt) return;
+  function done(ok) {
+    var old = b.getAttribute("data-label") || b.textContent; b.setAttribute("data-label", old);
+    b.textContent = ok ? "คัดลอกแล้ว" : "คัดลอกไม่สำเร็จ";
+    clearTimeout(b._t); b._t = setTimeout(function () { b.textContent = old; }, 1600);
+  }
+  function fallback() {
+    var t = document.createElement("textarea"); t.value = txt; t.style.cssText = "position:fixed;opacity:0;";
+    document.body.appendChild(t); t.select(); var ok = false;
+    try { ok = document.execCommand("copy"); } catch (x) {} t.remove(); done(ok);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { done(true); }, fallback);
+  else fallback();
+});
+
 // ---- เมนูเลือกเมื่อกดชื่อหุ้น (DR / กราฟ Finviz / บทความ / ข่าว / งบ) ใช้ร่วมกันทุกหน้า ----
 // ปุ่มชื่อหุ้นใส่ data-tkmenu="NVDA" (ใส่ data-dr="0" ถ้ารู้ว่าไม่มี DR) หน้าที่อยากให้ตัวเลือกของหน้าตัวเองกรองในหน้าเดิม ตั้ง window.SITE_MENU = { here: "news"|"articles"|"earnings", onHere: function (ticker) {} }
 (function () {

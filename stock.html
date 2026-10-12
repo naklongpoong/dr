@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610121253"></script>
-<script src="gate.js?v=202610121253"></script>
+<script src="site.js?v=202610121331"></script>
+<script src="gate.js?v=202610121331"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -601,7 +601,7 @@ function evHtml(e) {
     <div class="ptext">${linkify(esc(p.text))}</div>
     <button class="linkbtn" type="button" data-read hidden>อ่านต่อ</button>
     ${p.hasImages ? `<div class="nimgs ph" data-imgs="${col}/${esc(p.id)}"></div>` : ""}
-    <div class="pfoot">${others.map(chip).join("")}${safeUrl(p.link) ? `<a href="${esc(safeUrl(p.link))}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ</a>` : ""}</div></li>`;
+    <div class="pfoot">${others.map(chip).join("")}${safeUrl(p.link) ? `<a href="${esc(safeUrl(p.link))}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ</a>` : ""}<button class="linkbtn" type="button" data-copytext>คัดลอกข้อความ</button></div></li>`;
 }
 function renderChips(all) {
   const n = { all: all.length, news: 0, earn: 0, art: 0 };

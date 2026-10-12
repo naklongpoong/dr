@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610121253"></script>
-<script src="gate.js?v=202610121253"></script>
+<script src="site.js?v=202610121331"></script>
+<script src="gate.js?v=202610121331"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -364,7 +364,7 @@ function eCard(p) {
         <div class="ntime">${esc(fmt(p.createdAt))}${newPill(p.createdAt)}${viewsHtml(p)}</div>
         <div class="etext">${linkify(esc(p.text))}</div>
         <button class="linkbtn eread" type="button" data-read hidden>อ่านต่อ</button>
-        <div class="nfoot">${(p.tickers || []).slice(1).map(tickerChip).join("")}${safeUrl(p.link) ? `<a href="${esc(safeUrl(p.link))}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ</a>` : ""}</div>
+        <div class="nfoot">${(p.tickers || []).slice(1).map(tickerChip).join("")}${safeUrl(p.link) ? `<a href="${esc(safeUrl(p.link))}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ</a>` : ""}<button class="linkbtn" type="button" data-copytext>คัดลอกข้อความ</button></div>
       </div>
       ${imgBox("earnings", p)}
     </div></article>`;
@@ -584,7 +584,7 @@ function render() {
         <div class="ntext">${linkify(esc(p.text))}</div>
         <button class="linkbtn eread" type="button" data-read hidden>อ่านต่อ</button>
         ${imgBox("news", p)}
-        <div class="nfoot">${(p.tickers || []).map(tickerChip).join("")}${safeUrl(p.link) ? `<a href="${esc(safeUrl(p.link))}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ</a>` : ""}</div>
+        <div class="nfoot">${(p.tickers || []).map(tickerChip).join("")}${safeUrl(p.link) ? `<a href="${esc(safeUrl(p.link))}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ</a>` : ""}<button class="linkbtn" type="button" data-copytext>คัดลอกข้อความ</button></div>
       </article>`).join("");
     $("emptyN").hidden = N.length > 0;
     $("emptyN").textContent = state.ticker ? (tkBusy.has(state.ticker) ? `กำลังโหลดข่าวของ ${state.ticker}...` : `ยังไม่มีข่าวของ ${state.ticker}`) : "ยังไม่มีข่าว";

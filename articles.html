@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610121253"></script>
-<script src="gate.js?v=202610121253"></script>
+<script src="site.js?v=202610121331"></script>
+<script src="gate.js?v=202610121331"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -327,6 +327,7 @@ async function showReader(id) {
     ${a.body ? `<div class="rbody">${linkify(esc(a.body))}</div>` : ""}
     <div class="rlinks">
       ${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ ›</a>` : ""}
+      ${a.body ? '<button class="linkbtn" type="button" data-copytext>คัดลอกข้อความ</button>' : ""}
     </div>`;
   // นับคนดู: เปิดอ่านบทความครั้งแรกของเครื่องนี้ +1
   if (window.NLP && NLP.trackView) NLP.trackView("articles", id).then(ok => {
