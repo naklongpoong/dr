@@ -177,7 +177,7 @@ document.addEventListener("click", function (e) {
 
 // ---- ค้นหาทั้งเว็บ: ปุ่มในเมนู (หรือ Ctrl+K) ค้นข่าว งบ บทความ และ DR ล่าสุด + ข้ามไป dashboard ของหุ้นตามชื่อ ----
 (function () {
-  var box = null, inp, out, data = null, loading = null, last = null, sel = -1, TK = /^[A-Z0-9.\-]{1,12}$/;
+  var box = null, inp, out, data = null, loading = null, last = null, sel = -1, TK = /^[A-Z0-9.\-]{1,12}$/, meta = null, busy = false, PAGE_N = 50;
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   var css = document.createElement("style");
   css.textContent = ".nav-search{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font:inherit;font-size:.9rem;color:#c9d5f2;background:transparent;padding:3px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.25);cursor:pointer}.nav-search:hover{border-color:#f5b301;color:#fff}.nav-search:focus-visible{outline:2px solid #f5b301;outline-offset:2px}" +
@@ -186,12 +186,13 @@ document.addEventListener("click", function (e) {
     "#nlpS input{width:100%;box-sizing:border-box;font:inherit;font-size:1.05rem;padding:16px 18px;border:0;border-bottom:1px solid var(--line,#d5dbea);background:transparent;color:inherit;outline:none}" +
     "#nlpS .res{overflow:auto;padding:6px}#nlpS .g{font-size:.78rem;font-weight:600;color:var(--muted,#6b7794);padding:10px 12px 4px}#nlpS .res a{display:block;text-decoration:none;color:inherit;padding:8px 12px;border-radius:10px}#nlpS .res a:hover,#nlpS .res a.on{background:var(--accent-soft,#e8efff)}#nlpS .res a b{display:block;font-weight:600;font-size:.95rem}#nlpS .res a small{display:block;color:var(--muted,#6b7794);font-size:.82rem;line-height:1.45}" +
     "#nlpS .hint{padding:18px;color:var(--muted,#6b7794);font-size:.9rem}#nlpS .ft{padding:8px 14px;font-size:.76rem;color:var(--muted,#6b7794);border-top:1px solid var(--line,#d5dbea)}";
+  css.textContent += "#nlpS .more{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;margin:6px 6px 4px;padding:10px 12px;border-radius:10px;background:var(--bg,#f3f5fb);font-size:.84rem;color:var(--muted,#6b7794)}#nlpS .more button{font:inherit;font-size:.84rem;font-weight:600;cursor:pointer;border:0;border-radius:999px;padding:4px 14px;background:#f5b301;color:#1b1500}#nlpS .more button:disabled{opacity:.6;cursor:default}";
   document.head.appendChild(css);
 
   function ensure() {
     if (box) return;
     box = document.createElement("div"); box.id = "nlpS"; box.hidden = true; box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-label", "ค้นหาทั้งเว็บ");
-    box.innerHTML = '<div class="sb"><input type="search" id="nlpSq" autocomplete="off" spellcheck="false" placeholder="ค้นหาชื่อหุ้น ข่าว งบ บทความ หรือ DR" aria-label="ค้นหาทั้งเว็บ"><div class="res" id="nlpSr" aria-live="polite"></div><div class="ft">ค้นในข่าว งบ และบทความล่าสุดอย่างละ 50 เรื่อง กับรายการ DR ทั้งหมด · พิมพ์ชื่อหุ้นเพื่อข้ามไปหน้า dashboard · Esc ปิด</div></div>';
+    box.innerHTML = '<div class="sb"><input type="search" id="nlpSq" autocomplete="off" spellcheck="false" placeholder="ค้นหาชื่อหุ้น ข่าว งบ บทความ หรือ DR" aria-label="ค้นหาทั้งเว็บ"><div class="res" id="nlpSr" aria-live="polite"></div><div class="ft">เริ่มค้นจากข่าว งบ และบทความล่าสุดอย่างละ 50 เรื่อง กดค้นย้อนหลังต่อได้จนครบทุกโพสต์ กับรายการ DR ทั้งหมด · พิมพ์ชื่อหุ้นเพื่อข้ามไปหน้า dashboard · Esc ปิด</div></div>';
     document.body.appendChild(box); inp = box.querySelector("input"); out = box.querySelector("#nlpSr");
     box.addEventListener("mousedown", function (e) { if (e.target === box) close(); });
     inp.addEventListener("input", function () { render(); });
@@ -230,8 +231,61 @@ document.addEventListener("click", function (e) {
         });
       }
       return Promise.all([col("news"), col("earnings"), col("articles"), F.getDoc(F.doc(db, "content", "dr")).then(function (s) { return s.exists() ? parseDR(s.data().raw) : []; })]);
-    }).then(function (r) { data = { news: r[0], earnings: r[1], articles: r[2], dr: r[3] }; render(); })
+    }).then(function (r) {
+      data = { news: r[0], earnings: r[1], articles: r[2], dr: r[3] };
+      meta = {}; ["news", "earnings", "articles"].forEach(function (n) { meta[n] = { done: data[n].length < PAGE_N, cur: data[n].length ? Math.min.apply(null, data[n].map(function (x) { return tms(x.createdAt); })) : null }; });
+      render();
+    })
       .catch(function (e) { loading = null; if (e && e.code === "permission-denied" && window.NLP && NLP.relock) { close(); NLP.relock(); return; } if (out) out.innerHTML = '<div class="hint">โหลดข้อมูลค้นหาไม่สำเร็จ ลองรีเฟรชหน้า</div>'; });
+  }
+  function tms(x) { return x && x.toDate ? x.toDate().getTime() : (x && x.seconds != null ? x.seconds * 1000 + Math.floor((x.nanoseconds || 0) / 1e6) : 0); }
+  function mkHas(raw) {
+    var up = raw.toUpperCase(), terms = TK.test(up) ? tkAlias(up).map(function (x) { return x.toLowerCase(); }) : [raw.toLowerCase()];
+    return function (arr) { return arr.some(function (x) { x = String(x || "").toLowerCase(); return terms.some(function (t) { return x.indexOf(t) >= 0; }); }); };
+  }
+  function postHits() {   // จำนวนโพสต์ (ข่าว งบ บทความ) ที่ตรงกับคำค้นตอนนี้ ใช้ดูว่าโหลดย้อนหลังแล้วเจอเพิ่มไหม
+    var raw = inp.value.trim(); if (!raw || !data) return 0;
+    var has = mkHas(raw);
+    return data.articles.filter(function (a) { return has([a.title, a.summary].concat(a.tickers || [])); }).length +
+      data.earnings.filter(function (p) { return has([p.text, p.period].concat(p.tickers || [])); }).length +
+      data.news.filter(function (p) { return has([p.text, p.period].concat(p.tickers || [])); }).length;
+  }
+  function olderPage(name) {   // โหลดโพสต์ที่เก่ากว่าที่โหลดไว้อีก 50 เรื่อง (วิธีเดียวกับปุ่มโหลดเพิ่มในหน้าข่าว)
+    var m = meta[name]; if (m.done) return Promise.resolve();
+    var F = NLP.F, parts = [F.collection(NLP.db, name), F.orderBy("createdAt", "desc")];
+    if (m.cur != null) parts.push(F.startAfter(F.Timestamp.fromMillis(m.cur)));
+    parts.push(F.limit(PAGE_N));
+    return F.getDocs(F.query.apply(F, parts)).then(function (s) {
+      var seen = {}; data[name].forEach(function (x) { seen[x.id] = 1; });
+      var r = s.docs.map(function (d) { var o = d.data(); delete o.body; delete o.thumb; o.id = d.id; return o; });
+      r.forEach(function (x) { if (!seen[x.id]) data[name].push(x); });
+      if (r.length) m.cur = Math.min.apply(null, [m.cur == null ? Infinity : m.cur].concat(r.map(function (x) { return tms(x.createdAt); })));
+      if (r.length < PAGE_N) m.done = true;
+    });
+  }
+  function allDone() { return meta.news.done && meta.earnings.done && meta.articles.done; }
+  function loadOlder() {   // ค้นย้อนหลังต่อ: โหลดหน้าถัดไปของทุกประเภทที่ยังเหลือ วนจนเจอโพสต์เพิ่ม หรือครบ หรือครบ 5 รอบต่อการกดหนึ่งครั้ง
+    if (busy || !data || !meta || allDone()) return;
+    busy = true; render();
+    var rounds = 0;
+    function fin() { busy = false; render(); }
+    function step() {
+      var names = ["news", "earnings", "articles"].filter(function (n) { return !meta[n].done; });
+      if (!names.length || rounds >= 5) return fin();
+      rounds++;
+      var before = postHits();
+      Promise.all(names.map(olderPage)).then(function () { if (postHits() > before) fin(); else step(); }, function (e) {
+        busy = false;
+        if (e && e.code === "permission-denied" && window.NLP && NLP.relock) { close(); NLP.relock(); return; }
+        render(); if (out) out.insertAdjacentHTML("beforeend", '<div class="hint">โหลดโพสต์ย้อนหลังไม่สำเร็จ ลองกดอีกครั้ง</div>');
+      });
+    }
+    step();
+  }
+  function moreHtml() {
+    var n = data.news.length + data.earnings.length + data.articles.length;
+    if (allDone()) return '<div class="more"><span>ค้นครบทุกโพสต์แล้ว (' + n + ' เรื่อง)</span></div>';
+    return '<div class="more"><span>ค้นแล้ว ' + n + ' เรื่อง ยังมีโพสต์เก่ากว่านี้</span><button type="button" data-searchmore' + (busy ? " disabled" : "") + ">" + (busy ? "กำลังค้น…" : "ค้นย้อนหลังต่อ") + "</button></div>";
   }
   function snip(t, q) {
     t = String(t || "").replace(/\s+/g, " ").trim(); var i = t.toLowerCase().indexOf(q);
@@ -256,10 +310,12 @@ document.addEventListener("click", function (e) {
       if (m.length) html += '<div class="g">' + label + "</div>" + m.map(function (p) { var tk = (p.tickers || [])[0]; return '<a href="' + page + (tk ? "?ticker=" + encodeURIComponent(tk) : "") + '"><b>' + esc((p.tickers || []).join(" ") || label) + (p.period ? " · " + esc(p.period) : "") + "</b><small>" + snip(p.text, q) + "</small></a>"; }).join("");
     }
     posts(data.earnings, "งบและพรีวิวงบ", "earnings.html"); posts(data.news, "ข่าว", "news.html");
-    if (!html) html = '<div class="hint">ไม่พบ "' + esc(raw) + '" ในข่าว งบ บทความล่าสุด หรือ DR ลองคำอื่น หรือพิมพ์ชื่อหุ้นเพื่อเปิด dashboard</div>';
+    if (!html) html = '<div class="hint">ไม่พบ "' + esc(raw) + '" ในโพสต์ที่ค้นแล้ว หรือ DR ลองคำอื่น หรือพิมพ์ชื่อหุ้นเพื่อเปิด dashboard</div>';
+    if (meta) html += moreHtml();
     out.innerHTML = html;
   }
   document.addEventListener("click", function (e) {
+    if (e.target.closest("[data-searchmore]")) { e.preventDefault(); loadOlder(); return; }
     if (e.target.closest("[data-search]")) { e.preventDefault(); open(); return; }
     if (box && !box.hidden && e.target.closest("#nlpS .res a")) setTimeout(close, 0);
   });
