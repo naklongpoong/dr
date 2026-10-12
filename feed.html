@@ -270,6 +270,29 @@ h2 { font-size: 1.2rem; font-weight: 700; margin: 0; padding-left: 10px; border-
 .ev .atitle { margin: 4px 0 2px; font-size: 1.05rem; }
 .ev .asum { margin: 0 0 6px; color: var(--muted); }
 .feedwrap { max-width: 820px; margin: 0 auto; }
+/* การ์ดโพสต์แทนเส้นไทม์ไลน์ */
+.rail { border-left: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.rail .ev { padding: 14px 16px 12px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 12px; }
+.rail .ev::before { display: none; }
+.rail .ev[data-k="preview"] { border-left-color: var(--gold); }
+.rail .ev[data-k="result"] { border-left-color: #2fbf7a; }
+.rail .ev[data-k="art"] { border-left-color: #8a63e0; }
+.ev-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; margin: 0 0 8px; }
+.ev-top .tkrow { margin: 0; justify-content: flex-end; }
+.ntk.dim { background: transparent; box-shadow: inset 0 0 0 1px var(--line); color: var(--muted); }
+.rail .ptext { -webkit-line-clamp: 5; margin: 0 0 8px; line-height: 1.65; }
+.rail .ev .atitle { margin: 0 0 2px; }
+.rail .ev .asum { margin: 2px 0 0; }
+.rail .pfoot { gap: 6px 16px; }
+.rail .pfoot [data-copytext] { margin-left: auto; text-decoration: none; color: var(--muted); font-size: .82rem; padding: 1px 12px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--line); }
+.rail .pfoot [data-copytext]:hover { color: var(--ink); box-shadow: inset 0 0 0 1px var(--muted); }
+.sk { margin-left: 0; height: 110px; }
+.tl-tools { margin: 14px 0 6px; }
+.seg { max-width: 100%; overflow-x: auto; }
+.seg button { white-space: nowrap; }
+.seg button small { opacity: .65; margin-left: 5px; }
+.wlpick { margin: 8px 0 18px; align-items: center; }
+.wl-none { font-size: .82rem; color: var(--muted); margin-left: 4px; }
 </style>
 
 </head>
@@ -290,8 +313,8 @@ h2 { font-size: 1.2rem; font-weight: 700; margin: 0; padding-left: 10px; border-
     <section class="sec" aria-labelledby="fdTitle">
       <h2 id="fdTitle">อัปเดตล่าสุด</h2>
       <p class="tl-sum" id="summary"></p>
+      <div class="tl-tools"><div id="chips" class="seg" role="group" aria-label="กรองประเภทโพสต์"></div></div>
       <div class="wlpick" id="wlpick" role="group" aria-label="กรองตามหุ้น"></div>
-      <div class="tl-tools"><div id="chips" role="group" aria-label="กรองประเภทโพสต์" style="display:contents"></div></div>
       <div id="tlSkel"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
       <ol class="rail" id="rail" hidden></ol>
       <div class="empty" id="tlEmpty" hidden></div>
@@ -362,28 +385,27 @@ function build(news, earn, arts) {
 }
 const shown = () => items.filter(e => (kind === "all" || group(e.k) === kind) && (!pick || hitW(e.p, pick)));
 function evHtml(e) {
-  const p = e.p, k = e.k, mine = (p.tickers || []).filter(inW);
+  const p = e.p, k = e.k, all = p.tickers || [], mine = all.filter(inW), others = all.filter(t => !mine.includes(t));
   const tag = k === "news" ? '<span class="tag">ข่าว</span>' : k === "preview" ? '<span class="tag preview">พรีวิวงบ</span>' : k === "result" ? '<span class="tag result">งบ</span>' : `<span class="tag art">${p.type === "analysis" ? "วิเคราะห์" : p.type === "legend" ? "Legends" : "บทความ"}</span>`;
   const fresh = seenAt && e.t > seenAt ? '<span class="since">ใหม่</span>' : "";
-  const when = `<div class="ev-when"><b>${esc(e.t ? dateTh(e.t) : (p.date || ""))}</b>${tag}${p.period ? `<span>${esc(p.period)}</span>` : ""}${e.t ? `<span>${esc(ago(e.t))}</span>` : ""}${fresh}</div>`;
-  const tks = `<div class="tkrow">${mine.map(chip).join("")}</div>`;
-  if (k === "art") return `<li class="ev" data-k="art">${when}${tks}<h3 class="atitle"><a href="articles.html?id=${q(p.id)}">${esc(p.title)}</a></h3>${p.summary ? `<p class="asum">${esc(p.summary)}</p>` : ""}</li>`;
-  const others = (p.tickers || []).filter(t => !mine.includes(t));
-  return `<li class="ev" data-k="${k}">${when}${tks}
+  const when = `<div class="ev-when">${tag}<b>${esc(e.t ? dateTh(e.t) : (p.date || ""))}</b>${p.period ? `<span>${esc(p.period)}</span>` : ""}${e.t ? `<span>${esc(ago(e.t))}</span>` : ""}${fresh}</div>`;
+  const tks = `<div class="tkrow">${mine.map(chip).join("")}${others.map(t => chip(t).replace('class="ntk"', 'class="ntk dim"')).join("")}</div>`;   // หุ้นใน Watchlist เด่น หุ้นอื่นในโพสต์จาง รวมแถวเดียวบนหัวการ์ด
+  const top = `<div class="ev-top">${when}${tks}</div>`;
+  if (k === "art") return `<li class="ev" data-k="art">${top}<h3 class="atitle"><a href="articles.html?id=${q(p.id)}">${esc(p.title)}</a></h3>${p.summary ? `<p class="asum">${esc(p.summary)}</p>` : ""}</li>`;
+  return `<li class="ev" data-k="${k}">${top}
     <div class="ptext">${linkify(esc(p.text))}</div>
-    <button class="linkbtn" type="button" data-read hidden>อ่านต่อ</button>
-    <div class="pfoot">${others.map(chip).join("")}${safeUrl(p.link) ? `<a href="${esc(safeUrl(p.link))}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ</a>` : ""}<button class="linkbtn" type="button" data-copytext>คัดลอกข้อความ</button></div></li>`;
+    <div class="pfoot"><button class="linkbtn" type="button" data-read hidden>อ่านต่อ</button>${safeUrl(p.link) ? `<a href="${esc(safeUrl(p.link))}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ</a>` : ""}<button class="linkbtn" type="button" data-copytext>คัดลอกข้อความ</button></div></li>`;
 }
 function render() {
   const n = { all: 0, news: 0, earn: 0, art: 0 }, base = items.filter(e => !pick || hitW(e.p, pick));
   base.forEach(e => { n.all++; n[group(e.k)]++; });
-  $("chips").innerHTML = KINDS.map(([k, v]) => `<button class="chip" type="button" data-f="${k}" aria-pressed="${kind === k}">${v}<small>${n[k]}</small></button>`).join("");
+  $("chips").innerHTML = KINDS.map(([k, v]) => `<button type="button" data-f="${k}" aria-pressed="${kind === k}">${v}<small>${n[k]}</small></button>`).join("");
   const cnt = {}, shownW = []; watch.forEach(w => { const al = tkAlias(w); if (shownW.some(x => tkAlias(x).includes(w))) return; shownW.push(w); cnt[w] = items.filter(e => hitW(e.p, w)).length; });
-  $("wlpick").innerHTML = shownW.map(t => cnt[t]
-    ? `<button class="chip" type="button" data-pick="${esc(t)}" aria-pressed="${pick === t}">${esc(t)}<small>${cnt[t]}</small></button>`
-    : `<button class="chip zero" type="button" disabled title="ยังไม่มีโพสต์ของหุ้นนี้ในข่าว งบ บทความล่าสุด">${esc(t)}<small>0</small></button>`).join("");
+  const none = shownW.filter(t => !cnt[t]);
+  $("wlpick").innerHTML = shownW.filter(t => cnt[t]).map(t => `<button class="chip" type="button" data-pick="${esc(t)}" aria-pressed="${pick === t}">${esc(t)}<small>${cnt[t]}</small></button>`).join("")
+    + (none.length ? `<span class="wl-none" title="ยังไม่มีข่าว งบ หรือบทความของหุ้นเหล่านี้ในโพสต์ล่าสุด">ยังไม่มีโพสต์: ${none.map(esc).join(", ")}</span>` : "");
   const fresh = seenAt ? items.filter(e => e.t > seenAt).length : 0, nDr = watch.filter(t => drSet.has(t)).length;
-  $("summary").textContent = items.length ? `พบ ${items.length} โพสต์จากหุ้นใน Watchlist ${watch.length} ตัว` + (nDr ? ` (รวมดาวจากหน้า DR ${nDr} ตัว)` : "") + (fresh ? ` ใหม่ตั้งแต่ที่คุณเข้ามาครั้งก่อน ${fresh} โพสต์` : "") : "";
+  $("summary").textContent = items.length ? `${items.length} โพสต์ จาก Watchlist ${watch.length} ตัว` + (nDr ? ` (รวมดาว DR ${nDr})` : "") + (fresh ? ` · ใหม่ตั้งแต่ครั้งก่อน ${fresh}` : "") : "";
   const list = shown();
   $("tlSkel").hidden = true; $("rail").hidden = !list.length; $("rail").innerHTML = list.map(evHtml).join("");
   const em = $("tlEmpty"); em.hidden = list.length > 0;
