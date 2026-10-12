@@ -88,9 +88,14 @@ window.SITE_VER = (function () { try { var m = /[?&]v=(\d+)/.exec(document.curre
 document.addEventListener("DOMContentLoaded", function () {
   var w = document.querySelector("main.wrap, .wrap"); if (!w || window.NLP_NO_GATE) return;
   var f = document.createElement("p"); f.className = "site-copy";
-  f.textContent = "© " + new Date().getFullYear() + " นักลงพุง (naklongpoong) สงวนลิขสิทธิ์ เนื้อหา ข้อมูล และโค้ดของเว็บนี้ห้ามคัดลอกหรือนำไปเผยแพร่ซ้ำโดยไม่ได้รับอนุญาต" + (window.SITE_VER ? " · เวอร์ชัน " + SITE_VER : "");
+  f.textContent = "© " + new Date().getFullYear() + " นักลงพุง (naklongpoong) สงวนลิขสิทธิ์ เนื้อหา ข้อมูล และโค้ดของเว็บนี้ห้ามคัดลอกหรือนำไปเผยแพร่ซ้ำโดยไม่ได้รับอนุญาต";
   f.style.cssText = "margin:32px 0 0;text-align:center;font-size:.78rem;opacity:.55;";
   w.appendChild(f);
+  if (window.SITE_VER) {   // เลขเวอร์ชันแยกบรรทัด ตัวเล็กจาง ไว้เช็กว่าเบราว์เซอร์ได้ไฟล์ล่าสุดหรือยัง
+    var v = document.createElement("p"); v.className = "site-ver"; v.textContent = "เวอร์ชัน " + SITE_VER;
+    v.style.cssText = "margin:4px 0 0;text-align:center;font-size:.66rem;opacity:.35;";
+    w.appendChild(v);
+  }
 });
 
 // ---- เมนูเลือกเมื่อกดชื่อหุ้น (DR / กราฟ Finviz / บทความ / ข่าว / งบ) ใช้ร่วมกันทุกหน้า ----
