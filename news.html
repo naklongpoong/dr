@@ -179,13 +179,12 @@ textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); 
 .pchips { display: flex; flex-wrap: wrap; gap: 8px; }
 .pchip { display: inline-flex; align-items: stretch; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
 .pchip .ptk { font-weight: 700; font-size: 0.92rem; color: var(--accent); padding: 3px 10px 3px 13px; }
-.pchip .pn { font: inherit; font-size: 0.82rem; cursor: pointer; border: 0; border-left: 1px solid var(--line); background: transparent; color: var(--accent); padding: 0 10px; }
-.pchip .pn:hover { background: var(--accent-soft); }
-.pchip .pn[aria-pressed="true"] { background: var(--gold); color: var(--gold-ink); font-weight: 600; }
-.pchip .pn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.pchip.on { background: var(--gold); border-color: var(--gold); }
+.pchip.on .ptk-b { color: var(--gold-ink); }
+.pchip .pstar { margin-left: 5px; font-size: 0.78rem; color: var(--gold); }
+.pchip.on .pstar { color: var(--gold-ink); }
+.ptabs { margin: 0 0 12px; flex-wrap: wrap; }
 .p-legend { margin: 0 0 10px; font-size: 0.8rem; color: var(--muted); }
-.pchip .fv { display: flex; align-items: center; padding: 0 11px 0 9px; font-size: 0.82rem; border-left: 1px solid var(--line); white-space: nowrap; }
-.pchip .fv:hover { background: var(--accent-soft); text-decoration: none; }
 .p-note { margin: 0 0 12px; padding: 8px 12px; font-size: 0.88rem; color: var(--muted); background: var(--accent-soft); border-left: 3px solid var(--gold); border-radius: 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .p-note b { color: var(--ink); }
 .p-intro { margin: -4px 0 12px; color: var(--muted); font-size: 0.92rem; }
@@ -267,18 +266,14 @@ button.esym:focus-visible { outline: 2px solid var(--accent); outline-offset: 2p
     <div class="active" id="active" hidden></div>
   </div>
 
+  <!-- หุ้นน่าสนใจ + แอดมินแนะนำ รวมเป็นส่วนเดียว สลับแท็บเอา (ถ้ามีกล่องเดียวก็ไม่ขึ้นแท็บ) -->
   <section class="sec" id="secP" hidden>
     <div class="sec-h"><h2 id="pTitle">หุ้นน่าสนใจ</h2><small id="pUpd"></small></div>
+    <div class="tabs ptabs" id="pTabs" role="group" aria-label="เลือกชุดหุ้น" hidden></div>
     <p class="p-note" id="pNote" hidden></p>
-    <p class="p-legend">กดชื่อหุ้นเพื่อเลือกดู DR บทความ ข่าว งบ · “ข่าว” กรองข่าวในหน้านี้ · “กราฟ Finviz ↗” เปิดกราฟบนเว็บ Finviz</p>
     <div class="pchips" id="listP"></div>
-  </section>
-
-  <section class="sec" id="secA" hidden>
-    <div class="sec-h"><h2 id="aTitle">แอดมินแนะนำ</h2><small id="aUpd"></small></div>
-    <p class="p-note" id="aNote" hidden></p>
-    <p class="p-legend" id="legendA" hidden>กดชื่อหุ้นเพื่อเลือกดู DR บทความ ข่าว งบ · “ข่าว” กรองข่าวในหน้านี้ · “กราฟ Finviz ↗” เปิดกราฟบนเว็บ Finviz</p>
-    <div class="pchips" id="listA"></div>
+    <button class="linkbtn more" id="pMore" type="button" hidden></button>
+    <p class="p-legend" id="pLegend"></p>
   </section>
 
   <section class="sec" id="secV" hidden>
@@ -535,19 +530,33 @@ function renderTickerBar(list) {
 document.addEventListener("input", e => { if (e.target.id === "tbSearch") { tbQ = e.target.value; tbFill(); } });
 
 // ---- กล่องหุ้นน่าสนใจ / แอดมินแนะนำ: กดชื่อหุ้น -> ไปหน้า DR (ถ้าไม่มี DR กรองข่าวในหน้านี้แทน) ----
-const pchip = (t, dr) => {
+// ชิปหุ้นเหลือปุ่มเดียว กดแล้วขึ้นเมนู (dashboard / DR / กราฟ Finviz / บทความ / ข่าว / งบ) ★ = ตัวที่อยู่ในอีกชุดด้วย
+const pchip = (t, dr, star) => {
   const has = !dr || dr.has(t) || !!(window.TK_DR && TK_DR[t]);
-  return `<span class="pchip"><button class="ptk ptk-b" type="button" data-tkmenu="${esc(t)}" data-dr="${has ? 1 : 0}" aria-haspopup="menu" aria-expanded="false" title="กดเพื่อเลือกดู ${esc(t)}">${esc(t)}</button><button class="pn" type="button" data-tk="${esc(t)}" aria-pressed="${state.ticker === t}" title="กรองข่าวของ ${esc(t)} ในหน้านี้">ข่าว</button><a class="fv" href="https://finviz.com/quote.ashx?t=${encodeURIComponent(t)}" target="_blank" rel="noopener noreferrer" aria-label="ดูกราฟ ${esc(t)} บน Finviz" title="กราฟ ${esc(t)} บน Finviz">กราฟ Finviz ↗</a></span>`;
+  return `<span class="pchip${state.ticker === t ? " on" : ""}"><button class="ptk ptk-b" type="button" data-tkmenu="${esc(t)}" data-dr="${has ? 1 : 0}" aria-haspopup="menu" aria-expanded="false" title="กดเพื่อเลือกดู ${esc(t)}${star ? " (อยู่ในอีกชุดด้วย)" : ""}">${esc(t)}${star ? '<span class="pstar" aria-hidden="true">★</span>' : ""}</button></span>`;
 };
 window.SITE_MENU = { here: PAGE, onHere: t => { setTicker(t); const el = PAGE === "news" ? ($("secN").hidden ? $("filters") : $("secN")) : $("filters"); el.scrollIntoView({ behavior: "smooth", block: "start" }); } };
 
-function fillPicks(k, b, def) {
-  const m = b.meta; $(k + "Title").textContent = m.title || def;
-  const n = $(k + "Note"); n.hidden = !m.note;
+const P_COLLAPSE = 30;   // รายการยาวกว่านี้พับไว้ก่อน กด "ดูทั้งหมด" ค่อยขยาย
+let pTab = "p", pOpen = false;
+function renderPicks(pk, ap) {
+  const boxes = [["p", pk, "หุ้นน่าสนใจ"], ["a", ap, "แอดมินแนะนำ"]].filter(x => x[1] && x[1].list.length);
+  $("secP").hidden = !boxes.length; if (!boxes.length) return;
+  if (!boxes.some(x => x[0] === pTab)) pTab = boxes[0][0];
+  const two = boxes.length > 1, cur = boxes.find(x => x[0] === pTab), k = cur[0], b = cur[1], m = b.meta;
+  $("pTabs").hidden = !two;
+  $("pTabs").innerHTML = two ? boxes.map(x => `<button class="tab" type="button" data-ptab="${x[0]}" aria-pressed="${x[0] === pTab}">${esc(x[1].meta.title || x[2])}<span class="n">${x[1].list.length}</span></button>`).join("") : "";
+  $("pTitle").textContent = two ? "หุ้นแนะนำ" : (m.title || cur[2]);
+  const n = $("pNote"); n.hidden = !m.note;
   if (m.note) n.innerHTML = "<b>" + (k === "p" ? "ที่มา / วิธีกรอง:" : "หมายเหตุ:") + "</b> " + esc(m.note);
   const d = m.updatedAt && m.updatedAt.toDate ? m.updatedAt.toDate() : null;
-  $(k + "Upd").innerHTML = d ? "อัปเดต " + esc(d.toLocaleDateString("th-TH", { dateStyle: "medium" })) + newPill(m.updatedAt) : "";
-  $("list" + k.toUpperCase()).innerHTML = b.list.map(t => pchip(t, b.dr)).join("");
+  $("pUpd").innerHTML = d ? "อัปเดต " + esc(d.toLocaleDateString("th-TH", { dateStyle: "medium" })) + newPill(m.updatedAt) : "";
+  const other = new Set(two ? (k === "p" ? ap : pk).list : []);
+  const cut = !pOpen && b.list.length > P_COLLAPSE;
+  $("listP").innerHTML = (cut ? b.list.slice(0, P_COLLAPSE) : b.list).map(t => pchip(t, b.dr, other.has(t))).join("");
+  $("pMore").hidden = b.list.length <= P_COLLAPSE;
+  $("pMore").textContent = pOpen ? "ย่อรายการ" : `ดูทั้งหมด ${b.list.length} ตัว ›`;
+  $("pLegend").textContent = "กดชื่อหุ้นเพื่อเลือกดู dashboard · DR · กราฟ Finviz · บทความ · ข่าว · งบ" + (other.size && [...other].some(t => b.list.includes(t)) ? " · ★ = อยู่ในอีกชุดด้วย" : "");
 }
 
 function render() {
@@ -568,10 +577,7 @@ function render() {
 
   // หุ้นน่าสนใจ + แอดมินแนะนำ (แสดงในแท็บ "ทั้งหมด")
   const pk = data.picks, ap = data.apicks;
-  const showP = PAGE === "news" && !!(pk && pk.list.length), showA = PAGE === "news" && !!(ap && ap.list.length);
-  $("secP").hidden = !showP; $("secA").hidden = !showA; $("legendA").hidden = !(showA && !showP);
-  if (showP) fillPicks("p", pk, "หุ้นน่าสนใจ");
-  if (showA) fillPicks("a", ap, "แอดมินแนะนำ");
+  if (PAGE === "news") renderPicks(pk, ap); else $("secP").hidden = true;
 
   if (PAGE === "earnings") { earnSection("preview", V, "พรีวิวงบ"); earnSection("result", R, "งบหุ้นรายตัว"); }
   const showN = PAGE === "news" && !!any;
@@ -607,6 +613,8 @@ document.addEventListener("click", e => {
   if (e.target.closest("#lb")) { $("lb").hidden = true; return; }
   if (e.target.closest("#tbMore")) { tbOpen = !tbOpen; renderTickerBar(tbList); if (tbOpen) $("tbSearch").focus(); return; }
   const mb = e.target.closest("[data-more]"); if (mb) { loadMore(mb.dataset.more); return; }
+  const pt = e.target.closest("[data-ptab]"); if (pt) { pTab = pt.dataset.ptab; pOpen = false; renderPicks(data.picks, data.apicks); return; }
+  if (e.target.closest("#pMore")) { pOpen = !pOpen; renderPicks(data.picks, data.apicks); return; }
   const tab = e.target.closest("[data-tab]"); if (tab) { state.tab = tab.dataset.tab; render(); return; }
   const tk = e.target.closest("[data-tk]");
   if (tk) {
