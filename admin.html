@@ -121,7 +121,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
         <div id="nPerBox" hidden><label for="nPeriod">งวดงบ เช่น Q3/2026</label><input id="nPeriod" type="text" maxlength="20" autocomplete="off"></div>
         <div><label for="nLink">ลิงก์ต้นฉบับ (ไม่ใส่ก็ได้)</label><input id="nLink" type="url" placeholder="https://" autocomplete="off"></div>
       </div>
-      <label>รูปประกอบ (ไม่ใส่ก็ได้ สูงสุด 6 รูป ย่อให้อัตโนมัติ)</label>
+      <label>รูปประกอบ (ไม่ใส่ก็ได้ สูงสุด 10 รูป ย่อให้อัตโนมัติ)</label>
       <div class="drop" id="nDrop">แปะรูปด้วย Ctrl+V · ลากรูปมาวาง · หรือ <button class="linkbtn" type="button" id="nPick">เลือกไฟล์</button><input id="nFiles" type="file" accept="image/*" multiple hidden></div>
       <div class="prev" id="nPrev"></div>
       <p class="msg" id="nMsg" role="alert" hidden></p>
@@ -145,7 +145,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
         <div><label for="aTickers">ชื่อหุ้นที่เกี่ยวข้อง</label><input id="aTickers" type="text" placeholder="NVDA, AMD" autocomplete="off"></div>
         <div><label for="aUrl">ลิงก์ต้นฉบับ (ไม่ใส่ก็ได้)</label><input id="aUrl" type="url" placeholder="https://" autocomplete="off"></div>
       </div>
-      <label>รูปประกอบ (สูงสุด 6 รูป ย่อให้อัตโนมัติ)</label>
+      <label>รูปประกอบ (สูงสุด 10 รูป ย่อให้อัตโนมัติ)</label>
       <div class="drop" id="aDrop">แปะรูปด้วย Ctrl+V · ลากรูปมาวาง · หรือ <button class="linkbtn" type="button" id="aPick">เลือกไฟล์</button><input id="aFiles" type="file" accept="image/*" multiple hidden></div>
       <div class="prev" id="aPrev"></div>
       <p class="msg" id="aMsg" role="alert" hidden></p>
@@ -399,7 +399,7 @@ $("nList").addEventListener("click", async e => {
 
 // ---------- รูป (ใช้ร่วมกันทั้งบทความ ข่าว และงบ) ----------
 const imgs = [];   // รูปของบทความ (dataURL ย่อแล้ว)
-const MAX_IMGS = 6, MAX_TOTAL = 950000, IMG_TARGET = 150000;   // 6 รูปรวมกันต้องไม่เกิน 1MB ของเอกสาร Firestore (~110 KB ไฟล์จริงต่อรูป)
+const MAX_IMGS = 10, MAX_TOTAL = 950000, IMG_TARGET = 90000;   // 10 รูปรวมกันต้องไม่เกิน 1MB ของเอกสาร Firestore (~65 KB ไฟล์จริงต่อรูป) เลยย่อให้เล็กลงกว่าตอน 6 รูป
 async function toJpeg(src, maxW, q) {
   const bmp = typeof src === "string" ? await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }) : await createImageBitmap(src);
   const w0 = bmp.width, h0 = bmp.height, s = Math.min(1, maxW / w0);

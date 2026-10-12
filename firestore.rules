@@ -94,7 +94,7 @@ service cloud.firestore {
         && d.link is string && d.link.size() <= 1000
         && d.tickers is list && d.tickers.size() <= 10
         && (!('hasImages' in d) || d.hasImages is bool)
-        && (!('imgCount' in d) || (d.imgCount is int && d.imgCount <= 6));
+        && (!('imgCount' in d) || (d.imgCount is int && d.imgCount <= 10));
     }
     function earnFields() {
       return request.resource.data.period is string && request.resource.data.period.size() <= 20
@@ -143,7 +143,7 @@ service cloud.firestore {
     }
     function imagesValid() {
       return request.resource.data.keys().hasOnly(['images', 'createdAt'])
-        && request.resource.data.images is list && request.resource.data.images.size() <= 6;
+        && request.resource.data.images is list && request.resource.data.images.size() <= 10;
     }
 
     match /articles/{id} {
