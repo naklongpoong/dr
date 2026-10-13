@@ -157,7 +157,7 @@ h1 { font-size: clamp(1.55rem, 4.6vw, 2.2rem); font-weight: 700; line-height: 1.
 .rbody a, .rlinks a { color: var(--accent); }
 .rimgs img { display: block; width: 100%; height: auto; border-radius: 12px; margin: 12px 0; border: 1px solid var(--line); }
 .rimgs.multi { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
-.rimgs.multi img { margin: 0; aspect-ratio: 4 / 3; object-fit: contain; background: var(--bg); }
+.rimgs.multi img { margin: 0; aspect-ratio: 4 / 3; object-fit: cover; background: var(--bg); }
 @media (max-width: 560px) { .rimgs.multi { grid-template-columns: 1fr; } }
 .rlinks { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 0.92rem; }
 .empty { padding: 36px 16px; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 14px; }
