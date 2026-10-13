@@ -324,3 +324,19 @@ document.addEventListener("click", function (e) {
     else if (e.key === "Escape") close();
   });
 })();
+
+/* รูปหลายรูปในโพสต์เดียวกัน: วัดสัดส่วนจริงของรูป (เฉลี่ย) แล้วตั้งกรอบเท่ากัน เพื่อให้ตัดขอบน้อยที่สุด */
+(function () {
+  document.addEventListener("load", function (e) {
+    var im = e.target;
+    if (!im || im.tagName !== "IMG" || !im.closest) return;
+    var box = im.closest(".nimgs.multi, .rimgs.multi");
+    if (!box) return;
+    var list = box.querySelectorAll("img"), sum = 0, n = 0;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].naturalWidth && list[i].naturalHeight) { sum += list[i].naturalWidth / list[i].naturalHeight; n++; }
+    }
+    if (!n) return;
+    box.style.setProperty("--ar", Math.min(1.8, Math.max(0.75, sum / n)).toFixed(3));
+  }, true);
+})();
