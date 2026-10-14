@@ -48,6 +48,7 @@ window.buildNav = function (current) {
   el.innerHTML = items.map(function (i) {
     return '<a href="' + i[1] + '"' + (i[0] === current ? ' aria-current="page"' : "") + ">" + i[2] + "</a>";
   }).join("") + '<button type="button" class="nav-search" data-search aria-label="ค้นหาทั้งเว็บ" title="ค้นหาทั้งเว็บ (Ctrl+K)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg> ค้นหา</button>';
+  if (window.nlpPopupBtn) window.nlpPopupBtn();
 };
 
 // true ถ้าเวลาที่ให้มา (Firestore timestamp หรือ Date) อยู่ในช่วง newHours ชั่วโมงที่ผ่านมา
@@ -381,8 +382,8 @@ document.addEventListener("click", function (e) {
   }
   function show(d, opt) {
     var b = build(), ev = evHtml(d.events), full = bodyHtml(d.body);
-    preview = !!(opt && opt.preview); curVer = d.v == null ? null : d.v;
-    b.innerHTML = '<div class="pu" tabindex="-1"><div class="puh"><span class="puk">' + (preview ? "ตัวอย่าง · " : "") + 'ประกาศ</span><h2 id="nlpPuT">' + esc(d.title || "ประกาศ") + "</h2></div>" +
+    preview = !!(opt && (opt.preview || opt.reopen)); curVer = d.v == null ? null : d.v;
+    b.innerHTML = '<div class="pu" tabindex="-1"><div class="puh"><span class="puk">' + (opt && opt.preview ? "ตัวอย่าง · " : "") + 'ประกาศ</span><h2 id="nlpPuT">' + esc(d.title || "ประกาศ") + "</h2></div>" +
       '<div class="pum">' + (ev ? '<ul class="pue">' + ev + "</ul>" : "") + (full ? '<div class="pub" id="nlpPuB" hidden>' + full + "</div>" : "") + "</div>" +
       '<div class="pua">' + (full ? '<button type="button" class="pur" data-pu="more" aria-expanded="false" aria-controls="nlpPuB">อ่านต่อ</button>' : "") + '<button type="button" class="puc" data-pu="close">ปิด</button></div></div>';
     prevFocus = document.activeElement; b.hidden = false; document.documentElement.style.overflow = "hidden";
@@ -414,10 +415,21 @@ document.addEventListener("click", function (e) {
     function ms(t) { return t && t.toMillis ? t.toMillis() : (t && t.toDate ? t.toDate().getTime() : 0); }
     return { title: d.title || "", events: d.events || "", body: d.body || "", on: d.on !== false, until: ms(d.until), v: ms(d.updatedAt) };
   }
+  var last = null;
+  window.nlpPopupBtn = function () {   // ปุ่ม "ประกาศ" ที่แถบเมนู ไว้เปิดการ์ดล่าสุดซ้ำหลังปิดไปแล้ว (มีเฉพาะตอนมีการ์ดที่ยังไม่หมดอายุ)
+    var nav = document.getElementById("nav");
+    if (!last || !nav || nav.querySelector("[data-pu-open]")) return;
+    var b = document.createElement("button"); b.type = "button"; b.className = "nav-search"; b.setAttribute("data-pu-open", "");
+    b.textContent = "📢 ประกาศ"; b.title = "เปิดประกาศล่าสุดอีกครั้ง"; nav.appendChild(b);
+  };
+  document.addEventListener("click", function (e) {
+    if (e.target.closest && e.target.closest("[data-pu-open]") && last) show(last, { reopen: true });
+  });
   function pick(d) {
     if (!d || !d.on || !(d.events || d.body)) return;
     if (d.until && Date.now() > d.until) return;   // หมดอายุแล้ว
-    if (seen(d.v)) return;                          // เครื่องนี้ปิดการ์ดเวอร์ชันนี้ไปแล้ว
+    last = d; window.nlpPopupBtn();
+    if (seen(d.v)) return;                          // เครื่องนี้ปิดการ์ดเวอร์ชันนี้ไปแล้ว (ยังกดปุ่ม "ประกาศ" เปิดดูได้)
     show(d);
   }
   document.addEventListener("DOMContentLoaded", function () {
