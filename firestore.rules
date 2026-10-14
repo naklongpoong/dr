@@ -56,11 +56,23 @@ service cloud.firestore {
         && request.resource.data.tickers is list && request.resource.data.tickers.size() <= 100
         && (!('drTk' in request.resource.data) || (request.resource.data.drTk is list && request.resource.data.drTk.size() <= 100));
     }
+    // การ์ดเด้ง (content/popup): events = กำหนดการ/เหตุการณ์ที่โชว์บนการ์ด, body = ข้อความเต็มที่ซ่อนหลังปุ่ม "อ่านต่อ"
+    // on = เปิด/ปิดการแสดง, until = หมดอายุอัตโนมัติ (ไม่ใส่ = ไม่หมดอายุ)
+    function popupValid() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['title', 'events', 'body', 'on', 'until', 'updatedAt'])
+        && d.title is string && d.title.size() <= 120
+        && d.events is string && d.events.size() <= 3000
+        && d.body is string && d.body.size() <= 20000
+        && d.on is bool
+        && (!('until' in d) || d.until is timestamp)
+        && d.updatedAt is timestamp;
+    }
 
     match /content/{docId} {
       allow get: if isMember();
       allow create, update: if isAdmin()
-        && ((docId == 'dr' && drValid()) || (docId in ['picks', 'adminPicks'] && picksValid()));
+        && ((docId == 'dr' && drValid()) || (docId in ['picks', 'adminPicks'] && picksValid()) || (docId == 'popup' && popupValid()));
       allow delete: if isAdmin();
     }
 

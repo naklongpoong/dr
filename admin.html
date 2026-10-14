@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>window.NLP_NO_GATE = true;</script>
-<script src="site.js?v=202610140442"></script>
-<script src="gate.js?v=202610140442"></script>
+<script src="site.js?v=202610140917"></script>
+<script src="gate.js?v=202610140917"></script>
 <style>
 :root {
   --navy: #0f1e46; --gold: #f5b301; --bg: #f2f5fb; --surface: #ffffff; --ink: #14213d; --muted: #5b6982;
@@ -106,6 +106,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <button class="tab" type="button" data-p="art" aria-pressed="false">บทความ</button>
       <button class="tab" type="button" data-p="dr" aria-pressed="false">ข้อมูล DR</button>
       <button class="tab" type="button" data-p="picks" aria-pressed="false">หุ้นแนะนำ</button>
+      <button class="tab" type="button" data-p="popup" aria-pressed="false">การ์ดเด้ง</button>
       <button class="tab" type="button" data-p="code" aria-pressed="false">รหัสสมาชิก</button>
     </div>
 
@@ -187,6 +188,27 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <details id="pHistBox" style="margin-top:18px"><summary style="cursor:pointer;font-weight:600">ประวัติรายสัปดาห์ (อยู่มากี่สัปดาห์ / ตัวที่หายไป)</summary><div id="pHist" class="help" style="margin-top:10px;line-height:1.7">กำลังโหลด...</div></details>
     </section>
 
+    <!-- การ์ดเด้ง -->
+    <section class="card" id="p-popup" hidden>
+      <h2>การ์ดเด้ง</h2>
+      <p class="help">ขึ้นกลางจอให้สมาชิกเห็นตอนเปิดหน้าไหนก็ได้ การ์ดโชว์เฉพาะ "เหตุการณ์" (กำหนดการ) ข้อความเต็มซ่อนอยู่หลังปุ่ม "อ่านต่อ" ปิดแล้วไม่เด้งซ้ำในเครื่องนั้นจนกว่าจะบันทึกการ์ดใหม่</p>
+      <label for="uRaw">วางข้อความทั้งก้อนตรงนี้ แล้วกด "แยกให้อัตโนมัติ" (บรรทัดแรก = ชื่อการ์ด, ส่วน "กำหนดการ..." = เหตุการณ์, ที่เหลือ = ข้อความเต็ม)</label>
+      <textarea id="uRaw" class="big" spellcheck="false" placeholder="วางข้อความสรุปตลาดวันนี้ที่นี่"></textarea>
+      <button class="btn alt" id="uSplit" type="button">แยกให้อัตโนมัติ</button>
+      <label for="uTitle">ชื่อการ์ด</label><input id="uTitle" type="text" maxlength="120" autocomplete="off">
+      <label for="uEvents">เหตุการณ์ (บรรทัดละหนึ่งเรื่อง รูปแบบ "เวลา — เรื่อง" ขึ้นบนการ์ด)</label>
+      <textarea id="uEvents" maxlength="3000" style="min-height:130px" spellcheck="false"></textarea>
+      <label for="uBody">ข้อความเต็ม (ซ่อนหลังปุ่ม "อ่านต่อ" เว้นว่างได้ ถ้าไม่อยากมีปุ่มอ่านต่อ)</label>
+      <textarea id="uBody" class="big" maxlength="20000" spellcheck="false"></textarea>
+      <div class="grid2">
+        <div><label for="uHours">แสดงนานแค่ไหน</label><select id="uHours"><option value="12">12 ชั่วโมง</option><option value="24" selected>24 ชั่วโมง</option><option value="48">48 ชั่วโมง</option><option value="72">72 ชั่วโมง</option><option value="0">ไม่หมดอายุ (จนกว่าจะปิดเอง)</option></select></div>
+        <div><label for="uOn">สถานะ</label><select id="uOn"><option value="1" selected>เปิดแสดง</option><option value="0">ปิด (ไม่เด้ง)</option></select></div>
+      </div>
+      <div class="stat" id="uSum" hidden></div>
+      <p class="msg" id="uMsg" role="alert" hidden></p>
+      <button class="btn alt" id="uLoad" type="button">โหลดการ์ดปัจจุบัน</button><button class="btn alt" id="uPrev" type="button">ดูตัวอย่าง</button><button class="btn" id="uSave" type="button">บันทึกและเผยแพร่</button>
+    </section>
+
     <!-- รหัสสมาชิก -->
     <section class="card" id="p-code" hidden>
       <h2>รหัสสมาชิกประจำเดือน</h2>
@@ -236,8 +258,8 @@ $("btnOut").onclick = () => N.A.signOut(N.auth);
 $("tabs").addEventListener("click", e => {
   const b = e.target.closest("[data-p]"); if (!b) return;
   document.querySelectorAll("#tabs .tab").forEach(t => t.setAttribute("aria-pressed", t === b));
-  ["news", "art", "dr", "picks", "code"].forEach(p => { $("p-" + p).hidden = p !== b.dataset.p; });
-  if (!loaded[b.dataset.p]) { loaded[b.dataset.p] = true; ({ art: loadArticles, dr: loadDr, picks: loadPicks, code: loadCode })[b.dataset.p](); }
+  ["news", "art", "dr", "picks", "popup", "code"].forEach(p => { $("p-" + p).hidden = p !== b.dataset.p; });
+  if (!loaded[b.dataset.p]) { loaded[b.dataset.p] = true; ({ art: loadArticles, dr: loadDr, picks: loadPicks, popup: loadPopup, code: loadCode })[b.dataset.p](); }
 });
 
 // ---------- ย้ายหมวด ----------
@@ -562,6 +584,71 @@ async function loadDr() {
   } catch (e) { fail("dMsg", e); }
 }
 $("dLoad").onclick = loadDr;
+
+// ---------- การ์ดเด้ง (content/popup) ----------
+// แยกข้อความทั้งก้อนเป็น ชื่อ / เหตุการณ์ / ข้อความเต็ม: บรรทัดแรก = ชื่อ, บรรทัดที่ขึ้นต้น "กำหนดการ" หรือ "ปฏิทิน" = หัวข้อเหตุการณ์ (เก็บไว้เป็นบรรทัด # หัวข้อ เพราะบอกเขตเวลา) เหตุการณ์ต่อเนื่องไปจนเจอหัวข้อถัดไป (อีโมจิ / ไฮไลต์ / สรุป / เลขข้อ "1. ")
+function splitPopup(raw) {
+  const L = String(raw || "").replace(/\r/g, "").split("\n").map(l => l.trim());
+  const first = L.findIndex(l => l);
+  if (first < 0) return { title: "", events: "", body: "" };
+  const title = L[first], rest = L.slice(first + 1);
+  const isSec = l => { try { return /^(\p{Extended_Pictographic}|ไฮไลต์|สรุป|\d+\.\s)/u.test(l); } catch (e) { return /^(ไฮไลต์|สรุป|\d+\.\s)/.test(l); } };
+  const hi = rest.findIndex(l => /^(กำหนดการ|ปฏิทิน)/.test(l));
+  let events, body;
+  if (hi >= 0) {
+    let end = rest.length;
+    for (let k = hi + 1; k < rest.length; k++) if (rest[k] && isSec(rest[k])) { end = k; break; }
+    events = ["# " + rest[hi]].concat(rest.slice(hi + 1, end).filter(Boolean));
+    body = rest.slice(0, hi).concat(rest.slice(end));
+  } else {   // ไม่มีหัวข้อกำหนดการ: บรรทัดที่ขึ้นต้นด้วยเวลา (12:00 / 19.30) หรือ ก่อน/หลังตลาด และมี "—" ถือเป็นเหตุการณ์
+    const isEv = l => /^(\d{1,2}[:.]\d{2}|ก่อนตลาด|หลังตลาด)/.test(l) && /[—–]/.test(l);
+    events = rest.filter(isEv); body = rest.filter(l => !isEv(l));
+  }
+  return { title, events: events.join("\n"), body: body.join("\n").replace(/\n{3,}/g, "\n\n").trim() };
+}
+const uData = () => ({ title: $("uTitle").value.trim(), events: $("uEvents").value.trim(), body: $("uBody").value.trim() });
+function uCheck() {
+  const ev = $("uEvents").value.split("\n").filter(l => l.trim() && l.trim()[0] !== "#").length, bl = $("uBody").value.length;
+  const s = $("uSum"); s.hidden = false; s.classList.toggle("warn", !ev);
+  s.textContent = ev ? `เหตุการณ์ ${ev} รายการ · ข้อความเต็ม ${bl.toLocaleString()} ตัวอักษร` + (bl ? "" : " (ไม่มีปุ่มอ่านต่อ)") : "ยังไม่มีเหตุการณ์ในการ์ด เติมช่องเหตุการณ์ หรือวางข้อความแล้วกดแยกให้อัตโนมัติ";
+  return { ev, bl };
+}
+$("uSplit").onclick = () => {
+  const r = splitPopup($("uRaw").value);
+  if (!r.title && !r.events && !r.body) return note("uMsg", "วางข้อความในช่องด้านบนก่อน");
+  $("uTitle").value = r.title.slice(0, 120); $("uEvents").value = r.events; $("uBody").value = r.body;
+  const c = uCheck();
+  note("uMsg", c.ev ? "แยกให้แล้ว ตรวจช่องเหตุการณ์ ชื่อ และข้อความเต็มด้านล่าง แก้ได้ก่อนกดดูตัวอย่าง" : "ไม่เจอหัวข้อ \"กำหนดการ\" หรือบรรทัดรูปแบบ \"เวลา — เรื่อง\" ในข้อความ ใส่ช่องเหตุการณ์เองได้", !!c.ev);
+};
+$("uPrev").onclick = () => {
+  const d = uData(); if (!d.events && !d.body) return note("uMsg", "ยังไม่มีเนื้อหาให้ดูตัวอย่าง");
+  uCheck(); note("uMsg", ""); window.nlpPopupShow(d, { preview: true });
+};
+$("uSave").onclick = async () => {
+  const d = uData(), c = uCheck();
+  if (!c.ev && !d.body) return note("uMsg", "ไม่มีเนื้อหาให้บันทึก");
+  if (!c.ev && !confirm("การ์ดนี้ไม่มีเหตุการณ์ จะมีแต่ปุ่มอ่านต่อ บันทึกต่อไหม?")) return;
+  if (d.title.length > 120 || d.events.length > 3000 || d.body.length > 20000) return note("uMsg", "ข้อความยาวเกินกำหนด (ชื่อ 120 / เหตุการณ์ 3,000 / ข้อความเต็ม 20,000 ตัวอักษร)");
+  const hrs = +$("uHours").value, data = { title: d.title, events: d.events, body: d.body, on: $("uOn").value === "1", updatedAt: N.F.serverTimestamp() };
+  if (hrs > 0) data.until = N.F.Timestamp.fromMillis(Date.now() + hrs * 3600000);   // ไม่ใส่ until = ไม่หมดอายุ (setDoc ทับทั้งเอกสาร ค่าเก่าจึงหายไป)
+  note("uMsg", ""); $("uSave").disabled = true;
+  try {
+    await N.F.setDoc(N.F.doc(N.db, "content", "popup"), data);
+    note("uMsg", data.on ? "บันทึกแล้ว การ์ดจะเด้งให้สมาชิกที่ยังไม่เคยปิดการ์ดนี้ (คนที่เปิดหน้าค้างไว้จะเห็นหลังโหลดหน้าใหม่ ภายในราว 3 นาที)" : "บันทึกแล้ว สถานะปิด การ์ดจะไม่เด้ง", true);
+  } catch (e) { fail("uMsg", e); }
+  $("uSave").disabled = false;
+};
+async function loadPopup() {
+  try {
+    const s = await N.F.getDoc(N.F.doc(N.db, "content", "popup"));
+    if (!s.exists()) return note("uMsg", "ยังไม่มีการ์ดในระบบ วางข้อความด้านบนแล้วกดแยกให้อัตโนมัติ");
+    const d = s.data(); $("uTitle").value = d.title || ""; $("uEvents").value = d.events || ""; $("uBody").value = d.body || ""; $("uOn").value = d.on === false ? "0" : "1";
+    uCheck();
+    const u = d.until && d.until.toDate ? d.until.toDate() : null;
+    note("uMsg", "โหลดการ์ดปัจจุบันแล้ว บันทึกเมื่อ " + fmtTime(d.updatedAt) + (u ? " · หมดอายุ " + fmtTime(d.until) + (u < new Date() ? " (หมดอายุแล้ว)" : "") : " · ไม่หมดอายุ"), true);
+  } catch (e) { fail("uMsg", e); }
+}
+$("uLoad").onclick = loadPopup;
 
 // ---------- หุ้นแนะนำ (หุ้นน่าสนใจ = content/picks, แอดมินแนะนำ = content/adminPicks) ----------
 const PICKS_MAX = 100;

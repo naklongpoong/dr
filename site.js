@@ -340,3 +340,96 @@ document.addEventListener("click", function (e) {
     box.style.setProperty("--ar", Math.min(1.8, Math.max(0.75, sum / n)).toFixed(3));
   }, true);
 })();
+
+// ---- การ์ดเด้ง: แอดมินแปะข้อความที่หลังบ้าน (แท็บ "การ์ดเด้ง" เก็บที่ content/popup) การ์ดโชว์เฉพาะเหตุการณ์ กด "อ่านต่อ" เพื่ออ่านข้อความเต็ม หรือกด "ปิด" ----
+// ปิดแล้วไม่เด้งซ้ำในเครื่องนั้นจนกว่าแอดมินจะบันทึกการ์ดใหม่ (จำใน localStorage) หลังบ้านเรียก window.nlpPopupShow(data, { preview: true }) เพื่อดูตัวอย่างโดยไม่จำว่าปิดแล้ว
+(function () {
+  var SEEN = "nlp_popup_seen", el = null, prevFocus = null, curVer = null, preview = false, HEAD;
+  try { HEAD = new RegExp("^(\\p{Extended_Pictographic}|\\d+\\.\\s)", "u"); } catch (e) { HEAD = /^\d+\.\s/; }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function seen(v) { try { return localStorage.getItem(SEEN) === String(v); } catch (e) { return false; } }
+  function mark(v) { try { localStorage.setItem(SEEN, String(v)); } catch (e) {} }
+  function evHtml(text) {   // หนึ่งบรรทัดหนึ่งเหตุการณ์ รูปแบบ "เวลา — เรื่อง" (ไม่มีขีดคั่นก็แสดงทั้งบรรทัด) บรรทัดที่ขึ้นต้น "# " เป็นหัวข้อเล็ก เช่น "กำหนดการตามเวลาประเทศไทย"
+    return String(text || "").split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
+      if (l.charAt(0) === "#") return '<li class="puhd"><span>' + esc(l.replace(/^#+\s*/, "")) + "</span></li>";
+      var m = /^(.*?)\s+[—–]\s+(.+)$/.exec(l);
+      return m ? "<li><b>" + esc(m[1]) + "</b><span>" + esc(m[2]) + "</span></li>" : "<li><span>" + esc(l) + "</span></li>";
+    }).join("");
+  }
+  function bodyHtml(text) {   // ย่อหน้าคั่นด้วยบรรทัดว่าง บรรทัดเดี่ยวที่ขึ้นต้นด้วยอีโมจิหรือเลขข้อ "1. " เป็นหัวข้อ
+    return String(text || "").replace(/\r/g, "").split(/\n{2,}/).map(function (b) {
+      b = b.trim(); if (!b) return "";
+      return b.indexOf("\n") < 0 && b.length < 90 && HEAD.test(b) ? "<h4>" + esc(b) + "</h4>" : "<p>" + esc(b).replace(/\n/g, "<br>") + "</p>";
+    }).join("");
+  }
+  function build() {
+    if (el) return el;
+    var s = document.createElement("style");
+    s.textContent = "#nlpPu{position:fixed;inset:0;z-index:90;background:rgba(5,10,25,.7);display:flex;align-items:center;justify-content:center;padding:14px}#nlpPu[hidden]{display:none}" +
+      "#nlpPu .pu{width:100%;max-width:480px;max-height:88vh;display:flex;flex-direction:column;background:var(--surface,#fff);color:var(--ink,#14213d);border-radius:16px;border-bottom:4px solid #f5b301;box-shadow:0 20px 60px rgba(0,0,0,.45);overflow:hidden;outline:none}" +
+      "#nlpPu .puh{background:#0f1e46;color:#fff;padding:14px 18px 12px}#nlpPu .puk{display:inline-block;font-size:.72rem;font-weight:700;color:#14213d;background:#f5b301;border-radius:999px;padding:1px 10px;margin-bottom:6px}#nlpPu h2{margin:0;font-size:1.12rem;line-height:1.35;font-weight:700}" +
+      "#nlpPu .pum{overflow:auto;padding:4px 18px 6px;-webkit-overflow-scrolling:touch}#nlpPu .pue{list-style:none;margin:6px 0 4px;padding:0}#nlpPu .pue li{display:flex;flex-direction:column;gap:1px;padding:9px 0;border-top:1px solid var(--line,#dde3ef)}#nlpPu .pue li:first-child{border-top:0}#nlpPu .pue li.puhd{padding:4px 0 6px}#nlpPu .pue li.puhd span{font-size:.82rem;color:var(--muted,#5b6982)}" +
+      "#nlpPu .pue b{font-size:.88rem;font-weight:700;color:var(--accent,#1f4fa8)}#nlpPu .pue span{font-size:.95rem;line-height:1.5;overflow-wrap:anywhere}" +
+      "#nlpPu .pub{margin-top:6px;padding-top:4px;border-top:2px solid #f5b301}#nlpPu .pub[hidden]{display:none}#nlpPu .pub p{margin:.6em 0;font-size:.92rem;line-height:1.7;overflow-wrap:anywhere}#nlpPu .pub h4{margin:1.1em 0 .2em;font-size:.98rem}" +
+      "#nlpPu .pua{display:flex;gap:8px;justify-content:flex-end;padding:10px 18px 14px;border-top:1px solid var(--line,#dde3ef)}#nlpPu .pua button{font:inherit;font-size:.95rem;font-weight:600;cursor:pointer;border-radius:10px;padding:8px 20px;border:1px solid var(--line,#dde3ef);background:transparent;color:inherit}" +
+      "#nlpPu .pua .pur{background:#f5b301;border-color:#f5b301;color:#14213d}#nlpPu .pua button:focus-visible{outline:2px solid #f5b301;outline-offset:2px}";
+    document.head.appendChild(s);
+    el = document.createElement("div"); el.id = "nlpPu"; el.hidden = true; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); el.setAttribute("aria-labelledby", "nlpPuT");
+    document.body.appendChild(el);
+    el.addEventListener("mousedown", function (e) { if (e.target === el) closeIt(); });
+    return el;
+  }
+  function show(d, opt) {
+    var b = build(), ev = evHtml(d.events), full = bodyHtml(d.body);
+    preview = !!(opt && opt.preview); curVer = d.v == null ? null : d.v;
+    b.innerHTML = '<div class="pu" tabindex="-1"><div class="puh"><span class="puk">' + (preview ? "ตัวอย่าง · " : "") + 'ประกาศ</span><h2 id="nlpPuT">' + esc(d.title || "ประกาศ") + "</h2></div>" +
+      '<div class="pum">' + (ev ? '<ul class="pue">' + ev + "</ul>" : "") + (full ? '<div class="pub" id="nlpPuB" hidden>' + full + "</div>" : "") + "</div>" +
+      '<div class="pua">' + (full ? '<button type="button" class="pur" data-pu="more" aria-expanded="false" aria-controls="nlpPuB">อ่านต่อ</button>' : "") + '<button type="button" class="puc" data-pu="close">ปิด</button></div></div>';
+    prevFocus = document.activeElement; b.hidden = false; document.documentElement.style.overflow = "hidden";
+    (b.querySelector(".pur") || b.querySelector(".puc")).focus();
+  }
+  function closeIt() {
+    if (!el || el.hidden) return;
+    el.hidden = true; document.documentElement.style.overflow = "";
+    if (!preview && curVer != null) mark(curVer);
+    try { if (prevFocus && prevFocus.focus) prevFocus.focus(); } catch (e) {}
+  }
+  window.nlpPopupShow = show; window.nlpPopupClose = closeIt;
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest("[data-pu]"); if (!t || !el || el.hidden) return;
+    if (t.getAttribute("data-pu") === "close") { closeIt(); return; }
+    var body = document.getElementById("nlpPuB"); if (!body) return;
+    var open = body.hidden; body.hidden = !open; t.setAttribute("aria-expanded", String(open)); t.textContent = open ? "ย่อกลับ" : "อ่านต่อ";
+    if (open) { if (!preview && curVer != null) mark(curVer); body.scrollIntoView({ block: "nearest" }); }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (!el || el.hidden) return;
+    if (e.key === "Escape") { closeIt(); return; }
+    if (e.key !== "Tab") return;
+    var bs = [].slice.call(el.querySelectorAll("button")), i = bs.indexOf(document.activeElement);   // ให้โฟกัสวนอยู่ในการ์ด
+    if (e.shiftKey && i <= 0) { e.preventDefault(); bs[bs.length - 1].focus(); }
+    else if (!e.shiftKey && (i < 0 || i === bs.length - 1)) { e.preventDefault(); bs[0].focus(); }
+  });
+  function norm(d) {   // ข้อมูลจาก Firestore -> ออบเจ็กต์ธรรมดา (เก็บเวลาเป็นมิลลิวินาที เพื่อจำในเครื่องได้)
+    function ms(t) { return t && t.toMillis ? t.toMillis() : (t && t.toDate ? t.toDate().getTime() : 0); }
+    return { title: d.title || "", events: d.events || "", body: d.body || "", on: d.on !== false, until: ms(d.until), v: ms(d.updatedAt) };
+  }
+  function pick(d) {
+    if (!d || !d.on || !(d.events || d.body)) return;
+    if (d.until && Date.now() > d.until) return;   // หมดอายุแล้ว
+    if (seen(d.v)) return;                          // เครื่องนี้ปิดการ์ดเวอร์ชันนี้ไปแล้ว
+    show(d);
+  }
+  document.addEventListener("DOMContentLoaded", function () {
+    if (window.NLP_NO_GATE || !window.NLP || !NLP.ready) return;
+    NLP.ready.then(function (N) {
+      var c = window.cacheGet && cacheGet("popup", (window.SITE && SITE.cacheMinutes) || 0);
+      if (c) { pick(c.none ? null : c); return; }
+      return N.F.getDoc(N.F.doc(N.db, "content", "popup")).then(function (s) {
+        var d = s.exists() ? norm(s.data()) : null;
+        if (window.cachePut) cachePut("popup", d || { none: true });
+        pick(d);
+      });
+    }).catch(function () {});   // อ่านไม่ได้ (เช่น ยังไม่ได้วางกฎใหม่) ก็แค่ไม่เด้ง ไม่กระทบหน้าอื่น
+  });
+})();
