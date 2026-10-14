@@ -25,8 +25,8 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610150202"></script>
-<script src="gate.js?v=202610150202"></script>
+<script src="site.js?v=202610150207"></script>
+<script src="gate.js?v=202610150207"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -78,14 +78,22 @@ body {
 h1 { font-size: clamp(2.2rem, 8vw, 3.4rem); font-weight: 700; line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.01em; animation: rise .7s .08s ease both; }
 .lede { color: #b9c6e6; margin: 0 auto; max-width: 44ch; font-size: 1.05rem; animation: rise .7s .16s ease both; }
 
-.fomc { margin: 16px 0 0; padding: 20px 18px 18px; text-align: center; color: #fff; background: var(--navy); border-radius: 18px; border-bottom: 4px solid var(--gold); box-shadow: var(--shadow); }
+.fomc { position: relative; overflow: hidden; margin: 16px 0 0; padding: 20px 16px 16px; text-align: center; color: #fff; border-radius: 20px; border-bottom: 4px solid var(--gold); box-shadow: var(--shadow);
+  background: radial-gradient(120% 90% at 50% -20%, rgba(245,179,1,.22), transparent 60%), linear-gradient(165deg, #17306d 0%, #0f1e46 55%, #0b1633 100%); }
 .fomc[hidden] { display: none; }
-.fomc h2 { margin: 0 0 2px; font-size: 1.08rem; font-weight: 700; }
-.fomc .sub { margin: 0 0 14px; font-size: .84rem; color: #b9c6e6; }
-.fomc .tm { display: flex; justify-content: center; gap: 10px; }
-.fomc .tm div { flex: 1 1 0; max-width: 84px; background: #fff; color: #14213d; border-radius: 12px; padding: 10px 0 8px; }
-.fomc .tm b { display: block; font-size: 1.9rem; font-weight: 500; line-height: 1.1; font-variant-numeric: tabular-nums; border-bottom: 1px solid #14213d; margin: 0 14px 4px; padding-bottom: 3px; }
-.fomc .tm span { font-size: .7rem; letter-spacing: .06em; color: #4a5875; }
+.fomc .tag { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .12em; color: #14213d; background: var(--gold); border-radius: 999px; padding: 1px 12px; margin-bottom: 6px; }
+.fomc h2 { margin: 0 0 14px; font-size: 1.1rem; font-weight: 700; letter-spacing: .01em; }
+.fomc .tm { display: flex; justify-content: center; align-items: flex-start; gap: 6px; }
+.fomc .tm .u { flex: 1 1 0; max-width: 82px; }
+.fomc .tm .cell { position: relative; background: linear-gradient(180deg, #ffffff 0%, #e9effc 100%); color: #14213d; border-radius: 12px; padding: 10px 0 9px; box-shadow: 0 6px 14px rgba(0,0,0,.28), inset 0 -2px 0 rgba(15,30,70,.08); }
+.fomc .tm .cell::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(15,30,70,.14); }   /* เส้นกลางแบบป้ายพลิก */
+.fomc .tm b { display: block; font-size: 2.1rem; font-weight: 600; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.fomc .tm .u > span { display: block; margin-top: 6px; font-size: .74rem; font-weight: 600; letter-spacing: .05em; color: #c9d5f2; }
+.fomc .tm i { align-self: flex-start; padding-top: 12px; font-style: normal; font-size: 1.5rem; font-weight: 700; color: var(--gold); opacity: .85; }
+.fomc .when { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 8px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,.2); }
+.fomc .when span { font-size: .82rem; color: #d3dcf3; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 999px; padding: 3px 12px; }
+.fomc .when b { color: var(--gold); font-weight: 600; }
+@media (max-width: 360px) { .fomc .tm b { font-size: 1.8rem; } .fomc .tm i { display: none; } }
 .pick { font-size: 0.95rem; font-weight: 600; color: var(--muted); margin: 30px 4px 12px; letter-spacing: .02em; }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
 .card {
@@ -127,9 +135,15 @@ a.card:hover .go { text-decoration: underline; }
   </header>
 
   <section class="fomc" id="fomc" hidden role="timer" aria-label="นับถอยหลังถึงการประกาศผลประชุม FOMC">
+    <span class="tag">FOMC</span>
     <h2>การประชุม FOMC ครั้งถัดไปอีก</h2>
-    <p class="sub" id="fomcSub"></p>
-    <div class="tm"><div><b id="fD">--</b><span>วัน</span></div><div><b id="fH">--</b><span>ชม.</span></div><div><b id="fM">--</b><span>นาที</span></div><div><b id="fS">--</b><span>วินาที</span></div></div>
+    <div class="tm">
+      <div class="u"><div class="cell"><b id="fD">--</b></div><span>วัน</span></div><i aria-hidden="true">:</i>
+      <div class="u"><div class="cell"><b id="fH">--</b></div><span>ชม.</span></div><i aria-hidden="true">:</i>
+      <div class="u"><div class="cell"><b id="fM">--</b></div><span>นาที</span></div><i aria-hidden="true">:</i>
+      <div class="u"><div class="cell"><b id="fS">--</b></div><span>วินาที</span></div>
+    </div>
+    <div class="when"><span>ประชุม <b id="fMeet"></b></span><span>ประกาศผลดอกเบี้ย <b id="fAt"></b></span></div>
   </section>
 
   <h2 class="pick">เลือกที่อยากเข้า</h2>
@@ -182,7 +196,7 @@ if (window.NLP && NLP.ready) NLP.ready.then(function (N) {
   if (!next) return;   // ไม่มีครั้งถัดไปในตาราง (ปีหน้าเพิ่มรายการที่ site.js)
   var t = Date.parse(next.at), ids = ["fD", "fH", "fM", "fS"].map(function (k) { return document.getElementById(k); });
   var th = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(t));
-  document.getElementById("fomcSub").textContent = "ประชุม " + next.d + " · ประกาศผลดอกเบี้ย " + th + " น. (เวลาไทย)";
+  document.getElementById("fMeet").textContent = next.d; document.getElementById("fAt").textContent = th + " น. (เวลาไทย)";
   function two(n) { return n < 10 ? "0" + n : String(n); }
   function tick() {
     var s = Math.max(0, Math.floor((t - Date.now()) / 1000));
