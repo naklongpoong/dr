@@ -25,8 +25,8 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610150051"></script>
-<script src="gate.js?v=202610150051"></script>
+<script src="site.js?v=202610150202"></script>
+<script src="gate.js?v=202610150202"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -78,6 +78,14 @@ body {
 h1 { font-size: clamp(2.2rem, 8vw, 3.4rem); font-weight: 700; line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.01em; animation: rise .7s .08s ease both; }
 .lede { color: #b9c6e6; margin: 0 auto; max-width: 44ch; font-size: 1.05rem; animation: rise .7s .16s ease both; }
 
+.fomc { margin: 16px 0 0; padding: 20px 18px 18px; text-align: center; color: #fff; background: var(--navy); border-radius: 18px; border-bottom: 4px solid var(--gold); box-shadow: var(--shadow); }
+.fomc[hidden] { display: none; }
+.fomc h2 { margin: 0 0 2px; font-size: 1.08rem; font-weight: 700; }
+.fomc .sub { margin: 0 0 14px; font-size: .84rem; color: #b9c6e6; }
+.fomc .tm { display: flex; justify-content: center; gap: 10px; }
+.fomc .tm div { flex: 1 1 0; max-width: 84px; background: #fff; color: #14213d; border-radius: 12px; padding: 10px 0 8px; }
+.fomc .tm b { display: block; font-size: 1.9rem; font-weight: 500; line-height: 1.1; font-variant-numeric: tabular-nums; border-bottom: 1px solid #14213d; margin: 0 14px 4px; padding-bottom: 3px; }
+.fomc .tm span { font-size: .7rem; letter-spacing: .06em; color: #4a5875; }
 .pick { font-size: 0.95rem; font-weight: 600; color: var(--muted); margin: 30px 4px 12px; letter-spacing: .02em; }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
 .card {
@@ -117,6 +125,12 @@ a.card:hover .go { text-decoration: underline; }
     <p class="lede">เครื่องมือและบทวิเคราะห์สำหรับนักลงทุนหุ้นต่างประเทศ</p>
     <button type="button" class="nav-search" data-search aria-label="ค้นหาทั้งเว็บ" title="ค้นหาทั้งเว็บ (Ctrl+K)" style="margin:18px 0 0;padding:8px 20px;font-size:1rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg> ค้นหาข่าว งบ บทความ และ DR</button>
   </header>
+
+  <section class="fomc" id="fomc" hidden role="timer" aria-label="นับถอยหลังถึงการประกาศผลประชุม FOMC">
+    <h2>การประชุม FOMC ครั้งถัดไปอีก</h2>
+    <p class="sub" id="fomcSub"></p>
+    <div class="tm"><div><b id="fD">--</b><span>วัน</span></div><div><b id="fH">--</b><span>ชม.</span></div><div><b id="fM">--</b><span>นาที</span></div><div><b id="fS">--</b><span>วินาที</span></div></div>
+  </section>
 
   <h2 class="pick">เลือกที่อยากเข้า</h2>
   <section class="cards" id="cards" aria-label="เลือกหน้า"></section>
@@ -159,6 +173,25 @@ if (window.NLP && NLP.ready) NLP.ready.then(function (N) {
   if (SITE.earnings) latest("earnings").then(function (v) { if (v) mark("earnings"); });
   if (SITE.articles) latest("articles").then(function (v) { if (v) mark("articles"); });
 }).catch(function () {});
+
+// นับถอยหลังถึงประกาศผล FOMC ครั้งถัดไป (ตารางอยู่ที่ window.FOMC ใน site.js)
+(function () {
+  var box = document.getElementById("fomc"); if (!box || !window.FOMC) return;
+  var next = null, now = Date.now();
+  for (var i = 0; i < FOMC.length; i++) if (Date.parse(FOMC[i].at) > now) { next = FOMC[i]; break; }
+  if (!next) return;   // ไม่มีครั้งถัดไปในตาราง (ปีหน้าเพิ่มรายการที่ site.js)
+  var t = Date.parse(next.at), ids = ["fD", "fH", "fM", "fS"].map(function (k) { return document.getElementById(k); });
+  var th = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(t));
+  document.getElementById("fomcSub").textContent = "ประชุม " + next.d + " · ประกาศผลดอกเบี้ย " + th + " น. (เวลาไทย)";
+  function two(n) { return n < 10 ? "0" + n : String(n); }
+  function tick() {
+    var s = Math.max(0, Math.floor((t - Date.now()) / 1000));
+    ids[0].textContent = two(Math.floor(s / 86400)); ids[1].textContent = two(Math.floor(s % 86400 / 3600));
+    ids[2].textContent = two(Math.floor(s % 3600 / 60)); ids[3].textContent = two(s % 60);
+    if (s === 0) { clearInterval(iv); location.reload(); }   // ถึงเวลาแล้ว โหลดใหม่เพื่อขยับไปครั้งถัดไป
+  }
+  var iv = setInterval(tick, 1000); tick(); box.hidden = false;
+})();
 
 // ใช้โลโก้เป็น favicon
 var fav = document.createElement("link"); fav.rel = "icon"; fav.href = document.querySelector(".logo").src; document.head.appendChild(fav);
