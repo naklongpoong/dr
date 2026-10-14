@@ -43,6 +43,10 @@ window.FOMC = [
   { d: "27–28 ต.ค.", at: "2026-10-28T18:00:00Z" }, { d: "8–9 ธ.ค.", at: "2026-12-09T19:00:00Z" }
 ];
 
+// โอกาสที่ Fed จะลด/คงที่/ขึ้นดอกเบี้ย จาก CME FedWatch (ไม่ใช่เรียลไทม์ ต้องอัปเดตเอง) meeting = วันประกาศผลตามตาราง FOMC ด้านบน asOf = วันที่ของตัวเลข
+// หน้าแรกจะโชว์เฉพาะเมื่อ meeting ตรงกับครั้งถัดไป และ asOf ไม่เก่ากว่า maxAgeDays วัน (กันโชว์ตัวเลขเก่า)
+window.FOMC_ODDS = { meeting: "2026-10-28", asOf: "2026-10-15", ease: 0.0, hold: 65.1, hike: 34.9, maxAgeDays: 3 };
+
 // สร้างเมนูบนหัวหน้า ใช้กับทุกหน้าที่มี <nav id="nav">
 window.buildNav = function (current) {
   var el = document.getElementById("nav");

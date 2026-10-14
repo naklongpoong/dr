@@ -25,8 +25,8 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610150207"></script>
-<script src="gate.js?v=202610150207"></script>
+<script src="site.js?v=202610150214"></script>
+<script src="gate.js?v=202610150214"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -93,6 +93,14 @@ h1 { font-size: clamp(2.2rem, 8vw, 3.4rem); font-weight: 700; line-height: 1.15;
 .fomc .when { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 8px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,.2); }
 .fomc .when span { font-size: .82rem; color: #d3dcf3; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 999px; padding: 3px 12px; }
 .fomc .when b { color: var(--gold); font-weight: 600; }
+.fomc .odds { margin-top: 12px; }
+.fomc .odds[hidden] { display: none; }
+.fomc .odds .row { display: flex; justify-content: center; gap: 8px; }
+.fomc .odds .row div { flex: 1 1 0; max-width: 110px; padding: 6px 0 5px; border-radius: 10px; background: rgba(255,255,255,.07); }
+.fomc .odds .row b { display: block; font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.fomc .odds .row span { font-size: .74rem; color: #c9d5f2; }
+.fomc .odds .hike b { color: #ffb4a8; } .fomc .odds .ease b { color: #9fe3b4; } .fomc .odds .hold b { color: #fff; }
+.fomc .odds .src { margin: 6px 0 0; font-size: .7rem; color: #9fb0d6; }
 @media (max-width: 360px) { .fomc .tm b { font-size: 1.8rem; } .fomc .tm i { display: none; } }
 .pick { font-size: 0.95rem; font-weight: 600; color: var(--muted); margin: 30px 4px 12px; letter-spacing: .02em; }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
@@ -144,6 +152,10 @@ a.card:hover .go { text-decoration: underline; }
       <div class="u"><div class="cell"><b id="fS">--</b></div><span>วินาที</span></div>
     </div>
     <div class="when"><span>ประชุม <b id="fMeet"></b></span><span>ประกาศผลดอกเบี้ย <b id="fAt"></b></span></div>
+    <div class="odds" id="fOdds" hidden>
+      <div class="row"><div class="hold"><b id="oHold"></b><span>ไม่เปลี่ยน</span></div><div class="hike"><b id="oHike"></b><span>ขึ้นดอกเบี้ย</span></div><div class="ease"><b id="oEase"></b><span>ลดดอกเบี้ย</span></div></div>
+      <p class="src" id="oSrc"></p>
+    </div>
   </section>
 
   <h2 class="pick">เลือกที่อยากเข้า</h2>
@@ -197,6 +209,14 @@ if (window.NLP && NLP.ready) NLP.ready.then(function (N) {
   var t = Date.parse(next.at), ids = ["fD", "fH", "fM", "fS"].map(function (k) { return document.getElementById(k); });
   var th = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(t));
   document.getElementById("fMeet").textContent = next.d; document.getElementById("fAt").textContent = th + " น. (เวลาไทย)";
+  (function () {   // โอกาสปรับดอกเบี้ย (ตัวเลขที่อัปเดตเอง) โชว์เมื่อเป็นของการประชุมถัดไปและไม่เก่าเกินกำหนด
+    var o = window.FOMC_ODDS; if (!o || next.at.slice(0, 10) !== o.meeting) return;
+    var asOf = Date.parse(o.asOf + "T00:00:00+07:00"); if (!asOf || Date.now() - asOf > ((o.maxAgeDays || 3) + 1) * 86400000) return;
+    function pc(v) { return (+v).toFixed(1) + "%"; }
+    document.getElementById("oHold").textContent = pc(o.hold); document.getElementById("oHike").textContent = pc(o.hike); document.getElementById("oEase").textContent = pc(o.ease);
+    document.getElementById("oSrc").textContent = "ข้อมูล ณ " + new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short" }).format(new Date(asOf)) + " · CME FedWatch";
+    document.getElementById("fOdds").hidden = false;
+  })();
   function two(n) { return n < 10 ? "0" + n : String(n); }
   function tick() {
     var s = Math.max(0, Math.floor((t - Date.now()) / 1000));
