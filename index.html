@@ -25,8 +25,8 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610150723"></script>
-<script src="gate.js?v=202610150723"></script>
+<script src="site.js?v=202610150842"></script>
+<script src="gate.js?v=202610150842"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -199,6 +199,7 @@ a.card:hover .go { text-decoration: underline; }
 var ICON = {
   dr: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>',
   articles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg>',
+  basics: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M9 8h6"/></svg>',
   etf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M16 3.5A9 9 0 0 1 20.5 8H16z"/></svg>',
   earnings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4zM4 10h16M10 4v16"/></svg>',
   news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-8 4 16 3-8h6"/></svg>'
@@ -208,6 +209,7 @@ var PAGES = [
   { key: "articles", href: "articles.html", on: SITE.articles, title: "บทความ & บทวิเคราะห์", desc: "บทความและบทวิเคราะห์หุ้นต่างประเทศจากนักลงพุง กรองตามประเภทและชื่อหุ้นได้", go: "เข้าอ่านบทความ ›" },
   { key: "news", href: "news.html", on: SITE.news, hidden: !SITE.news, title: "ข่าว", desc: "ข่าวและหุ้นน่าสนใจ กรองตามชื่อหุ้นได้", go: "เข้าดูข่าว ›" },
   { key: "earnings", href: "earnings.html", on: SITE.earnings, hidden: !SITE.earnings, title: "พรีวิวงบ & งบ", desc: "พรีวิวงบและงบหุ้นรายตัว กรองตามชื่อหุ้นได้", go: "เข้าดูงบ ›" },
+  { key: "basics", href: "basics.html", on: true, hidden: !SITE.basics, badge: "Coming Soon", title: "ความรู้พื้นฐาน", desc: "ความรู้เริ่มต้นสำหรับมือใหม่ อ่านเข้าใจง่าย", go: "ดูหน้าความรู้พื้นฐาน ›" },
   { key: "etf", href: "etf.html", on: true, hidden: !SITE.etf, badge: "Coming Soon", title: "ETF", desc: "รวมข้อมูลและบทวิเคราะห์ ETF", go: "ดูหน้า ETF ›" }
 ];
 document.getElementById("cards").innerHTML = PAGES.filter(function (p) { return !p.hidden; }).map(function (p) {

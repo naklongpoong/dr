@@ -3,6 +3,7 @@ window.SITE = {
   articles: true,   // false = ซ่อนหน้าบทความจากเมนูและหน้าปก
   news: true,       // false = ซ่อนหน้าข่าวจากเมนูและหน้าปก
   earnings: true,   // false = ซ่อนหน้าพรีวิวงบ/งบหุ้นรายตัวจากเมนูและหน้าปก
+  basics: true,     // แท็บ ความรู้พื้นฐาน (ตอนนี้เป็นหน้า Coming Soon) false = ซ่อน
   etf: true,        // แท็บ ETF (ตอนนี้เป็นหน้า Coming Soon) false = ซ่อน
   newHours: 48,     // โพสต์ที่ใหม่กว่านี้ (ชั่วโมง) จะมีป้าย NEW
   listHours: 24,    // หน้าข่าวโหลดเฉพาะโพสต์ย้อนหลังกี่ชั่วโมง (เก่ากว่านั้นกดปุ่ม "โหลดเพิ่ม")
@@ -66,6 +67,7 @@ window.buildNav = function (current) {
   if (SITE.earnings) items.push(["earnings", "earnings.html", "งบ"]);
   items.push(["feed", "feed.html", "ฟีดของฉัน"]);
   if (SITE.articles) items.push(["legend", "articles.html?type=legend", "Legends"]);
+  if (SITE.basics) items.push(["basics", "basics.html", "ความรู้พื้นฐาน"]);
   if (SITE.etf) items.push(["etf", "etf.html", "ETF"]);
   el.innerHTML = items.map(function (i) {
     return '<a href="' + i[1] + '"' + (i[0] === current ? ' aria-current="page"' : "") + ">" + i[2] + "</a>";
