@@ -25,8 +25,8 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610150720"></script>
-<script src="gate.js?v=202610150720"></script>
+<script src="site.js?v=202610150723"></script>
+<script src="gate.js?v=202610150723"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -112,6 +112,8 @@ h1 { font-size: clamp(2.2rem, 8vw, 3.4rem); font-weight: 700; line-height: 1.15;
 .cpi-box { background: var(--accent-soft); border-radius: 14px; padding: 10px 12px 9px; text-align: center; }
 .cpi-box .cpi-l { display: block; font-size: .72rem; color: var(--muted); line-height: 1.3; min-height: 2.1em; }
 .cpi-box b { display: block; font-size: 2rem; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.cpi-mom { margin-top: 2px; font-size: .95rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cpi-mom small { display: block; font-size: .7rem; font-weight: 400; color: var(--muted); }
 .cpi-box p { margin: 6px 0 0; font-size: .74rem; white-space: nowrap; color: var(--muted); }
 .cpi-chip { display: inline-block; white-space: nowrap; margin-top: 2px; font-size: .72rem; font-weight: 600; padding: 1px 10px; border-radius: 999px; color: var(--muted); background: var(--surface); }
 .cpi-chip.hot { color: #b42318; background: rgba(217,45,32,.12); } .cpi-chip.cool { color: #067647; background: rgba(18,183,106,.14); }
@@ -180,8 +182,8 @@ a.card:hover .go { text-decoration: underline; }
   <section class="cpi" id="cpi" hidden aria-label="เงินเฟ้อสหรัฐ CPI ล่าสุด">
     <div class="cpi-head"><span class="cpi-t">เงินเฟ้อสหรัฐ (CPI)</span><span class="cpi-m" id="cpiMonth"></span></div>
     <div class="cpi-grid">
-      <div class="cpi-box"><span class="cpi-l">ทั่วไป<br>&nbsp;</span><b id="cH"></b><span class="cpi-chip" id="cHc"></span><p id="cHs"></p></div>
-      <div class="cpi-box"><span class="cpi-l">Core<br>ไม่รวมอาหาร-พลังงาน</span><b id="cC"></b><span class="cpi-chip" id="cCc"></span><p id="cCs"></p></div>
+      <div class="cpi-box"><span class="cpi-l">ทั่วไป<br>&nbsp;</span><b id="cH"></b><div class="cpi-mom" id="cHm"></div><span class="cpi-chip" id="cHc"></span><p id="cHs"></p></div>
+      <div class="cpi-box"><span class="cpi-l">Core<br>ไม่รวมอาหาร-พลังงาน</span><b id="cC"></b><div class="cpi-mom" id="cCm"></div><span class="cpi-chip" id="cCc"></span><p id="cCs"></p></div>
     </div>
     <p class="cpi-note" id="cpiNote" hidden></p>
     <p class="cpi-src" id="cpiSrc"></p>
@@ -261,14 +263,16 @@ if (window.NLP && NLP.ready) NLP.ready.then(function (N) {
   var c = window.CPI_LATEST, box = document.getElementById("cpi"); if (!c || !box) return;
   if (c.hideAfter && Date.now() >= Date.parse(c.hideAfter)) return;
   function pc(v) { return (+v).toFixed(1) + "%"; }
-  function fill(big, chip, sub, d) {
+  function sg(v) { return (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(1) + "%"; }
+  function fill(big, chip, sub, d, mom) {
     document.getElementById(big).textContent = pc(d.yoy);
+    document.getElementById(mom).innerHTML = "รายเดือน " + sg(d.mom) + (d.expMom != null ? "<small>คาด " + sg(d.expMom) + "</small>" : "<small>&nbsp;</small>");
     var el = document.getElementById(chip), diff = Math.round((d.yoy - d.exp) * 10);
     el.className = "cpi-chip" + (diff > 0 ? " hot" : diff < 0 ? " cool" : "");
     el.textContent = diff > 0 ? "สูงกว่าคาด" : diff < 0 ? "ต่ำกว่าคาด" : "ตรงคาด";
     document.getElementById(sub).textContent = "คาด " + pc(d.exp) + " · ก่อนหน้า " + pc(d.prev);
   }
-  fill("cH", "cHc", "cHs", c.headline); fill("cC", "cCc", "cCs", c.core);
+  fill("cH", "cHc", "cHs", c.headline, "cHm"); fill("cC", "cCc", "cCs", c.core, "cCm");
   document.getElementById("cpiMonth").textContent = c.month + " · เทียบปีก่อน";
   if (c.note) { var n = document.getElementById("cpiNote"); n.textContent = c.note; n.hidden = false; }
   var rel = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short" }).format(new Date(c.release + "T12:00:00+07:00"));
