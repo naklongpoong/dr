@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610151657"></script>
-<script src="gate.js?v=202610151657"></script>
+<script src="site.js?v=202610151703"></script>
+<script src="gate.js?v=202610151703"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -194,6 +194,58 @@ h2 { font-size: 1.2rem; font-weight: 700; margin: 0; padding-left: 10px; border-
 .nimgs.ph { min-height: 120px; border-radius: 8px; background: var(--bg); border: 1px dashed var(--line); }
 .empty { padding: 24px 16px; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; }
 .empty p { margin: 0 0 8px; }
+/* ภาพรวม 12 เดือน */
+.vrow { margin: 14px 0 0; } .vrow + .tl-tools { margin-top: 10px; }
+.vseg { display: inline-flex; padding: 3px; gap: 2px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; }
+.vseg button { font: inherit; font-size: .88rem; cursor: pointer; border: 0; background: transparent; color: var(--ink); padding: 3px 14px; border-radius: 999px; }
+.vseg button[aria-pressed="true"] { background: var(--navy); color: #fff; font-weight: 600; }
+:root[data-theme="dark"] .vseg button[aria-pressed="true"] { background: var(--gold); color: var(--gold-ink); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .vseg button[aria-pressed="true"] { background: var(--gold); color: var(--gold-ink); } }
+.vseg button:focus-visible, .dg-bar:focus-visible, .dg-hl:focus-visible, .mr-h:focus-visible, .mon summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dg-strip { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; align-items: end; padding: 12px 10px 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.dg-bar { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; padding: 0; font: inherit; color: var(--muted); background: none; border: 0; cursor: pointer; }
+.dg-bar[disabled] { cursor: default; }
+.dg-bar .n { height: 1em; font-size: .72rem; line-height: 1; font-variant-numeric: tabular-nums; color: var(--ink); }
+.dg-bar .slot { display: flex; align-items: flex-end; justify-content: center; width: 100%; height: 46px; }
+.dg-bar .stk { display: flex; flex-direction: column-reverse; width: 100%; max-width: 22px; border-radius: 4px; overflow: hidden; }
+.dg-bar .stk i { display: block; min-height: 3px; }
+.dg-bar .stk.e { height: 2px; background: var(--line); }
+.dg-bar:not([disabled]):hover .stk { filter: brightness(1.15); }
+.dg-bar .m { font-size: .7rem; line-height: 1.2; white-space: nowrap; }
+.dg-bar .y { font-size: .62rem; line-height: 1; opacity: .75; height: 1em; }
+.dg-leg { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 6px 4px 0; font-size: .78rem; color: var(--muted); }
+.dg-leg i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.c-news { background: var(--accent); } .c-earn { background: #2fbf7a; } .c-art { background: #8a63e0; }
+.dg-hl-box { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-top: 16px; }
+.dg-hl { text-align: left; font: inherit; color: var(--ink); cursor: pointer; padding: 10px 12px 11px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 12px; }
+.dg-hl[data-k="result"] { border-left-color: #2fbf7a; } .dg-hl[data-k="preview"] { border-left-color: var(--gold); } .dg-hl[data-k="art"] { border-left-color: #8a63e0; }
+.dg-hl:hover { background: var(--accent-soft); }
+.dg-hl small { display: block; font-size: .76rem; color: var(--muted); }
+.dg-hl small b { color: var(--ink); font-weight: 600; }
+.dg-hl span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-top: 3px; font-size: .94rem; line-height: 1.45; }
+.mons { margin-top: 18px; }
+.mon { border-top: 1px solid var(--line); }
+.mon summary { list-style: none; cursor: pointer; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; padding: 12px 2px; }
+.mon summary::-webkit-details-marker { display: none; }
+.mon summary::before { content: "▸"; color: var(--muted); font-size: .85rem; transition: transform .15s; }
+.mon[open] summary::before { transform: rotate(90deg); }
+.mon summary b { font-size: 1.03rem; }
+.mon .mc { font-size: .84rem; color: var(--muted); }
+.mrows { list-style: none; margin: 0; padding: 0 0 10px; }
+.mr-h { display: flex; align-items: baseline; gap: 8px; width: 100%; text-align: left; font: inherit; color: var(--ink); background: none; border: 0; border-radius: 8px; padding: 7px 4px; cursor: pointer; }
+.mr-h:hover { background: var(--accent-soft); }
+.mr-d { flex: none; width: 3.7em; font-size: .82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.mr-h .tag { flex: none; }
+.mr-t { flex: 1; min-width: 0; font-size: .95rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.mrow.open > .mr-h .mr-t { display: block; -webkit-line-clamp: unset; }
+.mr-b { padding: 4px 6px 12px 6px; }
+.mrow .ev { padding: 0 0 4px; }
+.mrow .ev::before { display: none; }
+.mrow.flash > .mr-h { animation: dgflash 2.4s ease-out; }
+@keyframes dgflash { from { background: var(--accent-soft); box-shadow: 0 0 0 2px var(--gold); } to { background: transparent; box-shadow: 0 0 0 2px transparent; } }
+.dg-note { margin: 14px 2px 0; font-size: .82rem; color: var(--muted); }
+.dg-more { display: block; margin: 8px 0 0 28px; }
+@media (max-width: 560px) { .dg-strip { padding: 10px 6px 6px; gap: 2px; } .dg-bar .m { font-size: .64rem; } .mr-d { width: 3.3em; } .mr-h { flex-wrap: wrap; } .mr-t { flex-basis: 100%; } .mr-d { width: auto; } }
 .tl-foot { margin: 6px 0 0 28px; font-size: .9rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 14px; }
 .sk { height: 78px; margin: 0 0 14px 28px; border-radius: 10px; background: linear-gradient(90deg, var(--line) 25%, var(--bg) 50%, var(--line) 75%); background-size: 200% 100%; animation: sh 1.4s linear infinite; }
 
@@ -329,12 +381,15 @@ h2 { font-size: 1.2rem; font-weight: 700; margin: 0; padding-left: 10px; border-
           <h2 id="tlTitle">ไทม์ไลน์</h2>
           <p id="summary"></p>
         </div>
+        <div class="vrow"><div class="vseg" role="group" aria-label="มุมมองไทม์ไลน์"><button type="button" data-v="sum" aria-pressed="true">ภาพรวม 12 เดือน</button><button type="button" data-v="all" aria-pressed="false">รายการเต็ม</button></div></div>
         <div class="tl-tools">
           <div id="chips" role="group" aria-label="กรองประเภทโพสต์" style="display:contents"></div>
           <input id="tlq" type="search" placeholder="ค้นในโพสต์ของหุ้นตัวนี้" aria-label="ค้นในโพสต์ของหุ้นตัวนี้" autocomplete="off">
         </div>
         <div id="tlSkel"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
+        <div id="digest" hidden></div>
         <ol class="rail" id="rail" hidden></ol>
+        <button class="linkbtn dg-more" id="tlMore" type="button" hidden></button>
         <div class="empty" id="tlEmpty" hidden></div>
         <p class="tl-foot" id="tlFoot" hidden></p>
       </section>
@@ -371,7 +426,7 @@ h2 { font-size: 1.2rem; font-weight: 700; margin: 0; padding-left: 10px; border-
 <div id="toast" role="status" aria-live="polite"></div>
 <script>
 const TK_OK = /^[A-Z0-9.\-]{1,12}$/;
-const LIST_N = 8;
+const HIST_N = 60, SHOW_N = 24, MONTHS = 12;   // ดึงต่อประเภทไม่เกิน HIST_N โพสต์ (กรองเหลือ 12 เดือนในเครื่อง) มุมมอง "ทั้งหมด" โชว์ทีละ SHOW_N
 const CACHE_MIN = window.SITE && SITE.cacheMinutes != null ? SITE.cacheMinutes : 3;
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -392,6 +447,7 @@ const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v == n
 const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const favs = () => board.watch;
 const recents = () => lsGet("nlp_recent", []).filter(t => TK_OK.test(t));
+let view = lsGet("nlp_tlview", "sum") === "all" ? "all" : "sum", railMax = SHOW_N;
 let toastT = null;
 function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 1900); }
 function ago(t) {
@@ -412,13 +468,13 @@ async function byTicker(col) {
   const one = async tk => {
     const base = [F.collection(NLP.db, col), F.where("tickers", "array-contains", tk)];
     let s;
-    try { s = await F.getDocs(F.query(...base, F.orderBy("createdAt", "desc"), F.limit(LIST_N))); }
+    try { s = await F.getDocs(F.query(...base, F.orderBy("createdAt", "desc"), F.limit(HIST_N))); }
     catch (e) { if (e && e.code === "permission-denied") throw e; s = await F.getDocs(F.query(...base, F.limit(50))); }
     return docRows(s);
   };
   const seen = new Set(), rows = [];
   (await Promise.all(GROUP().map(one))).flat().forEach(r => { if (!seen.has(r.id)) { seen.add(r.id); rows.push(r); } });
-  return rows.sort(byNew).slice(0, LIST_N);
+  return rows.sort(byNew).slice(0, HIST_N);
 }
 const soft = p => p.then(s => (s.exists() ? s.data() : null)).catch(() => null);   // ข้อมูลเสริม ถ้าอ่านไม่ได้ข้ามไปเฉยๆ
 function findDR(raw) {   // content/dr: @id|ชื่อกลุ่ม ขึ้นกลุ่มใหม่ / ชื่อย่อ|ประเทศ|ชื่อบริษัท|รหัส DR,รหัส DR
@@ -440,7 +496,7 @@ async function load() {
     soft(F.getDoc(F.doc(NLP.db, "content", "picks"))),
     soft(F.getDoc(F.doc(NLP.db, "content", "adminPicks")))
   ]);
-  return { v: 3, news, earnings, articles, dr: dr ? findDR(dr.raw) : [], picks: inPicks(pk), apicks: inPicks(ap) };
+  return { v: 4, news, earnings, articles, dr: dr ? findDR(dr.raw) : [], picks: inPicks(pk), apicks: inPicks(ap) };
 }
 
 // ---- ป้ายพลิกชื่อหุ้น ----
@@ -591,17 +647,77 @@ function matches(e) {
   return [p.text, p.title, p.summary, p.period, (p.tickers || []).join(" ")].join(" ").toLowerCase().includes(query);
 }
 const chip = t => `<button class="ntk" type="button" data-tkmenu="${esc(t)}" aria-haspopup="menu" aria-expanded="false" title="กดเพื่อเลือกดู ${esc(t)}">${esc(t)}</button>`;
-function evHtml(e) {
+function evInner(e) {
   const p = e.p, k = e.k, others = (p.tickers || []).filter(x => !GROUP().includes(x));
   const tag = k === "news" ? '<span class="tag">ข่าว</span>' : k === "preview" ? '<span class="tag preview">พรีวิวงบ</span>' : k === "result" ? '<span class="tag result">งบ</span>' : `<span class="tag art">${p.type === "analysis" ? "วิเคราะห์" : "บทความ"}</span>`;
   const when = `<div class="ev-when"><b>${esc(e.t ? dateTh(e.t) : (p.date || ""))}</b>${tag}${p.period ? `<span>${esc(p.period)}</span>` : ""}${e.t ? `<span>${esc(ago(e.t))}</span>` : ""}${newPill(p.createdAt)}</div>`;
-  if (k === "art") return `<li class="ev" data-k="art">${when}<h3 class="atitle"><a href="articles.html?id=${q(p.id)}">${esc(p.title)}</a></h3>${p.summary ? `<p class="asum">${esc(p.summary)}</p>` : ""}</li>`;
+  if (k === "art") return `${when}<h3 class="atitle"><a href="articles.html?id=${q(p.id)}">${esc(p.title)}</a></h3>${p.summary ? `<p class="asum">${esc(p.summary)}</p>` : ""}`;
   const col = k === "news" ? "news" : "earnings";
-  return `<li class="ev" data-k="${k}">${when}
+  return `${when}
     <div class="ptext">${linkify(esc(p.text))}</div>
     <button class="linkbtn" type="button" data-read hidden>อ่านต่อ</button>
     ${p.hasImages ? `<div class="nimgs ph" data-imgs="${col}/${esc(p.id)}"></div>` : ""}
-    <div class="pfoot">${others.map(chip).join("")}${safeUrl(p.link) ? `<a href="${esc(safeUrl(p.link))}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ</a>` : ""}<button class="linkbtn" type="button" data-copytext>คัดลอกข้อความ</button></div></li>`;
+    <div class="pfoot">${others.map(chip).join("")}${safeUrl(p.link) ? `<a href="${esc(safeUrl(p.link))}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ</a>` : ""}<button class="linkbtn" type="button" data-copytext>คัดลอกข้อความ</button></div>`;
+}
+const evHtml = e => `<li class="ev" data-k="${e.k}">${evInner(e)}</li>`;
+const mkey = t => { const d = new Date(t); return d.getFullYear() * 12 + d.getMonth(); };
+const inWin = all => { const from = mkey(Date.now()) - (MONTHS - 1); return all.filter(e => e.t && mkey(e.t) >= from); };
+const evKey = e => (e.k === "news" ? "n" : e.k === "art" ? "a" : "e") + ":" + e.p.id;
+const fmtD = (t, o) => new Date(t).toLocaleDateString("th-TH", o);
+function headline(e) {   // หัวข้อสั้นของโพสต์: บรรทัดแรกที่ไม่ใช่ลิงก์ล้วน ตัดที่ราว 110 ตัวอักษร
+  const p = e.p; if (e.k === "art") return p.title || "";
+  const raw = String(p.text || "").replace(/https?:\/\/\S+/g, "").trim();
+  const line = raw.split(/\n+/).map(x => x.trim()).find(x => x.length > 3) || raw || String(p.text || "");
+  return line.length > 110 ? line.slice(0, 108).trim() + "…" : line;
+}
+const tagOf = e => e.k === "news" ? '<span class="tag">ข่าว</span>' : e.k === "preview" ? '<span class="tag preview">พรีวิวงบ</span>' : e.k === "result" ? '<span class="tag result">งบ</span>' : `<span class="tag art">${e.p.type === "analysis" ? "วิเคราะห์" : "บทความ"}</span>`;
+let evMap = {};
+function digestHtml(list) {
+  const win = inWin(list), cur = mkey(Date.now()), from = cur - (MONTHS - 1);
+  evMap = {};
+  const buckets = Array.from({ length: MONTHS }, (_, i) => ({ i, key: from + i, news: 0, earn: 0, art: 0, items: [] }));
+  win.forEach(e => { const b = buckets[mkey(e.t) - from]; const g = group(e.k); b[g]++; b.items.push(e); evMap[evKey(e)] = e; });
+  const max = Math.max(1, ...buckets.map(b => b.news + b.earn + b.art));
+  const mDate = key => new Date(Math.floor(key / 12), key % 12, 1);
+  const strip = buckets.map(b => {
+    const tot = b.news + b.earn + b.art, d = mDate(b.key), lbl = fmtD(d, { month: "long", year: "numeric" });
+    const yr = (b.i === 0 || d.getMonth() === 0) ? new Intl.DateTimeFormat("th-TH", { year: "2-digit" }).format(d) : "";
+    const seg = (n, c) => n ? `<i class="${c}" style="flex:${n} 0 0"></i>` : "";
+    const stk = tot ? `<span class="stk" style="height:${Math.max(6, Math.round(tot / max * 46))}px">${seg(b.art, "c-art")}${seg(b.earn, "c-earn")}${seg(b.news, "c-news")}</span>` : '<span class="stk e"></span>';
+    const aria = `${lbl}: ข่าว ${b.news} งบ ${b.earn} บทความ ${b.art}`;
+    return `<button class="dg-bar" type="button" ${tot ? `data-mon="${b.i}"` : "disabled"} aria-label="${esc(aria)}" title="${esc(aria)}"><span class="n">${tot || ""}</span><span class="slot">${stk}</span><span class="m">${esc(fmtD(d, { month: "short" }))}</span><span class="y">${esc(yr)}</span></button>`;
+  }).join("");
+  // ไฮไลต์: ข่าวล่าสุด / งบล่าสุด (หรือพรีวิวงบที่ใหม่กว่า) / บทความล่าสุด
+  const first = f => win.find(f);   // win เรียงใหม่ไปเก่าอยู่แล้ว
+  const hn = first(e => e.k === "news"), hr = first(e => e.k === "result"), hp = first(e => e.k === "preview"), ha = first(e => e.k === "art");
+  const earnE = hp && (!hr || hp.t > hr.t) ? hp : hr;
+  const hls = [[hn, "ข่าวล่าสุด"], [earnE, earnE && earnE.k === "preview" ? "พรีวิวงบล่าสุด" : "งบล่าสุด"], [ha, "บทความล่าสุด"]].filter(x => x[0]).map(([e, label]) =>
+    `<button class="dg-hl" type="button" data-k="${e.k}" data-goto="${esc(evKey(e))}"><small><b>${label}</b> · ${esc(fmtD(e.t, { day: "numeric", month: "short" }))}${e.p.period ? " · " + esc(e.p.period) : ""}</small><span>${esc(headline(e))}</span></button>`).join("");
+  const months = buckets.filter(b => b.items.length).reverse();
+  const open = query || filter !== "all" ? months.length : 2;   // ค้นหา/กรองอยู่ ให้เปิดทุกเดือนที่มีผล ไม่งั้นเปิดแค่ 2 เดือนล่าสุด
+  const mons = months.map((b, idx) => {
+    const d = mDate(b.key), cnt = [b.news ? `ข่าว ${b.news}` : "", b.earn ? `งบ ${b.earn}` : "", b.art ? `บทความ ${b.art}` : ""].filter(Boolean).join(" · ");
+    const rows = b.items.map(e => `<li class="mrow" data-id="${esc(evKey(e))}" data-k="${e.k}"><button class="mr-h" type="button" aria-expanded="false"><span class="mr-d">${esc(fmtD(e.t, { day: "numeric", month: "short" }))}</span>${tagOf(e)}${newPill(e.p.createdAt)}<span class="mr-t">${esc(headline(e))}</span></button><div class="mr-b" hidden></div></li>`).join("");
+    return `<details class="mon" id="mon-${b.i}"${idx < open ? " open" : ""}><summary><b>${esc(fmtD(d, { month: "long", year: "numeric" }))}</b><span class="mc">${cnt}</span></summary><ul class="mrows">${rows}</ul></details>`;
+  }).join("");
+  const older = list.length - win.length;
+  const capped = [snap.news, snap.earnings, snap.articles].some(a => (a || []).length >= HIST_N && a.length && ms(a[a.length - 1].createdAt) >= mDate(from).getTime());
+  const note = (capped ? `ดึงมาแสดงล่าสุดไม่เกิน ${HIST_N} โพสต์ต่อประเภท โพสต์ที่เก่ากว่านั้นดูได้ที่หน้าข่าว งบ และบทความ` : "") + (older > 0 ? `${capped ? " · " : ""}มีโพสต์เก่ากว่า ${MONTHS} เดือนอีก ${older} รายการ ดูได้ในมุมมอง "รายการเต็ม"` : "");
+  if (!win.length) return `<div class="empty"><p>ไม่มีโพสต์ใน ${MONTHS} เดือนที่ผ่านมา${query || filter !== "all" ? "ตามตัวกรองนี้" : ""}</p>${older > 0 ? `<button class="linkbtn" type="button" data-v="all">ดูรายการเต็ม (${older})</button>` : ""}</div>`;
+  return `<div class="dg-strip" role="group" aria-label="จำนวนโพสต์รายเดือน ${MONTHS} เดือนที่ผ่านมา">${strip}</div>
+    <div class="dg-leg"><span><i class="c-news"></i>ข่าว</span><span><i class="c-earn"></i>งบและพรีวิว</span><span><i class="c-art"></i>บทความ</span></div>
+    ${hls ? `<div class="dg-hl-box">${hls}</div>` : ""}
+    <div class="mons">${mons}</div>${note ? `<p class="dg-note">${esc(note)}</p>` : ""}`;
+}
+function openRow(id, scroll) {
+  const li = document.querySelector(`.mrow[data-id="${CSS.escape(id)}"]`); if (!li) return;
+  const det = li.closest("details"); if (det) det.open = true;
+  const h = li.querySelector(".mr-h"), b = li.querySelector(".mr-b");
+  if (li.classList.contains("open") === false) {
+    if (!b.firstChild) { const e = evMap[id]; if (e) b.innerHTML = `<div class="ev" data-k="${e.k}">${evInner(e)}</div>`; }
+    b.hidden = false; li.classList.add("open"); h.setAttribute("aria-expanded", "true"); checkClamp(); hydrateImgs();
+  }
+  if (scroll) { li.classList.remove("flash"); void li.offsetWidth; li.classList.add("flash"); li.scrollIntoView({ block: "center", behavior: REDUCE ? "auto" : "smooth" }); }
 }
 function renderChips(all) {
   const n = { all: all.length, news: 0, earn: 0, art: 0 };
@@ -609,20 +725,33 @@ function renderChips(all) {
   $("chips").innerHTML = KINDS.map(([k, v]) => `<button class="chip" type="button" data-f="${k}" aria-pressed="${filter === k}">${v}<small>${n[k]}</small></button>`).join("");
 }
 function renderSummary(all) {
-  const s = snap, parts = [];
-  const cnt = (n, unit, label) => n ? parts.push(n >= LIST_N ? `${label}ล่าสุด ${n} ${unit}` : `${label} ${n} ${unit}`) : 0;
-  cnt((s.news || []).length, "โพสต์", "ข่าว"); cnt((s.earnings || []).length, "โพสต์", "งบและพรีวิวงบ"); cnt((s.articles || []).length, "ชิ้น", "บทความ");
-  $("summary").textContent = parts.length ? `เว็บนี้มี ${parts.join(" และ ")} ล่าสุดเมื่อ ${ago(all[0].t || Date.now())}` : `เว็บนี้ยังไม่มีข่าว งบ หรือบทความของ ${T}`;
+  const win = inWin(all), s = snap, c = { news: 0, earn: 0, art: 0 };
+  win.forEach(e => { c[group(e.k)]++; });
+  const parts = [c.news ? `ข่าว ${c.news} โพสต์` : "", c.earn ? `งบและพรีวิวงบ ${c.earn} โพสต์` : "", c.art ? `บทความ ${c.art} ชิ้น` : ""].filter(Boolean);
+  $("summary").textContent = !all.length ? `เว็บนี้ยังไม่มีข่าว งบ หรือบทความของ ${T}` :
+    parts.length ? `ใน ${MONTHS} เดือนที่ผ่านมามี ${parts.join(" · ")} ล่าสุดเมื่อ ${ago(all[0].t || Date.now())}` : `ไม่มีโพสต์ใน ${MONTHS} เดือนที่ผ่านมา ล่าสุดเมื่อ ${ago(all[0].t || Date.now())}`;
 }
 function renderTimeline() {
-  const all = events(), list = all.filter(matches);
+  const all = events(), list = all.filter(matches), sum = view === "sum";
   $("tlTitle").textContent = "ไทม์ไลน์ของ " + T;
-  renderSummary(all); renderChips(all);
+  document.querySelectorAll(".vseg [data-v]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === view)));
+  renderSummary(all); renderChips(sum ? inWin(all) : all);
   $("tlSkel").hidden = true;
-  $("rail").hidden = !list.length;
-  $("rail").innerHTML = list.map(evHtml).join("");
-  const em = $("tlEmpty"); em.hidden = list.length > 0;
-  if (!list.length) em.innerHTML = all.length ? `<p>ไม่พบโพสต์ที่ตรงกับตัวกรอง</p><button class="linkbtn" type="button" data-clear>ล้างตัวกรองและคำค้น</button>` : `<p>ยังไม่มีข่าว งบ หรือบทความของ ${esc(T)} บนเว็บนี้</p><a href="news.html">ไปดูข่าวทั้งหมด</a>`;
+  const em = $("tlEmpty"), more = $("tlMore");
+  if (sum) {
+    $("rail").hidden = true; more.hidden = true;
+    const dg = $("digest"); dg.hidden = !all.length; em.hidden = all.length > 0;
+    if (all.length) dg.innerHTML = digestHtml(list);
+    if (!all.length) em.innerHTML = `<p>ยังไม่มีข่าว งบ หรือบทความของ ${esc(T)} บนเว็บนี้</p>`;
+  } else {
+    $("digest").hidden = true;
+    const shown = list.slice(0, railMax);
+    $("rail").hidden = !list.length;
+    $("rail").innerHTML = shown.map(evHtml).join("");
+    more.hidden = list.length <= railMax; more.textContent = `แสดงเพิ่มอีก ${Math.min(SHOW_N, list.length - railMax)} จาก ${list.length - railMax} โพสต์ที่เหลือ`;
+    em.hidden = list.length > 0;
+    if (!list.length) em.innerHTML = all.length ? `<p>ไม่พบโพสต์ที่ตรงกับตัวกรอง</p><button class="linkbtn" type="button" data-clear>ล้างตัวกรองและคำค้น</button>` : `<p>ยังไม่มีข่าว งบ หรือบทความของ ${esc(T)} บนเว็บนี้</p>`;
+  }
   const ft = $("tlFoot"); ft.hidden = !all.length;
   ft.innerHTML = `<span>ดูทั้งหมดของ ${esc(T)}</span><a href="news.html?ticker=${q(T)}">ข่าว</a><a href="earnings.html?ticker=${q(T)}">งบ</a><a href="articles.html?ticker=${q(T)}">บทความ</a>`;
   checkClamp(); hydrateImgs();
@@ -738,8 +867,17 @@ document.addEventListener("click", e => {
   if ((b = t.closest("[data-typ]"))) { chart.ty = b.dataset.typ; renderChart(); return; }
   if (t.closest("#fsX")) { $("fs").hidden = true; return; }
   if (t.closest("#btnFull")) { openFs(); return; }
-  if ((b = t.closest("[data-f]"))) { filter = b.dataset.f; renderTimeline(); return; }
-  if (t.closest("[data-clear]")) { filter = "all"; query = ""; $("tlq").value = ""; renderTimeline(); return; }
+  if ((b = t.closest("[data-v]"))) { view = b.dataset.v === "all" ? "all" : "sum"; railMax = SHOW_N; lsSet("nlp_tlview", view); renderTimeline(); return; }
+  if (t.closest("#tlMore")) { railMax += SHOW_N; renderTimeline(); return; }
+  if ((b = t.closest(".mr-h"))) {
+    const li = b.closest(".mrow"), id = li.dataset.id;
+    if (li.classList.contains("open")) { li.classList.remove("open"); li.querySelector(".mr-b").hidden = true; b.setAttribute("aria-expanded", "false"); } else openRow(id, false);
+    return;
+  }
+  if ((b = t.closest("[data-goto]"))) { openRow(b.dataset.goto, true); return; }
+  if ((b = t.closest("[data-mon]"))) { const d = $("mon-" + b.dataset.mon); if (d) { d.open = true; d.scrollIntoView({ block: "start", behavior: REDUCE ? "auto" : "smooth" }); } return; }
+  if ((b = t.closest("[data-f]"))) { filter = b.dataset.f; railMax = SHOW_N; renderTimeline(); return; }
+  if (t.closest("[data-clear]")) { filter = "all"; query = ""; railMax = SHOW_N; $("tlq").value = ""; renderTimeline(); return; }
   if ((b = t.closest("[data-read]"))) { const c = b.closest(".ev"); c.classList.toggle("open"); b.textContent = c.classList.contains("open") ? "ย่อ" : "อ่านต่อ"; return; }
   if (t.closest("#favBtn")) {
     const f = favs(), on = f.includes(T);
@@ -809,7 +947,7 @@ async function boot() {
   $("main").hidden = false; watchScroll();
   try {
     snap = window.cacheGet ? cacheGet("stock_" + T, CACHE_MIN) : null;
-    if (!snap || snap.v !== 3) { snap = await load(); if (window.cachePut) cachePut("stock_" + T, snap); }
+    if (!snap || snap.v !== 4) { snap = await load(); if (window.cachePut) cachePut("stock_" + T, snap); }
   } catch (err) {
     if (err && err.code === "permission-denied") return NLP.relock();
     $("tlSkel").hidden = true; $("tlEmpty").hidden = false;
