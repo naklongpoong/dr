@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610160549"></script>
-<script src="gate.js?v=202610160549"></script>
+<script src="site.js?v=202610160551"></script>
+<script src="gate.js?v=202610160551"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -487,7 +487,7 @@ function findDR(raw) {   // content/dr: @id|ชื่อกลุ่ม ขึ�
   });
   return out;
 }
-const inPicks = d => !!d && Array.isArray(d.tickers) && d.tickers.some(x => GROUP().includes(x));
+const inPicks = (d, def) => (!!d && Array.isArray(d.tickers) && d.tickers.some(x => GROUP().includes(x))) ? (String(d.title || "").trim() || def) : "";   // ชื่อชุดที่แอดมินตั้ง (หรือ "หุ้นสแกน 1/2") ถ้าหุ้นนี้อยู่ในชุด ไม่อยู่ = ว่าง
 async function load() {
   const F = NLP.F;
   const [news, earnings, articles, dr, pk, ap] = await Promise.all([
@@ -496,7 +496,7 @@ async function load() {
     soft(F.getDoc(F.doc(NLP.db, "content", "picks"))),
     soft(F.getDoc(F.doc(NLP.db, "content", "adminPicks")))
   ]);
-  return { v: 4, news, earnings, articles, dr: dr ? findDR(dr.raw) : [], picks: inPicks(pk), apicks: inPicks(ap) };
+  return { v: 5, news, earnings, articles, dr: dr ? findDR(dr.raw) : [], picks: inPicks(pk, "หุ้นสแกน 1"), apicks: inPicks(ap, "หุ้นสแกน 2") };
 }
 
 // ---- ป้ายพลิกชื่อหุ้น ----
@@ -759,7 +759,7 @@ function renderTimeline() {
 function renderRest() {
   const s = snap, dr = s.dr || [];
   const nm = dr[0] && dr[0].name, al = GROUP().length > 1 ? "รวมข้อมูล " + GROUP().join(" และ ") : "", nmt = [nm, al].filter(Boolean).join(" · "); $("tkName").hidden = !nmt; $("tkName").textContent = nmt;
-  $("badges").innerHTML = (s.apicks ? '<a class="badge gold" href="news.html">แอดมินแนะนำ</a>' : "") + (s.picks ? '<a class="badge gold" href="news.html">หุ้นน่าสนใจ</a>' : "") + (dr.length ? `<a class="badge" href="dr.html?q=${q(T)}">มี DR</a>` : "");
+  $("badges").innerHTML = (s.apicks ? `<a class="badge gold" href="news.html">${esc(s.apicks)}</a>` : "") + (s.picks ? `<a class="badge gold" href="news.html">${esc(s.picks)}</a>` : "") + (dr.length ? `<a class="badge" href="dr.html?q=${q(T)}">มี DR</a>` : "");
   $("secD").hidden = !dr.length;
   $("listD").innerHTML = dr.map(r => `<div class="drrow"><div class="drname">${esc(r.name)}</div>${r.group ? `<div class="drsec">${esc(r.group)}</div>` : ""}<div class="drcodes">${r.codes.map(c => `<a href="https://www.set.or.th/th/market/product/dr/quote/${q((r.tk || T) + c)}/price" target="_blank" rel="noopener noreferrer" title="ดู ${esc((r.tk || T) + c)} บน SET">${esc((r.tk || T) + c)} ↗</a>`).join("")}</div></div>`).join("");
 }
@@ -947,7 +947,7 @@ async function boot() {
   $("main").hidden = false; watchScroll();
   try {
     snap = window.cacheGet ? cacheGet("stock_" + T, CACHE_MIN) : null;
-    if (!snap || snap.v !== 4) { snap = await load(); if (window.cachePut) cachePut("stock_" + T, snap); }
+    if (!snap || snap.v !== 5) { snap = await load(); if (window.cachePut) cachePut("stock_" + T, snap); }
   } catch (err) {
     if (err && err.code === "permission-denied") return NLP.relock();
     $("tlSkel").hidden = true; $("tlEmpty").hidden = false;

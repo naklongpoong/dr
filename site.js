@@ -198,7 +198,7 @@ document.addEventListener("click", function (e) {
     if (b.getAttribute("data-dr") !== "0") it.push(item("dr.html?q=" + q, "ดู DR ของ " + esc(tk), "รวม DR ในตลาดหุ้นไทย"));
     it.push(item("https://finviz.com/quote.ashx?t=" + q, "ดูกราฟ " + esc(tk) + " บน Finviz ↗", "เปิดในแท็บใหม่", ' target="_blank" rel="noopener noreferrer"'));
     if (SITE.articles) it.push(item("articles.html?ticker=" + q, "อ่านบทความเกี่ยวกับ " + esc(tk), "บทความและบทวิเคราะห์", here("articles")));
-    if (SITE.news) it.push(item("news.html?ticker=" + q, "ดูข่าวของ " + esc(tk), "ข่าวและหุ้นน่าสนใจ", here("news")));
+    if (SITE.news) it.push(item("news.html?ticker=" + q, "ดูข่าวของ " + esc(tk), "ข่าวและหุ้นสแกน", here("news")));
     if (SITE.earnings) it.push(item("earnings.html?ticker=" + q, "ดูงบของ " + esc(tk), "พรีวิวงบและงบหุ้นรายตัว", here("earnings")));
     p.innerHTML = it.join("");
     p.style.visibility = "hidden"; p.hidden = false;

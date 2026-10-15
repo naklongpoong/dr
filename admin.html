@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>window.NLP_NO_GATE = true;</script>
-<script src="site.js?v=202610160549"></script>
-<script src="gate.js?v=202610160549"></script>
+<script src="site.js?v=202610160551"></script>
+<script src="gate.js?v=202610160551"></script>
 <style>
 :root {
   --navy: #0f1e46; --gold: #f5b301; --bg: #f2f5fb; --surface: #ffffff; --ink: #14213d; --muted: #5b6982;
@@ -105,7 +105,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <button class="tab" type="button" data-p="news" aria-pressed="true">ข่าว & งบ</button>
       <button class="tab" type="button" data-p="art" aria-pressed="false">บทความ</button>
       <button class="tab" type="button" data-p="dr" aria-pressed="false">ข้อมูล DR</button>
-      <button class="tab" type="button" data-p="picks" aria-pressed="false">หุ้นแนะนำ</button>
+      <button class="tab" type="button" data-p="picks" aria-pressed="false">หุ้นสแกน</button>
       <button class="tab" type="button" data-p="popup" aria-pressed="false">การ์ดเด้ง</button>
       <button class="tab" type="button" data-p="code" aria-pressed="false">รหัสสมาชิก</button>
     </div>
@@ -172,12 +172,12 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <button class="btn alt" id="dLoad" type="button">โหลดข้อมูลปัจจุบัน</button><button class="btn alt" id="dCheck" type="button">ตรวจสอบ</button><button class="btn" id="dSave" type="button">บันทึก</button>
     </section>
 
-    <!-- หุ้นแนะนำ (หุ้นน่าสนใจ + แอดมินแนะนำ) -->
+    <!-- หุ้นสแกน (ชุด 1 = content/picks, ชุด 2 = content/adminPicks) -->
     <section class="card" id="p-picks" hidden>
-      <h2>หุ้นแนะนำ</h2>
-      <div class="seg" role="group" aria-label="เลือกกล่อง"><button type="button" id="pKindA" aria-pressed="true">หุ้นน่าสนใจ</button><button type="button" id="pKindB" aria-pressed="false">แอดมินแนะนำ</button></div>
+      <h2>หุ้นสแกน</h2>
+      <div class="seg" role="group" aria-label="เลือกชุด"><button type="button" id="pKindA" aria-pressed="true">หุ้นสแกน 1</button><button type="button" id="pKindB" aria-pressed="false">หุ้นสแกน 2</button></div>
       <p class="help" id="pHelp">ขึ้นบนหน้าข่าวเป็นแถบชื่อหุ้น กดชื่อหุ้นจะขึ้นเมนูให้เลือก (DR / บทความ / ข่าว / งบ ตัวที่ไม่มี DR เมนู DR จะไม่ขึ้น) กด “ข่าว” เพื่อกรองข่าว กด ↗ เพื่อไปกราฟบน Finviz (Finviz มีเฉพาะหุ้นสหรัฐฯ ใช้สัญลักษณ์ตลาดสหรัฐฯ เช่น NVDA, BRK-B)</p>
-      <label for="pTitle">ชื่อส่วน</label><input id="pTitle" type="text" maxlength="100" placeholder="หุ้นน่าสนใจ" autocomplete="off">
+      <label for="pTitle">ชื่อส่วน (ตั้งเองได้ ขึ้นเป็นหัวข้อ/แท็บบนหน้าข่าวและป้ายในหน้าหุ้น ไม่ใส่จะใช้ "หุ้นสแกน 1" / "หุ้นสแกน 2")</label><input id="pTitle" type="text" maxlength="100" placeholder="หุ้นสแกน 1" autocomplete="off">
       <label for="pNote" id="pNoteLbl">ที่มา / วิธีกรอง (เอามาจากไหน กรองยังไง ไม่ใส่ก็ได้)</label>
       <textarea id="pNote" maxlength="800" style="min-height:80px" placeholder="เช่น คัดจากสกรีนเนอร์ Finviz ตามเงื่อนไข ... / มาจากบทความ ..."></textarea>
       <label for="pTickers">ชื่อหุ้น วางทีเดียวได้ คั่นด้วยเว้นวรรค คอมมา หรือขึ้นบรรทัดใหม่ (สูงสุด 100 ตัว)</label>
@@ -650,12 +650,12 @@ async function loadPopup() {
 }
 $("uLoad").onclick = loadPopup;
 
-// ---------- หุ้นแนะนำ (หุ้นน่าสนใจ = content/picks, แอดมินแนะนำ = content/adminPicks) ----------
+// ---------- หุ้นสแกน (ชุด 1 = content/picks, ชุด 2 = content/adminPicks) ----------
 const PICKS_MAX = 100;
 let pDoc = "picks";
 const P_KIND = {
-  picks: { title: "หุ้นน่าสนใจ", noteLbl: "ที่มา / วิธีกรอง (เอามาจากไหน กรองยังไง ไม่ใส่ก็ได้)", notePh: "เช่น คัดจากสกรีนเนอร์ Finviz ตามเงื่อนไข ... / มาจากบทความ ..." },
-  adminPicks: { title: "แอดมินแนะนำ", noteLbl: "หมายเหตุ (เหตุผลที่แนะนำ ไม่ใส่ก็ได้)", notePh: "เช่น ตัวที่แอดมินจับตาเป็นพิเศษช่วงนี้ ..." }
+  picks: { title: "หุ้นสแกน 1", noteLbl: "ที่มา / วิธีกรอง (เอามาจากไหน กรองยังไง ไม่ใส่ก็ได้)", notePh: "เช่น คัดจากสกรีนเนอร์ Finviz ตามเงื่อนไข ... / มาจากบทความ ..." },
+  adminPicks: { title: "หุ้นสแกน 2", noteLbl: "หมายเหตุ (ไม่ใส่ก็ได้)", notePh: "เช่น เงื่อนไขที่ใช้สแกน ..." }
 };
 function setPKind(k) {
   pDoc = k; $("pKindA").setAttribute("aria-pressed", k === "picks"); $("pKindB").setAttribute("aria-pressed", k === "adminPicks");

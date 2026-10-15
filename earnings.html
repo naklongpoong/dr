@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610160549"></script>
-<script src="gate.js?v=202610160549"></script>
+<script src="site.js?v=202610160551"></script>
+<script src="gate.js?v=202610160551"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -268,14 +268,14 @@ button.esym:focus-visible { outline: 2px solid var(--accent); outline-offset: 2p
   </div>
 
   <section class="sec" id="secP" hidden>
-    <div class="sec-h"><h2 id="pTitle">หุ้นน่าสนใจ</h2><small id="pUpd"></small></div>
+    <div class="sec-h"><h2 id="pTitle">หุ้นสแกน 1</h2><small id="pUpd"></small></div>
     <p class="p-note" id="pNote" hidden></p>
     <p class="p-legend">กดชื่อหุ้นเพื่อเลือกดู DR บทความ ข่าว งบ · “ข่าว” กรองข่าวในหน้านี้ · “กราฟ Finviz ↗” เปิดกราฟบนเว็บ Finviz</p>
     <div class="pchips" id="listP"></div>
   </section>
 
   <section class="sec" id="secA" hidden>
-    <div class="sec-h"><h2 id="aTitle">แอดมินแนะนำ</h2><small id="aUpd"></small></div>
+    <div class="sec-h"><h2 id="aTitle">หุ้นสแกน 2</h2><small id="aUpd"></small></div>
     <p class="p-note" id="aNote" hidden></p>
     <p class="p-legend" id="legendA" hidden>กดชื่อหุ้นเพื่อเลือกดู DR บทความ ข่าว งบ · “ข่าว” กรองข่าวในหน้านี้ · “กราฟ Finviz ↗” เปิดกราฟบนเว็บ Finviz</p>
     <div class="pchips" id="listA"></div>
@@ -537,7 +537,7 @@ function renderTickerBar(list) {
 }
 document.addEventListener("input", e => { if (e.target.id === "tbSearch") { tbQ = e.target.value; tbFill(); } });
 
-// ---- กล่องหุ้นน่าสนใจ / แอดมินแนะนำ: กดชื่อหุ้น -> ไปหน้า DR (ถ้าไม่มี DR กรองข่าวในหน้านี้แทน) ----
+// ---- กล่องหุ้นสแกน 1 / 2: กดชื่อหุ้น -> ไปหน้า DR (ถ้าไม่มี DR กรองข่าวในหน้านี้แทน) ----
 const pchip = (t, dr) => {
   const has = !dr || dr.has(t) || !!(window.TK_DR && TK_DR[t]);
   return `<span class="pchip"><button class="ptk ptk-b" type="button" data-tkmenu="${esc(t)}" data-dr="${has ? 1 : 0}" aria-haspopup="menu" aria-expanded="false" title="กดเพื่อเลือกดู ${esc(t)}">${esc(t)}</button><button class="pn" type="button" data-tk="${esc(t)}" aria-pressed="${state.ticker === t}" title="กรองข่าวของ ${esc(t)} ในหน้านี้">ข่าว</button><a class="fv" href="https://finviz.com/quote.ashx?t=${encodeURIComponent(t)}" target="_blank" rel="noopener noreferrer" aria-label="ดูกราฟ ${esc(t)} บน Finviz" title="กราฟ ${esc(t)} บน Finviz">กราฟ Finviz ↗</a></span>`;
@@ -569,12 +569,12 @@ function render() {
   $("active").hidden = !state.ticker;
   $("active").innerHTML = state.ticker ? `<span>กรองหุ้น <b>${esc(state.ticker)}</b></span><a href="stock.html?t=${encodeURIComponent(state.ticker)}" target="_blank" rel="noopener"><b>เปิด dashboard ↗</b></a><a href="dr.html?q=${encodeURIComponent(state.ticker)}">ดู DR ของ ${esc(state.ticker)} ›</a><a href="articles.html?ticker=${encodeURIComponent(state.ticker)}">อ่านบทความ ›</a>${PAGE === "news" ? `<a href="earnings.html?ticker=${encodeURIComponent(state.ticker)}">ดูงบของ ${esc(state.ticker)} ›</a>` : `<a href="news.html?ticker=${encodeURIComponent(state.ticker)}">ดูข่าวของ ${esc(state.ticker)} ›</a>`}<button class="linkbtn" type="button" data-tk="">ล้างตัวกรอง</button>` : "";
 
-  // หุ้นน่าสนใจ + แอดมินแนะนำ (แสดงในแท็บ "ทั้งหมด")
+  // หุ้นสแกน 1 + 2
   const pk = data.picks, ap = data.apicks;
   const showP = PAGE === "news" && !!(pk && pk.list.length), showA = PAGE === "news" && !!(ap && ap.list.length);
   $("secP").hidden = !showP; $("secA").hidden = !showA; $("legendA").hidden = !(showA && !showP);
-  if (showP) fillPicks("p", pk, "หุ้นน่าสนใจ");
-  if (showA) fillPicks("a", ap, "แอดมินแนะนำ");
+  if (showP) fillPicks("p", pk, "หุ้นสแกน 1");
+  if (showA) fillPicks("a", ap, "หุ้นสแกน 2");
 
   if (PAGE === "earnings") { earnSection("preview", V, "พรีวิวงบ"); earnSection("result", R, "งบหุ้นรายตัว"); }
   if (PAGE === "earnings") {   // แท็บ "ทั้งหมด": ปุ่มโหลดงบเก่าที่เก่ากว่า 24 ชั่วโมง (เดิมมีเฉพาะในแท็บพรีวิว/งบรายตัว)
