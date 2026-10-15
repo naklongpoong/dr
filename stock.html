@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610151703"></script>
-<script src="gate.js?v=202610151703"></script>
+<script src="site.js?v=202610151708"></script>
+<script src="gate.js?v=202610151708"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -426,7 +426,7 @@ h2 { font-size: 1.2rem; font-weight: 700; margin: 0; padding-left: 10px; border-
 <div id="toast" role="status" aria-live="polite"></div>
 <script>
 const TK_OK = /^[A-Z0-9.\-]{1,12}$/;
-const HIST_N = 60, SHOW_N = 24, MONTHS = 12;   // ดึงต่อประเภทไม่เกิน HIST_N โพสต์ (กรองเหลือ 12 เดือนในเครื่อง) มุมมอง "ทั้งหมด" โชว์ทีละ SHOW_N
+const HIST_N = 50, SHOW_N = 24, MONTHS = 12;   // HIST_N ต้องไม่เกิน 50 (กฎ Firestore: request.query.limit <= 50 ถ้าเกินจะ permission-denied แล้วถูกเด้งไปหน้าใส่รหัส) ดึงต่อประเภทไม่เกิน HIST_N โพสต์ (กรองเหลือ 12 เดือนในเครื่อง) มุมมอง "ทั้งหมด" โชว์ทีละ SHOW_N
 const CACHE_MIN = window.SITE && SITE.cacheMinutes != null ? SITE.cacheMinutes : 3;
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
