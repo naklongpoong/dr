@@ -67,14 +67,29 @@ window.buildNav = function (current) {
   if (SITE.news) items.push(["news", "news.html", "ข่าว"]);
   if (SITE.earnings) items.push(["earnings", "earnings.html", "งบ"]);
   items.push(["feed", "feed.html", "ฟีดของฉัน"]);
-  if (SITE.articles) items.push(["legend", "articles.html?type=legend", "Legends"]);
-  if (SITE.basics) items.push(["basics", "basics.html", "ความรู้พื้นฐาน"]);
-  if (SITE.etf) items.push(["etf", "etf.html", "ETF"]);
-  el.innerHTML = items.map(function (i) {
-    return '<a href="' + i[1] + '"' + (i[0] === current ? ' aria-current="page"' : "") + ">" + i[2] + "</a>";
-  }).join("") + '<button type="button" class="nav-search" data-search aria-label="ค้นหาทั้งเว็บ" title="ค้นหาทั้งเว็บ (Ctrl+K)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg> ค้นหา</button>';
+  var extra = [];   // เมนูรอง เก็บไว้หลังปุ่ม "เพิ่มเติม" ให้แถบเมนูไม่ยาวเกินบนมือถือ
+  if (SITE.articles) extra.push(["legend", "articles.html?type=legend", "Legends"]);
+  if (SITE.basics) extra.push(["basics", "basics.html", "ความรู้พื้นฐาน"]);
+  if (SITE.etf) extra.push(["etf", "etf.html", "ETF"]);
+  function link(i, cls) {
+    return '<a' + (cls ? ' class="' + cls + '"' : "") + ' href="' + i[1] + '"' + (i[0] === current ? ' aria-current="page"' : "") + ">" + i[2] + "</a>";
+  }
+  var cur = extra.filter(function (i) { return i[0] === current; })[0];   // หน้านี้อยู่ในเมนูรอง: ปุ่มจะโชว์ชื่อหน้านี้และเป็นสีทอง
+  el.innerHTML = items.map(function (i) { return link(i); }).join("") +
+    (extra.length ? '<button type="button" class="nav-more' + (cur ? " on" : "") + '" aria-expanded="false" aria-label="เมนูอื่นๆ">' + (cur ? cur[2] : "เพิ่มเติม") + ' ▾</button>' + extra.map(function (i) { return link(i, "nav-x"); }).join("") : "") +
+    '<button type="button" class="nav-search" data-search aria-label="ค้นหาทั้งเว็บ" title="ค้นหาทั้งเว็บ (Ctrl+K)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="nlp-t">ค้นหา</span></button>';
   if (window.nlpPopupBtn) window.nlpPopupBtn();
 };
+(function () {   // ปุ่ม "เพิ่มเติม" เปิด/ปิดเมนูรอง (กดที่อื่นหรือกด Esc เพื่อปิด)
+  function close() { var n = document.getElementById("nav"); if (!n) return; n.classList.remove("open"); var m = n.querySelector(".nav-more"); if (m) m.setAttribute("aria-expanded", "false"); }
+  document.addEventListener("click", function (e) {
+    var n = document.getElementById("nav"); if (!n || !e.target.closest) return;
+    var b = e.target.closest(".nav-more");
+    if (b) { var o = n.classList.toggle("open"); b.setAttribute("aria-expanded", o ? "true" : "false"); return; }
+    if (n.classList.contains("open") && !e.target.closest(".nav-x")) close();
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+})();
 
 // true ถ้าเวลาที่ให้มา (Firestore timestamp หรือ Date) อยู่ในช่วง newHours ชั่วโมงที่ผ่านมา
 window.isNew = function (ts) {
@@ -206,7 +221,7 @@ document.addEventListener("click", function (e) {
   var box = null, inp, out, data = null, loading = null, last = null, sel = -1, TK = /^[A-Z0-9.\-]{1,12}$/, meta = null, busy = false, PAGE_N = 50;
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   var css = document.createElement("style");
-  css.textContent = ".nav-search{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font:inherit;font-size:.9rem;color:#c9d5f2;background:transparent;padding:3px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.25);cursor:pointer}.nav-search:hover{border-color:#f5b301;color:#fff}.nav-search:focus-visible{outline:2px solid #f5b301;outline-offset:2px}" +
+  css.textContent = ".nav .nav-x{display:none}.nav.open .nav-x{display:inline-block}.nav-more{font:inherit;font-size:.9rem;color:#c9d5f2;background:transparent;padding:3px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.25);cursor:pointer}.nav-more:hover,.nav.open .nav-more{border-color:#f5b301;color:#fff}.nav-more.on{background:#f5b301;border-color:#f5b301;color:#14213d;font-weight:600}.nav-more:focus-visible{outline:2px solid #f5b301;outline-offset:2px}@media(max-width:480px){.nav-search .nlp-t{display:none}}.nav-search{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font:inherit;font-size:.9rem;color:#c9d5f2;background:transparent;padding:3px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.25);cursor:pointer}.nav-search:hover{border-color:#f5b301;color:#fff}.nav-search:focus-visible{outline:2px solid #f5b301;outline-offset:2px}" +
     "#nlpS{position:fixed;inset:0;z-index:95;background:rgba(5,10,25,.72);display:flex;justify-content:center;align-items:flex-start;padding:8vh 14px 14px}#nlpS[hidden]{display:none}" +
     "#nlpS .sb{width:100%;max-width:640px;max-height:84vh;display:flex;flex-direction:column;background:var(--surface,#fff);color:var(--ink,#14213d);border-radius:16px;border-bottom:4px solid #f5b301;box-shadow:0 20px 60px rgba(0,0,0,.45);overflow:hidden}" +
     "#nlpS input{width:100%;box-sizing:border-box;font:inherit;font-size:1.05rem;padding:16px 18px;border:0;border-bottom:1px solid var(--line,#d5dbea);background:transparent;color:inherit;outline:none}" +
