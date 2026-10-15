@@ -3,7 +3,8 @@ window.SITE = {
   articles: true,   // false = ซ่อนหน้าบทความจากเมนูและหน้าปก
   news: true,       // false = ซ่อนหน้าข่าวจากเมนูและหน้าปก
   earnings: true,   // false = ซ่อนหน้าพรีวิวงบ/งบหุ้นรายตัวจากเมนูและหน้าปก
-  basics: true,     // แท็บ ความรู้พื้นฐาน (ตอนนี้เป็นหน้า Coming Soon) false = ซ่อน
+  basics: true,     // แท็บ ความรู้พื้นฐาน false = ซ่อนทั้งเมนูและการ์ด
+  basicsLive: false, // false = สมาชิกเห็นหน้า Coming Soon (ดูตัวจริงที่ basics.html?preview=1) true = เปิดคลังคำศัพท์จริง
   etf: true,        // แท็บ ETF (ตอนนี้เป็นหน้า Coming Soon) false = ซ่อน
   newHours: 48,     // โพสต์ที่ใหม่กว่านี้ (ชั่วโมง) จะมีป้าย NEW
   listHours: 24,    // หน้าข่าวโหลดเฉพาะโพสต์ย้อนหลังกี่ชั่วโมง (เก่ากว่านั้นกดปุ่ม "โหลดเพิ่ม")

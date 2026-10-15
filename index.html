@@ -25,8 +25,8 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610150842"></script>
-<script src="gate.js?v=202610150842"></script>
+<script src="site.js?v=202610151653"></script>
+<script src="gate.js?v=202610151653"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -209,7 +209,7 @@ var PAGES = [
   { key: "articles", href: "articles.html", on: SITE.articles, title: "บทความ & บทวิเคราะห์", desc: "บทความและบทวิเคราะห์หุ้นต่างประเทศจากนักลงพุง กรองตามประเภทและชื่อหุ้นได้", go: "เข้าอ่านบทความ ›" },
   { key: "news", href: "news.html", on: SITE.news, hidden: !SITE.news, title: "ข่าว", desc: "ข่าวและหุ้นน่าสนใจ กรองตามชื่อหุ้นได้", go: "เข้าดูข่าว ›" },
   { key: "earnings", href: "earnings.html", on: SITE.earnings, hidden: !SITE.earnings, title: "พรีวิวงบ & งบ", desc: "พรีวิวงบและงบหุ้นรายตัว กรองตามชื่อหุ้นได้", go: "เข้าดูงบ ›" },
-  { key: "basics", href: "basics.html", on: true, hidden: !SITE.basics, badge: "Coming Soon", title: "ความรู้พื้นฐาน", desc: "ความรู้เริ่มต้นสำหรับมือใหม่ อ่านเข้าใจง่าย", go: "ดูหน้าความรู้พื้นฐาน ›" },
+  { key: "basics", href: "basics.html", on: true, hidden: !SITE.basics, badge: SITE.basicsLive ? "" : "Coming Soon", title: "ความรู้พื้นฐาน", desc: "ความรู้เริ่มต้นสำหรับมือใหม่ อ่านเข้าใจง่าย", go: "ดูหน้าความรู้พื้นฐาน ›" },
   { key: "etf", href: "etf.html", on: true, hidden: !SITE.etf, badge: "Coming Soon", title: "ETF", desc: "รวมข้อมูลและบทวิเคราะห์ ETF", go: "ดูหน้า ETF ›" }
 ];
 document.getElementById("cards").innerHTML = PAGES.filter(function (p) { return !p.hidden; }).map(function (p) {
@@ -279,6 +279,7 @@ if (window.NLP && NLP.ready) NLP.ready.then(function (N) {
   if (c.note) { var n = document.getElementById("cpiNote"); n.textContent = c.note; n.hidden = false; }
   var rel = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short" }).format(new Date(c.release + "T12:00:00+07:00"));
   document.getElementById("cpiSrc").textContent = "BLS · ประกาศ " + rel + (c.nextRelease ? " · ครั้งหน้า " + c.nextRelease : "");
+  if (window.SITE && SITE.basicsLive) { var a = document.createElement("a"); a.href = "basics.html#core-cpi"; a.textContent = " · Core คืออะไร ›"; document.getElementById("cpiSrc").appendChild(a); }
   box.hidden = false;
 })();
 
