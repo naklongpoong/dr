@@ -25,8 +25,8 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610151708"></script>
-<script src="gate.js?v=202610151708"></script>
+<script src="site.js?v=202610160536"></script>
+<script src="gate.js?v=202610160536"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -116,6 +116,7 @@ h1 { font-size: clamp(2.2rem, 8vw, 3.4rem); font-weight: 700; line-height: 1.15;
 .cpi-mom small { display: block; font-size: .7rem; font-weight: 400; color: var(--muted); }
 .cpi-box p { margin: 6px 0 0; font-size: .74rem; white-space: nowrap; color: var(--muted); }
 .cpi-chip { display: inline-block; white-space: nowrap; margin-top: 2px; font-size: .72rem; font-weight: 600; padding: 1px 10px; border-radius: 999px; color: var(--muted); background: var(--surface); }
+.cpi-chip[hidden] { display: none; }
 .cpi-chip.hot { color: #b42318; background: rgba(217,45,32,.12); } .cpi-chip.cool { color: #067647; background: rgba(18,183,106,.14); }
 @media (prefers-color-scheme: dark) { .cpi-chip.hot { color: #ffb4a8; } .cpi-chip.cool { color: #9fe3b4; } }
 :root[data-theme="dark"] .cpi-chip.hot { color: #ffb4a8; } :root[data-theme="dark"] .cpi-chip.cool { color: #9fe3b4; }
@@ -123,6 +124,19 @@ h1 { font-size: clamp(2.2rem, 8vw, 3.4rem); font-weight: 700; line-height: 1.15;
 .cpi-note[hidden] { display: none; }
 .cpi-src { margin: 6px 2px 0; font-size: .7rem; color: var(--muted); }
 @media (max-width: 360px) { .cpi-box b { font-size: 1.7rem; } }
+/* การ์ดมหภาคใบเดียว: แท็บ FOMC / CPI / PPI (แต่ละแท็บโผล่เองเมื่อมีข้อมูล) + บรรทัดวันประกาศรอบหน้า */
+.macro { margin: 16px 0 0; background: var(--surface); border: 1.5px solid var(--line); border-bottom: 4px solid var(--gold); border-radius: 20px; box-shadow: var(--shadow); overflow: hidden; }
+.macro[hidden] { display: none; }
+.macro-tabs { display: flex; gap: 6px; padding: 10px 12px; background: #0f1e46; }
+.macro-tab { flex: 1 1 0; font: inherit; font-size: .9rem; font-weight: 600; letter-spacing: .04em; color: #c9d5f2; background: transparent; border: 1px solid rgba(255,255,255,.22); border-radius: 999px; padding: 5px 0; cursor: pointer; }
+.macro-tab:hover { border-color: var(--gold); color: #fff; }
+.macro-tab[aria-selected="true"] { background: var(--gold); border-color: var(--gold); color: #14213d; }
+.macro-tab:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.macro .fomc { margin: 0; padding: 18px 16px 16px; border: 0; border-radius: 0; box-shadow: none; }
+.macro .cpi { margin: 0; padding: 14px 16px 12px; background: transparent; border: 0; border-radius: 0; box-shadow: none; }
+.macro-next { margin: 0; padding: 9px 14px 11px; text-align: center; font-size: .78rem; line-height: 1.6; color: var(--muted); border-top: 1px solid var(--line); }
+.macro-next[hidden] { display: none; }
+.macro-next b { color: var(--ink); font-weight: 600; }
 .pick { font-size: 0.95rem; font-weight: 600; color: var(--muted); margin: 30px 4px 12px; letter-spacing: .02em; }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
 .card {
@@ -163,7 +177,10 @@ a.card:hover .go { text-decoration: underline; }
     <button type="button" class="nav-search" data-search aria-label="ค้นหาทั้งเว็บ" title="ค้นหาทั้งเว็บ (Ctrl+K)" style="margin:18px 0 0;padding:8px 20px;font-size:1rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg> ค้นหาข่าว งบ บทความ และ DR</button>
   </header>
 
-  <section class="fomc" id="fomc" hidden role="timer" aria-label="นับถอยหลังถึงการประกาศผลประชุม FOMC">
+  <section class="macro" id="macro" hidden aria-label="ตัวเลขเศรษฐกิจสหรัฐที่ตลาดจับตา">
+  <div class="macro-tabs" id="macroTabs" role="tablist" aria-label="เลือกดู FOMC CPI หรือ PPI"></div>
+
+  <div class="fomc" id="fomc" hidden role="tabpanel" aria-label="นับถอยหลังถึงการประกาศผลประชุม FOMC">
     <span class="tag">FOMC</span>
     <h2>การประชุม FOMC ครั้งถัดไปอีก</h2>
     <div class="tm">
@@ -177,9 +194,9 @@ a.card:hover .go { text-decoration: underline; }
       <div class="row"><div class="hold"><b id="oHold"></b><span>ไม่เปลี่ยน</span></div><div class="hike"><b id="oHike"></b><span>ขึ้นดอกเบี้ย</span></div><div class="ease"><b id="oEase"></b><span>ลดดอกเบี้ย</span></div></div>
       <p class="src" id="oSrc"></p>
     </div>
-  </section>
+  </div>
 
-  <section class="cpi" id="cpi" hidden aria-label="เงินเฟ้อสหรัฐ CPI ล่าสุด">
+  <div class="cpi" id="cpi" hidden role="tabpanel" aria-label="เงินเฟ้อสหรัฐ CPI ล่าสุด">
     <div class="cpi-head"><span class="cpi-t">เงินเฟ้อสหรัฐ (CPI)</span><span class="cpi-m" id="cpiMonth"></span></div>
     <div class="cpi-grid">
       <div class="cpi-box"><span class="cpi-l">ทั่วไป<br>&nbsp;</span><b id="cH"></b><div class="cpi-mom" id="cHm"></div><span class="cpi-chip" id="cHc"></span><p id="cHs"></p></div>
@@ -187,6 +204,19 @@ a.card:hover .go { text-decoration: underline; }
     </div>
     <p class="cpi-note" id="cpiNote" hidden></p>
     <p class="cpi-src" id="cpiSrc"></p>
+  </div>
+
+  <div class="cpi" id="ppi" hidden role="tabpanel" aria-label="เงินเฟ้อผู้ผลิตสหรัฐ PPI ล่าสุด">
+    <div class="cpi-head"><span class="cpi-t">เงินเฟ้อผู้ผลิตสหรัฐ (PPI)</span><span class="cpi-m" id="ppiMonth"></span></div>
+    <div class="cpi-grid">
+      <div class="cpi-box"><span class="cpi-l">ทั่วไป<br>&nbsp;</span><b id="pH"></b><div class="cpi-mom" id="pHm"></div><span class="cpi-chip" id="pHc"></span><p id="pHs"></p></div>
+      <div class="cpi-box"><span class="cpi-l">Core*<br>ไม่รวมอาหาร-พลังงาน-การค้า</span><b id="pC"></b><div class="cpi-mom" id="pCm"></div><span class="cpi-chip" id="pCc"></span><p id="pCs"></p></div>
+    </div>
+    <p class="cpi-note" id="ppiNote" hidden></p>
+    <p class="cpi-src" id="ppiSrc"></p>
+  </div>
+
+  <p class="macro-next" id="macroNext" hidden></p>
   </section>
 
   <h2 class="pick">เลือกที่อยากเข้า</h2>
@@ -257,30 +287,68 @@ if (window.NLP && NLP.ready) NLP.ready.then(function (N) {
     ids[2].textContent = two(Math.floor(s % 3600 / 60)); ids[3].textContent = two(s % 60);
     if (s === 0) { clearInterval(iv); location.reload(); }   // ถึงเวลาแล้ว โหลดใหม่เพื่อขยับไปครั้งถัดไป
   }
-  var iv = setInterval(tick, 1000); tick(); box.hidden = false;
+  var iv = setInterval(tick, 1000); tick(); box.dataset.ready = "1";
 })();
 
-// การ์ดเงินเฟ้อ CPI ล่าสุด (ค่าอยู่ที่ window.CPI_LATEST ใน site.js ซ่อนเองเมื่อถึงเวลาประกาศครั้งถัดไป)
-(function () {
-  var c = window.CPI_LATEST, box = document.getElementById("cpi"); if (!c || !box) return;
+// การ์ดเงินเฟ้อ CPI / PPI ล่าสุด (ค่าอยู่ที่ window.CPI_LATEST / window.PPI_LATEST ใน site.js ซ่อนเองเมื่อถึงเวลาประกาศครั้งถัดไป)
+// ค่าคาด (exp / expMom) กับค่าก่อนหน้า (prev) ไม่ใส่ก็ได้ ถ้าไม่ใส่จะไม่โชว์ป้ายสูงกว่า/ต่ำกว่าคาด
+function pc(v) { return (+v).toFixed(1) + "%"; }
+function sg(v) { return (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(1) + "%"; }
+function inflCard(c, p, src) {   // p = ตัวอักษรนำหน้า id: c (CPI) หรือ p (PPI)
+  var box = document.getElementById(src); if (!c || !box) return;
   if (c.hideAfter && Date.now() >= Date.parse(c.hideAfter)) return;
-  function pc(v) { return (+v).toFixed(1) + "%"; }
-  function sg(v) { return (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(1) + "%"; }
   function fill(big, chip, sub, d, mom) {
     document.getElementById(big).textContent = pc(d.yoy);
     document.getElementById(mom).innerHTML = "รายเดือน " + sg(d.mom) + (d.expMom != null ? "<small>คาด " + sg(d.expMom) + "</small>" : "<small>&nbsp;</small>");
-    var el = document.getElementById(chip), diff = Math.round((d.yoy - d.exp) * 10);
-    el.className = "cpi-chip" + (diff > 0 ? " hot" : diff < 0 ? " cool" : "");
-    el.textContent = diff > 0 ? "สูงกว่าคาด" : diff < 0 ? "ต่ำกว่าคาด" : "ตรงคาด";
-    document.getElementById(sub).textContent = "คาด " + pc(d.exp) + " · ก่อนหน้า " + pc(d.prev);
+    var el = document.getElementById(chip);
+    if (d.exp != null) {
+      var diff = Math.round((d.yoy - d.exp) * 10);
+      el.className = "cpi-chip" + (diff > 0 ? " hot" : diff < 0 ? " cool" : "");
+      el.textContent = diff > 0 ? "สูงกว่าคาด" : diff < 0 ? "ต่ำกว่าคาด" : "ตรงคาด";
+    } else el.hidden = true;
+    var parts = []; if (d.exp != null) parts.push("คาด " + pc(d.exp)); if (d.prev != null) parts.push("ก่อนหน้า " + pc(d.prev));
+    document.getElementById(sub).textContent = parts.join(" · ");
   }
-  fill("cH", "cHc", "cHs", c.headline, "cHm"); fill("cC", "cCc", "cCs", c.core, "cCm");
-  document.getElementById("cpiMonth").textContent = c.month + " · เทียบปีก่อน";
-  if (c.note) { var n = document.getElementById("cpiNote"); n.textContent = c.note; n.hidden = false; }
+  fill(p + "H", p + "Hc", p + "Hs", c.headline, p + "Hm"); fill(p + "C", p + "Cc", p + "Cs", c.core, p + "Cm");
+  document.getElementById(src + "Month").textContent = c.month + " · เทียบปีก่อน";
+  if (c.note) { var n = document.getElementById(src + "Note"); n.textContent = c.note; n.hidden = false; }
   var rel = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short" }).format(new Date(c.release + "T12:00:00+07:00"));
-  document.getElementById("cpiSrc").textContent = "BLS · ประกาศ " + rel + (c.nextRelease ? " · ครั้งหน้า " + c.nextRelease : "");
-  if (window.SITE && SITE.basicsLive) { var a = document.createElement("a"); a.href = "basics.html#core-cpi"; a.textContent = " · Core คืออะไร ›"; document.getElementById("cpiSrc").appendChild(a); }
-  box.hidden = false;
+  var s = document.getElementById(src + "Src");
+  s.textContent = (c.srcText || "BLS") + " · ประกาศ " + rel + (c.nextRelease ? " · ครั้งหน้า " + c.nextRelease : "");
+  if (src === "cpi" && window.SITE && SITE.basicsLive) { var a = document.createElement("a"); a.href = "basics.html#core-cpi"; a.textContent = " · Core คืออะไร ›"; s.appendChild(a); }
+  box.dataset.ready = "1";
+}
+inflCard(window.CPI_LATEST, "c", "cpi");
+inflCard(window.PPI_LATEST, "p", "ppi");
+
+// รวมเป็นการ์ดมหภาคใบเดียว: แท็บ FOMC / CPI / PPI (โผล่เฉพาะแท็บที่มีข้อมูล) + บรรทัดวันประกาศรอบหน้า
+(function () {
+  var wrap = document.getElementById("macro"), tabs = document.getElementById("macroTabs"); if (!wrap || !tabs) return;
+  var defs = [["fomc", "FOMC"], ["cpi", "CPI"], ["ppi", "PPI"]].filter(function (d) { var el = document.getElementById(d[0]); return el && el.dataset.ready === "1"; });
+  if (!defs.length) return;
+  var keep = ""; try { keep = localStorage.getItem("macroTab") || ""; } catch (e) {}
+  var cur = defs.some(function (d) { return d[0] === keep; }) ? keep : defs[0][0];
+  function show(id) {
+    cur = id;
+    defs.forEach(function (d) { document.getElementById(d[0]).hidden = d[0] !== id; });
+    Array.prototype.forEach.call(tabs.children, function (b) { b.setAttribute("aria-selected", b.dataset.t === id ? "true" : "false"); });
+  }
+  defs.forEach(function (d) {
+    var b = document.createElement("button"); b.type = "button"; b.className = "macro-tab"; b.setAttribute("role", "tab"); b.dataset.t = d[0]; b.textContent = d[1];
+    b.onclick = function () { show(d[0]); try { localStorage.setItem("macroTab", d[0]); } catch (e) {} };
+    tabs.appendChild(b);
+  });
+  if (defs.length < 2) tabs.hidden = true;
+  show(cur);
+  // บรรทัดเดียว: วันประกาศสำคัญรอบหน้า เรียงตามเวลา
+  var ev = [], now = Date.now();
+  if (window.FOMC) for (var i = 0; i < FOMC.length; i++) if (Date.parse(FOMC[i].at) > now) { ev.push([Date.parse(FOMC[i].at), "FOMC " + FOMC[i].d]); break; }
+  [["CPI", window.CPI_LATEST], ["PPI", window.PPI_LATEST]].forEach(function (x) {
+    var c = x[1]; if (c && c.nextRelease && c.hideAfter && Date.parse(c.hideAfter) > now) ev.push([Date.parse(c.hideAfter), x[0] + " " + c.nextRelease]);
+  });
+  ev.sort(function (a, b) { return a[0] - b[0]; });
+  if (ev.length) { var n = document.getElementById("macroNext"); n.innerHTML = "รอบหน้า: " + ev.map(function (e) { return "<b>" + e[1] + "</b>"; }).join(" · "); n.hidden = false; }
+  wrap.hidden = false;
 })();
 
 // ใช้โลโก้เป็น favicon
