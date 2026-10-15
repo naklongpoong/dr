@@ -47,6 +47,15 @@ window.FOMC = [
 // หน้าแรกจะโชว์เฉพาะเมื่อ meeting ตรงกับครั้งถัดไป และ asOf ไม่เก่ากว่า maxAgeDays วัน (กันโชว์ตัวเลขเก่า)
 window.FOMC_ODDS = { meeting: "2026-10-28", asOf: "2026-10-15", ease: 0.0, hold: 65.1, hike: 34.9, maxAgeDays: 3 };
 
+// เงินเฟ้อสหรัฐ (CPI) ล่าสุด จาก BLS (อัปเดตเอง) ค่าเป็น % release = วันที่ประกาศ (เวลานิวยอร์ก) exp = ค่าที่นักเศรษฐศาสตร์คาด (FactSet)
+// yoy = เทียบปีก่อน prev = yoy เดือนก่อน mom = เทียบเดือนก่อน hideAfter = ซ่อนการ์ดเมื่อถึงเวลาประกาศครั้งถัดไป (BLS: 10 พ.ย. 8:30 น. นิวยอร์ก = 13:30Z)
+window.CPI_LATEST = {
+  month: "ก.ย. 2026", release: "2026-10-14", nextRelease: "10 พ.ย.", hideAfter: "2026-11-10T13:30:00Z",
+  headline: { yoy: 3.7, prev: 3.4, mom: 0.6, exp: 3.6 },
+  core: { yoy: 2.6, prev: 2.4, mom: 0.3, exp: 2.5 },
+  note: "น้ำมันเบนซิน +9.1% ในเดือนเดียว ดันเงินเฟ้อสูงกว่าคาด"
+};
+
 // สร้างเมนูบนหัวหน้า ใช้กับทุกหน้าที่มี <nav id="nav">
 window.buildNav = function (current) {
   var el = document.getElementById("nav");

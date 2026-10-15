@@ -25,8 +25,8 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610150214"></script>
-<script src="gate.js?v=202610150214"></script>
+<script src="site.js?v=202610150720"></script>
+<script src="gate.js?v=202610150720"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -102,6 +102,25 @@ h1 { font-size: clamp(2.2rem, 8vw, 3.4rem); font-weight: 700; line-height: 1.15;
 .fomc .odds .hike b { color: #ffb4a8; } .fomc .odds .ease b { color: #9fe3b4; } .fomc .odds .hold b { color: #fff; }
 .fomc .odds .src { margin: 6px 0 0; font-size: .7rem; color: #9fb0d6; }
 @media (max-width: 360px) { .fomc .tm b { font-size: 1.8rem; } .fomc .tm i { display: none; } }
+
+.cpi { margin: 12px 0 0; padding: 16px 16px 12px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); }
+.cpi[hidden] { display: none; }
+.cpi-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.cpi-t { font-weight: 700; font-size: 1rem; }
+.cpi-m { font-size: .8rem; color: var(--muted); }
+.cpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cpi-box { background: var(--accent-soft); border-radius: 14px; padding: 10px 12px 9px; text-align: center; }
+.cpi-box .cpi-l { display: block; font-size: .72rem; color: var(--muted); line-height: 1.3; min-height: 2.1em; }
+.cpi-box b { display: block; font-size: 2rem; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.cpi-box p { margin: 6px 0 0; font-size: .74rem; white-space: nowrap; color: var(--muted); }
+.cpi-chip { display: inline-block; white-space: nowrap; margin-top: 2px; font-size: .72rem; font-weight: 600; padding: 1px 10px; border-radius: 999px; color: var(--muted); background: var(--surface); }
+.cpi-chip.hot { color: #b42318; background: rgba(217,45,32,.12); } .cpi-chip.cool { color: #067647; background: rgba(18,183,106,.14); }
+@media (prefers-color-scheme: dark) { .cpi-chip.hot { color: #ffb4a8; } .cpi-chip.cool { color: #9fe3b4; } }
+:root[data-theme="dark"] .cpi-chip.hot { color: #ffb4a8; } :root[data-theme="dark"] .cpi-chip.cool { color: #9fe3b4; }
+.cpi-note { margin: 10px 2px 0; font-size: .82rem; color: var(--ink); }
+.cpi-note[hidden] { display: none; }
+.cpi-src { margin: 6px 2px 0; font-size: .7rem; color: var(--muted); }
+@media (max-width: 360px) { .cpi-box b { font-size: 1.7rem; } }
 .pick { font-size: 0.95rem; font-weight: 600; color: var(--muted); margin: 30px 4px 12px; letter-spacing: .02em; }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
 .card {
@@ -156,6 +175,16 @@ a.card:hover .go { text-decoration: underline; }
       <div class="row"><div class="hold"><b id="oHold"></b><span>ไม่เปลี่ยน</span></div><div class="hike"><b id="oHike"></b><span>ขึ้นดอกเบี้ย</span></div><div class="ease"><b id="oEase"></b><span>ลดดอกเบี้ย</span></div></div>
       <p class="src" id="oSrc"></p>
     </div>
+  </section>
+
+  <section class="cpi" id="cpi" hidden aria-label="เงินเฟ้อสหรัฐ CPI ล่าสุด">
+    <div class="cpi-head"><span class="cpi-t">เงินเฟ้อสหรัฐ (CPI)</span><span class="cpi-m" id="cpiMonth"></span></div>
+    <div class="cpi-grid">
+      <div class="cpi-box"><span class="cpi-l">ทั่วไป<br>&nbsp;</span><b id="cH"></b><span class="cpi-chip" id="cHc"></span><p id="cHs"></p></div>
+      <div class="cpi-box"><span class="cpi-l">Core<br>ไม่รวมอาหาร-พลังงาน</span><b id="cC"></b><span class="cpi-chip" id="cCc"></span><p id="cCs"></p></div>
+    </div>
+    <p class="cpi-note" id="cpiNote" hidden></p>
+    <p class="cpi-src" id="cpiSrc"></p>
   </section>
 
   <h2 class="pick">เลือกที่อยากเข้า</h2>
@@ -225,6 +254,26 @@ if (window.NLP && NLP.ready) NLP.ready.then(function (N) {
     if (s === 0) { clearInterval(iv); location.reload(); }   // ถึงเวลาแล้ว โหลดใหม่เพื่อขยับไปครั้งถัดไป
   }
   var iv = setInterval(tick, 1000); tick(); box.hidden = false;
+})();
+
+// การ์ดเงินเฟ้อ CPI ล่าสุด (ค่าอยู่ที่ window.CPI_LATEST ใน site.js ซ่อนเองเมื่อถึงเวลาประกาศครั้งถัดไป)
+(function () {
+  var c = window.CPI_LATEST, box = document.getElementById("cpi"); if (!c || !box) return;
+  if (c.hideAfter && Date.now() >= Date.parse(c.hideAfter)) return;
+  function pc(v) { return (+v).toFixed(1) + "%"; }
+  function fill(big, chip, sub, d) {
+    document.getElementById(big).textContent = pc(d.yoy);
+    var el = document.getElementById(chip), diff = Math.round((d.yoy - d.exp) * 10);
+    el.className = "cpi-chip" + (diff > 0 ? " hot" : diff < 0 ? " cool" : "");
+    el.textContent = diff > 0 ? "สูงกว่าคาด" : diff < 0 ? "ต่ำกว่าคาด" : "ตรงคาด";
+    document.getElementById(sub).textContent = "คาด " + pc(d.exp) + " · ก่อนหน้า " + pc(d.prev);
+  }
+  fill("cH", "cHc", "cHs", c.headline); fill("cC", "cCc", "cCs", c.core);
+  document.getElementById("cpiMonth").textContent = c.month + " · เทียบปีก่อน";
+  if (c.note) { var n = document.getElementById("cpiNote"); n.textContent = c.note; n.hidden = false; }
+  var rel = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short" }).format(new Date(c.release + "T12:00:00+07:00"));
+  document.getElementById("cpiSrc").textContent = "BLS · ประกาศ " + rel + (c.nextRelease ? " · ครั้งหน้า " + c.nextRelease : "");
+  box.hidden = false;
 })();
 
 // ใช้โลโก้เป็น favicon
