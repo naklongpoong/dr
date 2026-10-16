@@ -6,6 +6,7 @@ window.SITE = {
   basics: true,     // แท็บ ความรู้พื้นฐาน false = ซ่อนทั้งเมนูและการ์ด
   basicsLive: true, // false = สมาชิกเห็นหน้า Coming Soon (ดูตัวจริงที่ basics.html?preview=1) true = เปิดคลังคำศัพท์จริง
   invest: true,    // แท็บ แนวทางการลงทุน (เกมตอบคำถามดูสไตล์นักลงทุน) false = ซ่อนทั้งเมนูและการ์ด
+  calc: true,      // แท็บ จำลองดอกเบี้ยทบต้น (กรอกตัวเลขดูเงินโต) false = ซ่อนทั้งเมนูและการ์ด
   etf: true,        // แท็บ ETF (ตอนนี้เป็นหน้า Coming Soon) false = ซ่อน
   newHours: 48,     // โพสต์ที่ใหม่กว่านี้ (ชั่วโมง) จะมีป้าย NEW
   listHours: 24,    // หน้าข่าวโหลดเฉพาะโพสต์ย้อนหลังกี่ชั่วโมง (เก่ากว่านั้นกดปุ่ม "โหลดเพิ่ม")
@@ -82,6 +83,7 @@ window.buildNav = function (current) {
   if (SITE.articles) extra.push(["legend", "articles.html?type=legend", "Legends"]);
   if (SITE.basics) extra.push(["basics", "basics.html", "ความรู้พื้นฐาน"]);
   if (SITE.invest) extra.push(["invest", "invest.html", "แนวทางการลงทุน"]);
+  if (SITE.calc) extra.push(["calc", "calc.html", "จำลองทบต้น"]);
   if (SITE.etf) extra.push(["etf", "etf.html", "ETF"]);
   function link(i, cls) {
     return '<a' + (cls ? ' class="' + cls + '"' : "") + ' href="' + i[1] + '"' + (i[0] === current ? ' aria-current="page"' : "") + ">" + i[2] + "</a>";
