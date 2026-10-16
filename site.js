@@ -399,7 +399,7 @@ document.addEventListener("click", function (e) {
 // ---- การ์ดเด้ง: แอดมินแปะข้อความที่หลังบ้าน (แท็บ "การ์ดเด้ง" เก็บที่ content/popup) การ์ดโชว์เฉพาะเหตุการณ์ กด "อ่านต่อ" เพื่ออ่านข้อความเต็ม หรือกด "ปิด" ----
 // ปิดแล้วไม่เด้งซ้ำในเครื่องนั้นจนกว่าแอดมินจะบันทึกการ์ดใหม่ (จำใน localStorage) หลังบ้านเรียก window.nlpPopupShow(data, { preview: true }) เพื่อดูตัวอย่างโดยไม่จำว่าปิดแล้ว
 (function () {
-  var SEEN = "nlp_popup_seen", el = null, prevFocus = null, curVer = null, preview = false, HEAD;
+  var SEEN = "nlp_popup_seen", SEEN_WK = "nlp_popupwk_seen", el = null, prevFocus = null, curVer = null, curKind = "", preview = false, HEAD;
   try { HEAD = new RegExp("^(\\p{Extended_Pictographic}|\\d+\\.\\s)", "u"); } catch (e) { HEAD = /^\d+\.\s/; }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function seen(v) { try { return localStorage.getItem(SEEN) === String(v); } catch (e) { return false; } }
@@ -428,6 +428,7 @@ document.addEventListener("click", function (e) {
       "#nlpPu .pub{margin-top:6px;padding-top:4px;border-top:2px solid #f5b301}#nlpPu .pub[hidden]{display:none}#nlpPu .pub p{margin:.6em 0;font-size:.92rem;line-height:1.7;overflow-wrap:anywhere}#nlpPu .pub h4{margin:1.1em 0 .2em;font-size:.98rem}" +
       "#nlpPu .pua{display:flex;gap:8px;justify-content:flex-end;padding:10px 18px 14px;border-top:1px solid var(--line,#dde3ef)}#nlpPu .pua button{font:inherit;font-size:.95rem;font-weight:600;cursor:pointer;border-radius:10px;padding:8px 20px;border:1px solid var(--line,#dde3ef);background:transparent;color:inherit}" +
       "#nlpPu .pua .pur{background:#f5b301;border-color:#f5b301;color:#14213d}#nlpPu .pua button:focus-visible{outline:2px solid #f5b301;outline-offset:2px}";
+    s.textContent += "#nlpPu .puw{display:flex;flex-direction:column;gap:10px;margin:10px 0 6px}#nlpPu .puw img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line,#dde3ef)}#nlpPu .pua a.pur{font:inherit;font-size:.95rem;font-weight:600;border-radius:10px;padding:8px 20px;background:#f5b301;color:#14213d;text-decoration:none}#nlpPu .pua a.pur:focus-visible{outline:2px solid #f5b301;outline-offset:2px}";
     document.head.appendChild(s);
     el = document.createElement("div"); el.id = "nlpPu"; el.hidden = true; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); el.setAttribute("aria-labelledby", "nlpPuT");
     document.body.appendChild(el);
@@ -436,20 +437,32 @@ document.addEventListener("click", function (e) {
   }
   function show(d, opt) {
     var b = build(), ev = evHtml(d.events), full = bodyHtml(d.body);
-    preview = !!(opt && (opt.preview || opt.reopen)); curVer = d.v == null ? null : d.v;
+    preview = !!(opt && (opt.preview || opt.reopen)); curVer = d.v == null ? null : d.v; curKind = "";
     b.innerHTML = '<div class="pu" tabindex="-1"><div class="puh"><span class="puk">' + (opt && opt.preview ? "ตัวอย่าง · " : "") + 'ประกาศ</span><h2 id="nlpPuT">' + esc(d.title || "ประกาศ") + "</h2></div>" +
       '<div class="pum">' + (ev ? '<ul class="pue">' + ev + "</ul>" : "") + (full ? '<div class="pub" id="nlpPuB" hidden>' + full + "</div>" : "") + "</div>" +
       '<div class="pua">' + (full ? '<button type="button" class="pur" data-pu="more" aria-expanded="false" aria-controls="nlpPuB">อ่านต่อ</button>' : "") + '<button type="button" class="puc" data-pu="close">ปิด</button></div></div>';
     prevFocus = document.activeElement; b.hidden = false; document.documentElement.style.overflow = "hidden";
     (b.querySelector(".pur") || b.querySelector(".puc")).focus();
   }
+  function bkkDay() { return new Date(Date.now() + 7 * 3600000).toISOString().slice(0, 10); }
+  function seenWk(v) { try { return localStorage.getItem(SEEN_WK) === v + "|" + bkkDay(); } catch (e) { return false; } }
+  function markWk(v) { try { localStorage.setItem(SEEN_WK, v + "|" + bkkDay()); } catch (e) {} }
+  function showWk(d, opt) {   // การ์ดงบประจำสัปดาห์: มีรูป เด้งวันละครั้งต่อเครื่อง
+    var b = build(), full = bodyHtml(d.body), im = (d.images || []).map(function (u, i) { return '<img src="' + u + '" alt="งบประจำสัปดาห์ รูปที่ ' + (i + 1) + '">'; }).join("");
+    preview = !!(opt && (opt.preview || opt.reopen)); curVer = d.v == null ? null : d.v; curKind = "wk";
+    b.innerHTML = '<div class="pu" tabindex="-1"><div class="puh"><span class="puk">' + (opt && opt.preview ? "ตัวอย่าง · " : "") + 'งบประจำสัปดาห์</span><h2 id="nlpPuT">' + esc(d.title || "งบประจำสัปดาห์") + "</h2></div>" +
+      '<div class="pum">' + (im ? '<div class="puw">' + im + "</div>" : "") + (full ? '<div class="pub">' + full + "</div>" : "") + "</div>" +
+      '<div class="pua"><a class="pur" href="earnings.html">ดูพรีวิวงบ</a><button type="button" class="puc" data-pu="close">ปิด</button></div></div>';
+    prevFocus = document.activeElement; b.hidden = false; document.documentElement.style.overflow = "hidden";
+    b.querySelector(".puc").focus();
+  }
   function closeIt() {
     if (!el || el.hidden) return;
     el.hidden = true; document.documentElement.style.overflow = "";
-    if (!preview && curVer != null) mark(curVer);
+    if (!preview && curVer != null) { if (curKind === "wk") markWk(curVer); else mark(curVer); }
     try { if (prevFocus && prevFocus.focus) prevFocus.focus(); } catch (e) {}
   }
-  window.nlpPopupShow = show; window.nlpPopupClose = closeIt;
+  window.nlpPopupShow = show; window.nlpPopupShowWk = showWk; window.nlpPopupClose = closeIt;
   document.addEventListener("click", function (e) {
     var t = e.target.closest && e.target.closest("[data-pu]"); if (!t || !el || el.hidden) return;
     if (t.getAttribute("data-pu") === "close") { closeIt(); return; }
@@ -461,7 +474,7 @@ document.addEventListener("click", function (e) {
     if (!el || el.hidden) return;
     if (e.key === "Escape") { closeIt(); return; }
     if (e.key !== "Tab") return;
-    var bs = [].slice.call(el.querySelectorAll("button")), i = bs.indexOf(document.activeElement);   // ให้โฟกัสวนอยู่ในการ์ด
+    var bs = [].slice.call(el.querySelectorAll("button,a[href]")), i = bs.indexOf(document.activeElement);   // ให้โฟกัสวนอยู่ในการ์ด
     if (e.shiftKey && i <= 0) { e.preventDefault(); bs[bs.length - 1].focus(); }
     else if (!e.shiftKey && (i < 0 || i === bs.length - 1)) { e.preventDefault(); bs[0].focus(); }
   });
@@ -469,33 +482,63 @@ document.addEventListener("click", function (e) {
     function ms(t) { return t && t.toMillis ? t.toMillis() : (t && t.toDate ? t.toDate().getTime() : 0); }
     return { title: d.title || "", events: d.events || "", body: d.body || "", on: d.on !== false, until: ms(d.until), v: ms(d.updatedAt) };
   }
-  var last = null;
+  function normWk(d) {
+    function ms(t) { return t && t.toMillis ? t.toMillis() : (t && t.toDate ? t.toDate().getTime() : 0); }
+    var im = (Array.isArray(d.images) ? d.images : []).filter(function (u) { return /^data:image\/(jpeg|png|webp);base64,/.test(u); }).slice(0, 4);
+    return { title: d.title || "", body: d.body || "", images: im, on: d.on !== false, until: ms(d.until), v: ms(d.updatedAt) };
+  }
+  var last = null, lastWk = null;
   window.nlpPopupBtn = function () {   // ปุ่ม "ประกาศ" ที่แถบเมนู ไว้เปิดการ์ดล่าสุดซ้ำหลังปิดไปแล้ว (มีเฉพาะตอนมีการ์ดที่ยังไม่หมดอายุ)
     var nav = document.getElementById("nav");
-    if (!last || !nav || nav.querySelector("[data-pu-open]")) return;
-    var b = document.createElement("button"); b.type = "button"; b.className = "nav-search"; b.setAttribute("data-pu-open", "");
-    b.textContent = "📢 ประกาศ"; b.title = "เปิดประกาศล่าสุดอีกครั้ง"; nav.appendChild(b);
+    if (!nav) return;
+    if (last && !nav.querySelector('[data-pu-open="a"]')) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "nav-search"; b.setAttribute("data-pu-open", "a");
+      b.textContent = "📢 ประกาศ"; b.title = "เปิดประกาศล่าสุดอีกครั้ง"; nav.appendChild(b);
+    }
+    if (lastWk && !nav.querySelector('[data-pu-open="wk"]')) {
+      var w = document.createElement("button"); w.type = "button"; w.className = "nav-search"; w.setAttribute("data-pu-open", "wk");
+      w.textContent = "📊 งบสัปดาห์นี้"; w.title = "เปิดสรุปงบประจำสัปดาห์อีกครั้ง"; nav.appendChild(w);
+    }
   };
   document.addEventListener("click", function (e) {
-    if (e.target.closest && e.target.closest("[data-pu-open]") && last) show(last, { reopen: true });
+    var o = e.target.closest && e.target.closest("[data-pu-open]"); if (!o) return;
+    if (o.getAttribute("data-pu-open") === "wk") { if (lastWk) showWk(lastWk, { reopen: true }); }
+    else if (last) show(last, { reopen: true });
   });
-  function pick(d) {
-    if (!d || !d.on || !(d.events || d.body)) return;
-    if (d.until && Date.now() > d.until) return;   // หมดอายุแล้ว
+  function pick(d) {   // คืน true ถ้าเด้งการ์ดขึ้นมาแล้ว
+    if (!d || !d.on || !(d.events || d.body)) return false;
+    if (d.until && Date.now() > d.until) return false;   // หมดอายุแล้ว
     last = d; window.nlpPopupBtn();
-    if (seen(d.v)) return;                          // เครื่องนี้ปิดการ์ดเวอร์ชันนี้ไปแล้ว (ยังกดปุ่ม "ประกาศ" เปิดดูได้)
-    show(d);
+    if (seen(d.v)) return false;                    // เครื่องนี้ปิดการ์ดเวอร์ชันนี้ไปแล้ว (ยังกดปุ่ม "ประกาศ" เปิดดูได้)
+    show(d); return true;
+  }
+  function pickWk(d) {   // การ์ดงบประจำสัปดาห์ เด้งวันละครั้ง และหลบถ้าการ์ดประกาศเพิ่งเด้งไปในหน้านี้
+    if (!d || !d.on || !(d.images.length || d.body)) return;
+    if (d.until && Date.now() > d.until) return;
+    lastWk = d; window.nlpPopupBtn();
+    if (seenWk(d.v)) return;
+    show_wk_later = d;
+  }
+  var show_wk_later = null;
+  function getDocCached(N, key, name, normFn) {
+    var c = window.cacheGet && cacheGet(key, (window.SITE && SITE.cacheMinutes) || 0);
+    if (c) return Promise.resolve(c.none ? null : c);
+    return N.F.getDoc(N.F.doc(N.db, "content", name)).then(function (s) {
+      var d = s.exists() ? normFn(s.data()) : null;
+      if (window.cachePut) cachePut(key, d || { none: true });
+      return d;
+    });
   }
   document.addEventListener("DOMContentLoaded", function () {
     if (window.NLP_NO_GATE || !window.NLP || !NLP.ready) return;
     NLP.ready.then(function (N) {
-      var c = window.cacheGet && cacheGet("popup", (window.SITE && SITE.cacheMinutes) || 0);
-      if (c) { pick(c.none ? null : c); return; }
-      return N.F.getDoc(N.F.doc(N.db, "content", "popup")).then(function (s) {
-        var d = s.exists() ? norm(s.data()) : null;
-        if (window.cachePut) cachePut("popup", d || { none: true });
-        pick(d);
+      var a = getDocCached(N, "popup", "popup", norm).catch(function () { return null; });   // อ่านไม่ได้ (เช่น ยังไม่ได้วางกฎใหม่) ก็แค่ไม่เด้ง ไม่กระทบหน้าอื่น
+      var w = getDocCached(N, "popupWk", "popupWeekly", normWk).catch(function () { return null; });
+      return Promise.all([a, w]).then(function (r) {
+        var shown = pick(r[0]);
+        pickWk(r[1]);
+        if (show_wk_later && !shown) showWk(show_wk_later);
       });
-    }).catch(function () {});   // อ่านไม่ได้ (เช่น ยังไม่ได้วางกฎใหม่) ก็แค่ไม่เด้ง ไม่กระทบหน้าอื่น
+    }).catch(function () {});
   });
 })();

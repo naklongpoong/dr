@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>window.NLP_NO_GATE = true;</script>
-<script src="site.js?v=202610170643"></script>
-<script src="gate.js?v=202610170643"></script>
+<script src="site.js?v=202610170647"></script>
+<script src="gate.js?v=202610170647"></script>
 <style>
 :root {
   --navy: #0f1e46; --gold: #f5b301; --bg: #f2f5fb; --surface: #ffffff; --ink: #14213d; --muted: #5b6982;
@@ -107,6 +107,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <button class="tab" type="button" data-p="dr" aria-pressed="false">ข้อมูล DR</button>
       <button class="tab" type="button" data-p="picks" aria-pressed="false">หุ้นสแกน</button>
       <button class="tab" type="button" data-p="popup" aria-pressed="false">การ์ดเด้ง</button>
+      <button class="tab" type="button" data-p="popwk" aria-pressed="false">การ์ดงบสัปดาห์</button>
       <button class="tab" type="button" data-p="code" aria-pressed="false">รหัสสมาชิก</button>
     </div>
 
@@ -209,6 +210,24 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <button class="btn alt" id="uLoad" type="button">โหลดการ์ดปัจจุบัน</button><button class="btn alt" id="uPrev" type="button">ดูตัวอย่าง</button><button class="btn" id="uSave" type="button">บันทึกและเผยแพร่</button>
     </section>
 
+    <!-- การ์ดเด้งงบประจำสัปดาห์ -->
+    <section class="card" id="p-popwk" hidden>
+      <h2>การ์ดเด้งงบประจำสัปดาห์</h2>
+      <p class="help">เด้งกลางจอให้สมาชิกวันละครั้งต่อเครื่อง พร้อมรูป (เช่นตารางงบที่จะออกสัปดาห์นี้) สลับกับ "การ์ดเด้ง" ปกติ: ถ้าการ์ดประกาศยังไม่เคยถูกปิดในเครื่องนั้น จะเด้งการ์ดประกาศก่อน แล้วการ์ดงบจะเด้งในการเปิดเว็บครั้งถัดไป เมนูจะมีปุ่ม "📊 งบสัปดาห์นี้" ให้เปิดซ้ำได้ ขึ้นการ์ดที่มีรูปอย่างเดียวก็ได้</p>
+      <label for="wTitle">ชื่อการ์ด</label><input id="wTitle" type="text" maxlength="120" autocomplete="off" placeholder="เช่น งบที่น่าจับตาสัปดาห์นี้ (20–24 ต.ค.)">
+      <label for="wBody">ข้อความใต้รูป (ไม่ใส่ก็ได้)</label>
+      <textarea id="wBody" maxlength="5000" style="min-height:110px" spellcheck="false"></textarea>
+      <label>รูปประกอบ (สูงสุด 4 รูป ย่อให้อัตโนมัติ)</label>
+      <div class="drop" id="wDrop">แปะรูปด้วย Ctrl+V · ลากรูปมาวาง · หรือ <button class="linkbtn" type="button" id="wPick">เลือกไฟล์</button><input id="wFiles" type="file" accept="image/*" multiple hidden></div>
+      <div class="prev" id="wPrev"></div>
+      <div class="grid2">
+        <div><label for="wHours">แสดงนานแค่ไหน</label><select id="wHours"><option value="72">3 วัน</option><option value="120">5 วัน</option><option value="168" selected>7 วัน</option><option value="0">ไม่หมดอายุ</option></select></div>
+        <div><label for="wOn">สถานะ</label><select id="wOn"><option value="1" selected>เปิดแสดง</option><option value="0">ปิด (ไม่เด้ง)</option></select></div>
+      </div>
+      <p class="msg" id="wMsg" role="alert" hidden></p>
+      <button class="btn alt" id="wLoad" type="button">โหลดการ์ดปัจจุบัน</button><button class="btn alt" id="wPrevBtn" type="button">ดูตัวอย่าง</button><button class="btn" id="wSave" type="button">บันทึกและเปิดแสดง</button>
+    </section>
+
     <!-- รหัสสมาชิก -->
     <section class="card" id="p-code" hidden>
       <h2>รหัสสมาชิกประจำเดือน</h2>
@@ -258,8 +277,8 @@ $("btnOut").onclick = () => N.A.signOut(N.auth);
 $("tabs").addEventListener("click", e => {
   const b = e.target.closest("[data-p]"); if (!b) return;
   document.querySelectorAll("#tabs .tab").forEach(t => t.setAttribute("aria-pressed", t === b));
-  ["news", "art", "dr", "picks", "popup", "code"].forEach(p => { $("p-" + p).hidden = p !== b.dataset.p; });
-  if (!loaded[b.dataset.p]) { loaded[b.dataset.p] = true; ({ art: loadArticles, dr: loadDr, picks: loadPicks, popup: loadPopup, code: loadCode })[b.dataset.p](); }
+  ["news", "art", "dr", "picks", "popup", "popwk", "code"].forEach(p => { $("p-" + p).hidden = p !== b.dataset.p; });
+  if (!loaded[b.dataset.p]) { loaded[b.dataset.p] = true; ({ art: loadArticles, dr: loadDr, picks: loadPicks, popup: loadPopup, popwk: loadWk, code: loadCode })[b.dataset.p](); }
 });
 
 // ---------- ย้ายหมวด ----------
@@ -447,7 +466,7 @@ function makePicker(o) {
     note(o.msg, "");
     for (const f of files) {
       if (!/^image\//.test(f.type)) continue;
-      if (o.arr.length >= MAX_IMGS) { note(o.msg, "แนบได้สูงสุด " + MAX_IMGS + " รูป"); break; }
+      if (o.arr.length >= (o.max || MAX_IMGS)) { note(o.msg, "แนบได้สูงสุด " + (o.max || MAX_IMGS) + " รูป"); break; }
       try {
         const out = await compress(f);
         if (o.arr.reduce((n, s) => n + s.length, 0) + out.length > MAX_TOTAL) { note(o.msg, "รูปรวมกันใหญ่เกินไป ลองเอารูปอื่นออกก่อน"); break; }
@@ -466,11 +485,13 @@ function makePicker(o) {
 }
 const artPick = makePicker({ arr: imgs, drop: "aDrop", prev: "aPrev", files: "aFiles", pick: "aPick", msg: "aMsg", cover: true });
 const newsPick = makePicker({ arr: nImgs, drop: "nDrop", prev: "nPrev", files: "nFiles", pick: "nPick", msg: "nMsg", cover: false });
+const wImgs = [];
+const wkPick = makePicker({ arr: wImgs, drop: "wDrop", prev: "wPrev", files: "wFiles", pick: "wPick", msg: "wMsg", cover: false, max: 4 });
 const drawPrev = artPick.draw;
 // แปะรูปด้วย Ctrl+V: ไปที่แท็บที่เปิดอยู่ (ข้อความที่แปะมาด้วยยังเข้าช่องพิมพ์ตามปกติ)
 document.addEventListener("paste", e => {
   const fs = [...(e.clipboardData ? e.clipboardData.files : [])].filter(f => /^image\//.test(f.type)); if (!fs.length) return;
-  const pk = !$("p-art").hidden ? artPick : (!$("p-news").hidden ? newsPick : null); if (!pk) return;
+  const pk = !$("p-art").hidden ? artPick : (!$("p-news").hidden ? newsPick : (!$("p-popwk").hidden ? wkPick : null)); if (!pk) return;
   if (!(e.clipboardData.getData("text/plain") || "").trim()) e.preventDefault();
   pk.add(fs);
 });
@@ -649,6 +670,37 @@ async function loadPopup() {
   } catch (e) { fail("uMsg", e); }
 }
 $("uLoad").onclick = loadPopup;
+
+// ---------- การ์ดเด้งงบประจำสัปดาห์ (content/popupWeekly) ----------
+const wData = () => ({ title: $("wTitle").value.trim(), body: $("wBody").value.trim(), images: wImgs.slice() });
+$("wPrevBtn").onclick = () => {
+  const d = wData(); if (!d.images.length && !d.body) return note("wMsg", "ยังไม่มีรูปหรือข้อความให้ดูตัวอย่าง");
+  note("wMsg", ""); window.nlpPopupShowWk(d, { preview: true });
+};
+$("wSave").onclick = async () => {
+  const d = wData();
+  if (!d.images.length && !d.body) return note("wMsg", "ใส่รูปหรือข้อความอย่างน้อยหนึ่งอย่างก่อนบันทึก");
+  if (d.title.length > 120 || d.body.length > 5000) return note("wMsg", "ข้อความยาวเกินกำหนด (ชื่อ 120 / ข้อความ 5,000 ตัวอักษร)");
+  const hrs = +$("wHours").value, data = { title: d.title, body: d.body, images: d.images, on: $("wOn").value === "1", updatedAt: N.F.serverTimestamp() };
+  if (hrs > 0) data.until = N.F.Timestamp.fromMillis(Date.now() + hrs * 3600000);
+  note("wMsg", ""); $("wSave").disabled = true;
+  try {
+    await N.F.setDoc(N.F.doc(N.db, "content", "popupWeekly"), data);
+    note("wMsg", data.on ? "บันทึกแล้ว สมาชิกจะเห็นการ์ดนี้วันละครั้ง (เครื่องที่เปิดหน้าค้างไว้จะเห็นเมื่อโหลดหน้าใหม่)" : "บันทึกแล้ว แต่ตั้งเป็นปิด การ์ดจะไม่เด้ง");
+  } catch (e) { fail("wMsg", e); }
+  $("wSave").disabled = false;
+};
+async function loadWk() {
+  try {
+    const s = await N.F.getDoc(N.F.doc(N.db, "content", "popupWeekly"));
+    if (!s.exists()) return note("wMsg", "ยังไม่มีการ์ดงบประจำสัปดาห์ในระบบ");
+    const d = s.data(); $("wTitle").value = d.title || ""; $("wBody").value = d.body || ""; $("wOn").value = d.on === false ? "0" : "1";
+    wImgs.length = 0; (d.images || []).forEach(x => wImgs.push(x)); wkPick.draw();
+    const u = d.until && d.until.toDate ? d.until.toDate() : null;
+    note("wMsg", "โหลดการ์ดปัจจุบันแล้ว บันทึกเมื่อ " + fmtTime(d.updatedAt) + (u ? " · หมดอายุ " + fmtTime(d.until) + (u < new Date() ? " (หมดอายุแล้ว)" : "") : " · ไม่หมดอายุ"));
+  } catch (e) { fail("wMsg", e); }
+}
+$("wLoad").onclick = loadWk;
 
 // ---------- หุ้นสแกน (ชุด 1 = content/picks, ชุด 2 = content/adminPicks) ----------
 const PICKS_MAX = 100;
