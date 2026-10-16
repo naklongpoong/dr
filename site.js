@@ -69,28 +69,6 @@ window.PPI_LATEST = {
   srcText: "BLS"
 };
 
-// อัตราแลกเปลี่ยน USD/THB: ดึงอัตโนมัติจาก Frankfurter (อัตราอ้างอิงของธนาคารกลางยุโรป ECB อัปเดตวันทำการละครั้ง ไม่ใช่เรทที่โบรกเกอร์หรือธนาคารใช้จริง)
-// เรียกใช้: fxUsdThb(function (fx) { fx.rate, fx.date (YYYY-MM-DD), fx.src = "live" | "cache" | "fallback" })
-// จำค่าในเครื่องผู้อ่าน 3 ชั่วโมง ถ้าดึงไม่ได้ใช้ค่าสำรอง FX_FALLBACK (ปรับเองได้ ควรเป็นค่าล่าสุดที่เช็กแล้ว)
-window.FX_FALLBACK = { rate: 33.54, date: "2026-10-15" };
-window.fxUsdThb = function (cb) {
-  var KEY = "nlp_fx_usdthb", TTL = 3 * 3600 * 1000, now = Date.now(), c = null;
-  try { c = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
-  if (c && c.rate > 0 && now - c.at < TTL) { cb({ rate: c.rate, date: c.date, src: "cache" }); return; }
-  var done = false;
-  function fall() { if (done) return; done = true; cb(c && c.rate > 0 ? { rate: c.rate, date: c.date, src: "fallback" } : { rate: FX_FALLBACK.rate, date: FX_FALLBACK.date, src: "fallback" }); }
-  try {
-    var ctl = window.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); fall(); }, 6000);
-    fetch("https://api.frankfurter.dev/v1/latest?base=USD&symbols=THB", ctl ? { signal: ctl.signal } : {})
-      .then(function (r) { if (!r.ok) throw 0; return r.json(); })
-      .then(function (j) {
-        clearTimeout(to); var v = j && j.rates && +j.rates.THB; if (!(v > 20 && v < 60) || !j.date) throw 0;   // กันค่าเพี้ยน
-        try { localStorage.setItem(KEY, JSON.stringify({ rate: v, date: j.date, at: Date.now() })); } catch (e) {}
-        if (!done) { done = true; cb({ rate: v, date: j.date, src: "live" }); }
-      }).catch(function () { clearTimeout(to); fall(); });
-  } catch (e) { fall(); }
-};
-
 // สร้างเมนูบนหัวหน้า ใช้กับทุกหน้าที่มี <nav id="nav">
 window.buildNav = function (current) {
   var el = document.getElementById("nav");
