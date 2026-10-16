@@ -331,6 +331,8 @@ async function showReader(id) {
     <div class="rlinks">
       ${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ ›</a>` : ""}
       ${a.body ? '<button class="linkbtn" type="button" data-copytext>คัดลอกข้อความ</button>' : ""}
+      <button class="linkbtn" type="button" data-copyurl>คัดลอกลิงก์บทความ</button>
+      <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.origin + location.pathname + "?id=" + encodeURIComponent(id))}" target="_blank" rel="noopener noreferrer">แชร์ Facebook</a>
     </div>`;
   // นับคนดู: เปิดอ่านบทความครั้งแรกของเครื่องนี้ +1
   if (window.NLP && NLP.trackView) NLP.trackView("articles", id).then(ok => {
@@ -349,6 +351,13 @@ document.addEventListener("click", e => {
   const open = e.target.closest("[data-open]");
   if (open) { e.preventDefault(); let ok = true; try { history.pushState(null, "", "articles.html?id=" + encodeURIComponent(open.dataset.open)); } catch (x) { ok = false; } if (ok) route(); else { state.id = open.dataset.open; showReader(state.id); } return; }
   if (e.target.closest("[data-back]")) { let ok = true; try { history.pushState(null, "", "articles.html"); } catch (x) { ok = false; } if (ok) route(); else { state.id = ""; hideReader(); } return; }
+  const cu = e.target.closest("[data-copyurl]");
+  if (cu) {
+    const url = location.origin + location.pathname + "?id=" + encodeURIComponent(state.id);
+    const done = () => { cu.textContent = "คัดลอกแล้ว"; setTimeout(() => { cu.textContent = "คัดลอกลิงก์บทความ"; }, 1600); };
+    (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(done, () => { const t = document.createElement("textarea"); t.value = url; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch (e2) {} t.remove(); done(); });
+    return;
+  }
   const tab = e.target.closest("[data-tab]");
   if (tab) { state.tab = tab.dataset.tab; writeParams(); renderList(); return; }
   const tk = e.target.closest("[data-tk]");
