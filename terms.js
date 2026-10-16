@@ -167,5 +167,5 @@ window.TERMS = [
 
 // ศัพท์ที่สมาชิกเห็น: ฉบับร่าง (n: 1) จะโผล่เมื่อ TERMS_NEW_LIVE = true หรือเปิดดูแบบ preview ที่ basics.html?preview=1
 // เปิดให้สมาชิกเห็นทุกคำใหม่: เปลี่ยน false เป็น true บรรทัดล่างแล้วรัน sh bump-version.sh
-window.TERMS_NEW_LIVE = false;
+window.TERMS_NEW_LIVE = true;
 window.termsShown = function (preview) { return window.TERMS.filter(function (x) { return !x.n || window.TERMS_NEW_LIVE || preview; }); };
