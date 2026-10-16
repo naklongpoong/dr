@@ -25,9 +25,9 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610170140"></script>
-<script src="terms.js?v=202610170140"></script>
-<script src="gate.js?v=202610170140"></script>
+<script src="site.js?v=202610170150"></script>
+<script src="terms.js?v=202610170150"></script>
+<script src="gate.js?v=202610170150"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -332,7 +332,10 @@ function inflCard(c, p, src) {   // p = ตัวอักษรนำหน้�
   var rel = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short" }).format(new Date(c.release + "T12:00:00+07:00"));
   var s = document.getElementById(src + "Src");
   s.textContent = (c.srcText || "BLS") + " · ประกาศ " + rel + (c.nextRelease ? " · ครั้งหน้า " + c.nextRelease : "");
-  if (src === "cpi" && window.SITE && SITE.basicsLive) { var a = document.createElement("a"); a.href = "basics.html#core-cpi"; a.textContent = " · Core คืออะไร ›"; s.appendChild(a); }
+  if (window.SITE && SITE.basicsLive) {   // ลิงก์ไปคลังศัพท์: CPI -> Core CPI, PPI -> PPI (มีอธิบายว่า Core ของ PPI ไม่รวมบริการการค้า)
+    var a = document.createElement("a"); a.href = "basics.html#" + (src === "cpi" ? "core-cpi" : "ppi"); a.textContent = src === "cpi" ? "Core คืออะไร ›" : "PPI และ Core คืออะไร ›";
+    s.appendChild(document.createTextNode(" · ")); s.appendChild(a);
+  }
   box.dataset.ready = "1";
 }
 inflCard(window.CPI_LATEST, "c", "cpi");
