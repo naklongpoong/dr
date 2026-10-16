@@ -25,9 +25,9 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610161204"></script>
-<script src="terms.js?v=202610161204"></script>
-<script src="gate.js?v=202610161204"></script>
+<script src="site.js?v=202610161221"></script>
+<script src="terms.js?v=202610161221"></script>
+<script src="gate.js?v=202610161221"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -138,9 +138,12 @@ h1 { font-size: clamp(2.2rem, 8vw, 3.4rem); font-weight: 700; line-height: 1.15;
 .macro-next { margin: 0; padding: 9px 14px 11px; text-align: center; font-size: .78rem; line-height: 1.6; color: var(--muted); border-top: 1px solid var(--line); }
 .macro-next[hidden] { display: none; }
 .macro-next b { color: var(--ink); font-weight: 600; }
-.macro-fx { margin: 0; padding: 0 14px 10px; text-align: center; font-size: .74rem; color: var(--muted); }
-.macro-fx[hidden] { display: none; }
-.macro-fx b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.fx { margin: 16px 0 0; padding: 12px 16px; display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 14px; box-shadow: var(--shadow); }
+.fx[hidden] { display: none; }
+.fx .fx-l { font-size: .78rem; font-weight: 600; color: var(--muted); line-height: 1.35; }
+.fx .fx-v { font-size: 1.9rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.fx .fx-v small { font-size: .8rem; font-weight: 500; color: var(--muted); margin-left: 4px; }
+.fx .fx-s { margin-top: 2px; font-size: .72rem; color: var(--muted); }
 /* ศัพท์วันนี้ */
 .wod { margin: 16px 0 0; padding: 14px 16px 14px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 14px; box-shadow: var(--shadow); }
 .wod[hidden] { display: none; }
@@ -230,8 +233,9 @@ a.card:hover .go { text-decoration: underline; }
   </div>
 
   <p class="macro-next" id="macroNext" hidden></p>
-  <p class="macro-fx" id="macroFx" hidden></p>
   </section>
+
+  <section class="fx" id="fx" hidden aria-label="อัตราแลกเปลี่ยนดอลลาร์สหรัฐต่อบาท"></section>
 
   <section class="wod" id="wod" hidden aria-label="ศัพท์การลงทุนวันนี้"></section>
 
@@ -371,10 +375,10 @@ inflCard(window.PPI_LATEST, "p", "ppi");
 
 // ค่าเงินบาท/ดอลลาร์ ใต้การ์ดมหภาค (ดึงอัตโนมัติ ดู fxUsdThb ใน site.js)
 (function () {
-  var el = document.getElementById("macroFx"); if (!el || !window.fxUsdThb) return;
+  var el = document.getElementById("fx"); if (!el || !window.fxUsdThb) return;
   fxUsdThb(function (fx) {
     var d = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short" }).format(new Date(fx.date + "T12:00:00+07:00"));
-    el.innerHTML = "USD/THB <b>" + fx.rate.toFixed(2) + "</b> · อัตราอ้างอิง ECB ณ " + d + (fx.src === "fallback" ? " (ค่าสำรอง ดึงข้อมูลสดไม่ได้)" : "") + " · ไม่ใช่เรทของโบรกเกอร์";
+    el.innerHTML = '<div class="fx-l">ค่าเงินบาท<br>USD/THB</div><div><div class="fx-v">' + fx.rate.toFixed(2) + '<small>บาทต่อ 1 ดอลลาร์</small></div><div class="fx-s">อัตราอ้างอิง ECB ณ ' + d + (fx.src === "fallback" ? " · ค่าสำรอง ดึงข้อมูลสดไม่ได้" : "") + ' · ไม่ใช่เรทของโบรกเกอร์</div></div>';
     el.hidden = false;
   });
 })();
