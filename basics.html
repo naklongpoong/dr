@@ -18,8 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610160628"></script>
-<script src="gate.js?v=202610160628"></script>
+<script src="site.js?v=202610161204"></script>
+<script src="terms.js?v=202610161204"></script>
+<script src="gate.js?v=202610161204"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -220,6 +221,20 @@ textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); 
 .g-card .why b { color: var(--ink); font-weight: 600; }
 .g-card a { color: var(--accent); }
 .g-cat { display: inline-block; margin-bottom: 6px; font-size: .72rem; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 0 9px; }
+.g-mode { display: flex; margin-top: 18px; }
+.g-mode .seg { margin: 0 auto 0 0; }
+.qq { margin-top: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 20px; box-shadow: var(--shadow); }
+.qq h2 { margin: 6px 0 4px; font-size: 1.15rem; line-height: 1.45; }
+.qq .qtop { display: flex; justify-content: space-between; font-size: .85rem; color: var(--muted); }
+.qq .qopts { display: grid; gap: 10px; margin-top: 12px; }
+.qq .qo { font: inherit; text-align: left; cursor: pointer; padding: 11px 14px; color: var(--ink); background: var(--bg); border: 1.5px solid var(--line); border-radius: 12px; line-height: 1.5; }
+.qq .qo:hover:not(:disabled) { border-color: var(--gold); }
+.qq .qo:disabled { cursor: default; }
+.qq .qo.ok { border-color: #17a34a; background: rgba(23,163,74,.12); }
+.qq .qo.no { border-color: #dc2626; background: rgba(220,38,38,.1); }
+.qq .qexp { margin-top: 12px; padding: 9px 12px; font-size: .92rem; background: var(--accent-soft); border-left: 3px solid var(--gold); border-radius: 6px; }
+.qq .qexp a { color: var(--accent); }
+.qq .qscore { font-size: 2.2rem; font-weight: 700; margin: 4px 0; }
 .g-foot { margin: 22px 4px 0; font-size: .8rem; color: var(--muted); text-align: center; }
 @media (max-width: 560px) { .g-tools { margin: 14px -14px 0; padding: 8px 14px; } }
 @media (max-width: 560px) {
@@ -257,12 +272,16 @@ textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); 
   </section>
 
   <section id="gloss" hidden aria-label="คลังคำศัพท์การลงทุน">
+    <div class="g-mode"><div class="seg" role="group" aria-label="เลือกโหมด"><button type="button" id="gmList" aria-pressed="true">คลังศัพท์</button><button type="button" id="gmQuiz" aria-pressed="false">ควิซทดสอบ</button></div></div>
+    <div id="gwrap">
     <div class="g-tools">
       <input class="g-search" id="gq" type="search" inputmode="search" autocomplete="off" spellcheck="false" placeholder="ค้นหาคำศัพท์ เช่น CPI, P/E, DR" aria-label="ค้นหาคำศัพท์">
       <div class="g-cats" id="gcats"></div>
     </div>
     <div class="g-list" id="glist"></div>
     <p class="empty" id="gempty" hidden>ไม่พบคำนี้ ลองพิมพ์ตัวย่อ เช่น CPI หรือ EPS</p>
+    </div>
+    <div id="quiz" hidden></div>
     <p class="g-foot">เนื้อหาเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน</p>
   </section>
 </main>
@@ -271,68 +290,10 @@ textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); 
 if (window.buildNav) buildNav("basics");
 const fav = document.createElement("link"); fav.rel = "icon"; fav.href = document.querySelector(".brand img").src; document.head.appendChild(fav);
 
-// คลังคำศัพท์ (แก้ข้อความที่นี่ได้เลย) id = ลิงก์ตรง เช่น basics.html#core-cpi
-const CATS = { macro: "เงินเฟ้อและดอกเบี้ย", earn: "งบและมูลค่าหุ้น", prod: "ผลิตภัณฑ์ลงทุน" };
-const TERMS = [
-  { id: "inflation", c: "macro", t: "เงินเฟ้อ", en: "Inflation",
-    d: "ราคาสินค้าและบริการโดยรวมสูงขึ้นต่อเนื่อง ทำให้เงินจำนวนเท่าเดิมซื้อของได้น้อยลง ธนาคารกลางตั้งเป้าไม่ให้เงินเฟ้อสูงเกินไป โดย Fed ตั้งเป้าไว้ที่ 2% ต่อปี (วัดด้วย PCE)",
-    w: "เงินเฟ้อสูงกว่าเป้า Fed มักตรึงหรือขึ้นดอกเบี้ยเพื่อชะลอ ซึ่งกดดันราคาหุ้น โดยเฉพาะหุ้นเติบโตสูง" },
-  { id: "cpi", c: "macro", t: "CPI", en: "Consumer Price Index · ดัชนีราคาผู้บริโภค",
-    d: "วัดว่าราคาสินค้าและบริการที่ครัวเรือนสหรัฐซื้อเป็นประจำ (อาหาร ที่อยู่อาศัย น้ำมัน ค่าเดินทาง ฯลฯ) เปลี่ยนไปเท่าไร สำนักสถิติแรงงานสหรัฐ (BLS) ประกาศทุกเดือน และเป็นตัวเลขเงินเฟ้อที่ตลาดจับตามากที่สุด",
-    w: "ตลาดดูว่า <b>สูงหรือต่ำกว่าที่นักวิเคราะห์คาด</b> ถ้าสูงกว่าคาด คนมักมองว่า Fed จะคงดอกเบี้ยสูงนานขึ้น" },
-  { id: "core-cpi", c: "macro", t: "Core CPI", en: "CPI ไม่รวมอาหารและพลังงาน",
-    d: "CPI ที่ตัดหมวดอาหารกับพลังงานออก เพราะสองหมวดนี้ราคาผันผวนตามฤดูกาลและเหตุการณ์ เช่น ราคาน้ำมัน Core จึงสะท้อนแรงกดดันด้านราคาพื้นฐานได้ดีกว่า และ Fed ดูตัวนี้ประกอบเสมอ",
-    w: "ถ้าตัวเลขรวมพุ่งเพราะน้ำมันแต่ Core นิ่ง มักตีความว่าเป็นแรงชั่วคราว ถ้า Core ขึ้นด้วย แปลว่าราคากำลังขึ้นกระจายหลายหมวด" },
-  { id: "ppi", c: "macro", t: "PPI", en: "Producer Price Index · ดัชนีราคาผู้ผลิต",
-    d: "วัดการเปลี่ยนแปลงของราคาที่ผู้ผลิตในสหรัฐขายสินค้าและบริการได้ (ราคาหน้าโรงงานหรือต้นน้ำ ก่อนถึงมือผู้บริโภค) สำนักสถิติแรงงานสหรัฐ (BLS) ประกาศทุกเดือน ตัวเลขหลักคือ Final Demand และมี Core หลายนิยาม เช่น ไม่รวมอาหารและพลังงาน หรือไม่รวมอาหาร พลังงาน และบริการการค้า",
-    w: "ต้นทุนผู้ผลิตที่ขึ้นแรงอาจถูกส่งต่อไปยังราคาสินค้าผู้บริโภคในภายหลัง ตลาดจึงมักดู PPI เป็นสัญญาณประกอบ CPI แต่ไม่ได้ขึ้นลงตามกันเสมอ เพราะบริษัทอาจรับต้นทุนไว้เอง การ์ด PPI ในหน้าแรกใช้ Core แบบ <b>ไม่รวมอาหาร พลังงาน และบริการการค้า</b>" },
-  { id: "pce", c: "macro", t: "PCE", en: "Personal Consumption Expenditures",
-    d: "อีกตัวชี้วัดเงินเฟ้อ ประกาศโดยสำนักวิเคราะห์เศรษฐกิจสหรัฐ (BEA) เป็นตัวที่ Fed ใช้เป็นเป้าหมาย 2% อย่างเป็นทางการ แต่ CPI ออกก่อน คนจึงพูดถึงมากกว่า",
-    w: "ค่าจะต่างจาก CPI เล็กน้อย เพราะสัดส่วนสินค้าที่นับไม่เท่ากัน" },
-  { id: "yoy", c: "macro", t: "YoY / MoM / QoQ", en: "การเทียบช่วงเวลา",
-    d: "YoY เทียบช่วงเดียวกันของปีก่อน, MoM เทียบเดือนก่อนหน้า, QoQ เทียบไตรมาสก่อนหน้า เช่น เงินเฟ้อ 3% YoY แปลว่าราคาโดยรวมสูงกว่าเดือนเดียวกันของปีก่อน 3%",
-    w: "ข่าวเศรษฐกิจมักให้ทั้ง YoY และ MoM อ่านคู่กัน YoY บอกภาพใหญ่ MoM บอกทิศทางล่าสุด" },
-  { id: "fomc", c: "macro", t: "FOMC", en: "Federal Open Market Committee",
-    d: "คณะกรรมการของ Fed ที่ประชุมปีละ 8 ครั้งตามตาราง เพื่อกำหนดดอกเบี้ยนโยบายสหรัฐ วันที่สองของการประชุมจะประกาศมติ ตามด้วยแถลงข่าวของประธาน Fed",
-    w: "ตลาดหุ้นมักผันผวนช่วงประกาศผล ดูได้จากการ์ดนับถอยหลังในหน้าแรก" },
-  { id: "fed-funds", c: "macro", t: "ดอกเบี้ยนโยบาย", en: "Federal Funds Rate",
-    d: "อัตราดอกเบี้ยเป้าหมายที่ Fed กำหนด เป็นช่วงกว้าง 0.25% ซึ่งเป็นฐานให้ดอกเบี้ยกู้ยืมและดอกเบี้ยเงินฝากทั่วระบบขยับตาม",
-    w: "โดยทั่วไป ขึ้นดอกเบี้ย = ต้นทุนเงินสูงขึ้น หุ้นมักถูกกดดัน ลดดอกเบี้ย = ตรงข้าม แต่ไม่เป็นแบบนี้เสมอไป ตลาดมักขยับล่วงหน้าไปแล้วตามที่คาด" },
-  { id: "hawk-dove", c: "macro", t: "Hawkish / Dovish", en: "ท่าทีของธนาคารกลาง",
-    d: "Hawkish คือท่าทีเข้มงวด เอนไปทางขึ้นหรือคงดอกเบี้ยสูงเพื่อสู้เงินเฟ้อ ส่วน Dovish คือท่าทีผ่อนปรน เอนไปทางลดดอกเบี้ยเพื่อพยุงเศรษฐกิจ",
-    w: "ตลาดอ่านท่าทีจากถ้อยคำในแถลงการณ์และคำพูดของเจ้าหน้าที่ Fed ไม่ได้ดูแค่ตัวเลขดอกเบี้ย" },
-  { id: "fedwatch", c: "macro", t: "CME FedWatch", en: "เครื่องมือประเมินโอกาสปรับดอกเบี้ย",
-    d: "เครื่องมือของ CME Group ที่คำนวณโอกาสที่ Fed จะขึ้น คงที่ หรือลดดอกเบี้ยในแต่ละการประชุม จากราคาสัญญาซื้อขายล่วงหน้าอัตราดอกเบี้ยในตลาด",
-    w: "ตัวเลขนี้คือ <b>สิ่งที่ตลาดคาดการณ์</b> ไม่ใช่คำพยากรณ์ของ Fed และเปลี่ยนได้ทุกวันตามข้อมูลเศรษฐกิจใหม่" },
 
-  { id: "revenue-profit", c: "earn", t: "รายได้ vs กำไรสุทธิ", en: "Revenue vs Net Income",
-    d: "รายได้ (Revenue) คือยอดขายรวมก่อนหักต้นทุน ส่วนกำไรสุทธิ (Net Income) คือส่วนที่เหลือหลังหักต้นทุน ค่าใช้จ่าย ดอกเบี้ย และภาษี",
-    w: "รายได้โตแต่กำไรไม่โตก็เกิดได้ ถ้าต้นทุนโตเร็วกว่า จึงควรดูทั้งสองตัวคู่กัน" },
-  { id: "eps", c: "earn", t: "EPS", en: "Earnings Per Share · กำไรต่อหุ้น",
-    d: "กำไรสุทธิหารด้วยจำนวนหุ้นทั้งหมด บอกว่าหุ้นหนึ่งหุ้นได้กำไรเท่าไร งบบริษัทสหรัฐมักมีทั้งตัวเลขตามมาตรฐานบัญชี (GAAP) และตัวเลขแบบปรับปรุง (Adjusted / Non-GAAP) ที่ตัดรายการพิเศษออก",
-    w: "เวลาเทียบกับที่นักวิเคราะห์คาด ให้ดูว่าข่าวใช้ตัวเลขแบบไหน เพราะสองแบบอาจต่างกันได้" },
-  { id: "pe", c: "earn", t: "P/E", en: "Price-to-Earnings Ratio",
-    d: "ราคาหุ้นหารด้วย EPS บอกว่าตลาดจ่ายราคากี่เท่าของกำไรต่อปี Trailing P/E ใช้กำไรย้อนหลัง 12 เดือน ส่วน Forward P/E ใช้กำไรที่คาดไว้ข้างหน้า",
-    w: "P/E สูงไม่ได้แปลว่าแพงเสมอ อาจเพราะตลาดคาดว่ากำไรจะโตเร็ว ควรเทียบกับหุ้นในกลุ่มเดียวกันและอัตราการเติบโต" },
-  { id: "beat-miss", c: "earn", t: "Consensus / Beat / Miss", en: "ค่าคาดการณ์ และผลเทียบกับคาด",
-    d: "Consensus คือค่าเฉลี่ยที่นักวิเคราะห์คาดไว้ ถ้าผลจริงสูงกว่าเรียก Beat ต่ำกว่าเรียก Miss ตรงกันเรียก In-line ใช้ได้ทั้งกับงบบริษัทและตัวเลขเศรษฐกิจอย่าง CPI",
-    w: "ราคาหุ้นขยับตามว่า <b>เทียบกับที่ตลาดคาด</b> ไม่ใช่แค่กำไรโตหรือไม่โต จึงมีกรณีงบดีแต่หุ้นร่วงได้" },
-  { id: "guidance", c: "earn", t: "Guidance", en: "แนวโน้มที่บริษัทประเมินเอง",
-    d: "ประมาณการที่บริษัทบอกเองสำหรับไตรมาสหรือปีข้างหน้า เช่น รายได้ กำไร หรือช่วงตัวเลขที่คาดว่าจะทำได้",
-    w: "หลายครั้งตลาดสนใจ Guidance มากกว่าผลงบที่ผ่านมาแล้ว เพราะราคาหุ้นมองไปข้างหน้า" },
-  { id: "market-cap", c: "earn", t: "Market Cap", en: "มูลค่าตลาด",
-    d: "ราคาหุ้น คูณจำนวนหุ้นทั้งหมด เท่ากับมูลค่าตลาดรวมของบริษัท ใช้เทียบขนาดของบริษัท",
-    w: "ราคาหุ้นต่อหน่วยสูงไม่ได้แปลว่าบริษัทใหญ่ ต้องดูมูลค่าตลาดรวม" },
 
-  { id: "dr", c: "prod", t: "DR", en: "Depositary Receipt · ใบแสดงสิทธิในหุ้นต่างประเทศ",
-    d: "ตราสารที่ออกและซื้อขายในตลาดหลักทรัพย์ไทย (SET) เป็นเงินบาท โดยอ้างอิงหุ้นหรือสินทรัพย์ต่างประเทศ ผู้ออก DR มีหุ้นต้นทางหรือสินทรัพย์อ้างอิงรองรับ ทำให้นักลงทุนไทยเข้าถึงหุ้นต่างประเทศได้ผ่านบัญชีหุ้นไทย",
-    w: "ราคา DR มักวิ่งตามหุ้นต้นทาง แต่ <b>ไม่เท่ากันเป๊ะ</b> อาจมีส่วนต่างราคา (Premium/Discount) จากอุปสงค์อุปทานในไทย ค่าเงิน และเวลาซื้อขายที่ต่างกัน สิทธิบางอย่างอาจไม่เหมือนถือหุ้นต้นทางโดยตรง ควรอ่านรายละเอียดของ DR ตัวนั้นก่อนซื้อ ดูรายการ DR ได้ที่ <a href=\"dr.html\">รวม DR</a>" },
-  { id: "etf", c: "prod", t: "ETF", en: "Exchange Traded Fund",
-    d: "กองทุนที่ซื้อขายในตลาดเหมือนหุ้น แต่ถือสินทรัพย์เป็นตะกร้า เช่น หุ้นหลายตัว ดัชนี หรือทองคำ ซื้อครั้งเดียวได้กระจายไปหลายตัว เช่น ETF ที่ตามดัชนี S&P 500",
-    w: "มีค่าธรรมเนียมการจัดการรายปี และแต่ละกองมีนโยบายต่างกัน ดู DR ที่เป็น ETF ได้ที่ <a href=\"dr.html?sector=etf\">รวม DR › กลุ่ม ETF</a>" }
-];
-
-const live = !!(window.SITE && SITE.basicsLive) || /[?&]preview=1/.test(location.search);
+const preview = /[?&]preview=1/.test(location.search), live = !!(window.SITE && SITE.basicsLive) || preview;
+const CATS = window.TERM_CATS, GT = window.termsShown(preview);   // คำศัพท์อยู่ใน terms.js (ฉบับร่างโผล่เฉพาะ ?preview=1 จนกว่าจะเปิด)
 if (live) {
   document.getElementById("soon").hidden = true; document.getElementById("gloss").hidden = false;
   document.querySelector(".lede").textContent = "ศัพท์การลงทุนที่เจอบ่อย อ่านเข้าใจง่าย";
@@ -344,13 +305,66 @@ if (live) {
   }
   function list() {
     const q = norm(st.q).trim();
-    const rows = TERMS.filter(x => (st.cat === "all" || x.c === st.cat) && (!q || norm([x.t, x.en, x.d, x.w].join(" ")).includes(q)));
+    const rows = GT.filter(x => (st.cat === "all" || x.c === st.cat) && (!q || norm([x.t, x.en, x.d, x.w].join(" ")).includes(q)));
     $("glist").innerHTML = rows.map(x => `<article class="g-card" id="${x.id}"><span class="g-cat">${CATS[x.c]}</span><h3>${x.t}<small>${x.en}</small></h3><p>${x.d}</p><p class="why">${x.w}</p></article>`).join("");
     $("gempty").hidden = rows.length > 0;
   }
   $("gcats").addEventListener("click", e => { const b = e.target.closest("[data-c]"); if (!b) return; st.cat = b.dataset.c; cats(); list(); });
   $("gq").addEventListener("input", e => { st.q = e.target.value; list(); });
   cats(); list();
+
+  // ---- ควิซ: สุ่ม 5 ข้อจาก 13 ข้อ เฉลยทันที (แก้ข้อความที่นี่ได้เลย: q = คำถาม, o = ตัวเลือก (ตัวแรกคือคำตอบที่ถูก สลับลำดับให้เอง), x = คำอธิบาย, id = คำศัพท์ที่ลิงก์ไปอ่านต่อ) ----
+  const QS = [
+    { q: "CPI ออกมาสูงกว่าที่นักวิเคราะห์คาด ตลาดมักตีความอย่างไร", o: ["Fed อาจคงดอกเบี้ยสูงนานขึ้น", "Fed น่าจะลดดอกเบี้ยเร็วขึ้น", "ไม่มีผลอะไรกับตลาดเลย"], x: "ตลาดดูว่าสูงหรือต่ำกว่าที่คาด ถ้าสูงกว่า คนมักมองว่า Fed ยังต้องสู้เงินเฟ้อ จึงไม่รีบลดดอกเบี้ย", id: "cpi" },
+    { q: "Core CPI ต่างจาก CPI ทั่วไปอย่างไร", o: ["ตัดหมวดอาหารและพลังงานออก", "นับเฉพาะราคาบ้านและค่าเช่า", "คำนวณจากราคาที่ผู้ผลิตขาย"], x: "อาหารกับพลังงานราคาผันผวนง่าย การตัดออกทำให้เห็นแรงกดดันด้านราคาพื้นฐานชัดขึ้น", id: "core-cpi" },
+    { q: "เป้าหมายเงินเฟ้อ 2% ของ Fed อย่างเป็นทางการวัดด้วยตัวไหน", o: ["PCE", "CPI", "PPI"], x: "Fed ใช้ PCE เป็นตัวหลัก แต่ CPI ประกาศก่อนจึงเป็นที่พูดถึงมากกว่า", id: "pce" },
+    { q: "CPI เพิ่ม 3% YoY หมายความว่าอย่างไร", o: ["ราคาโดยรวมสูงกว่าเดือนเดียวกันของปีก่อน 3%", "ราคาโดยรวมสูงกว่าเดือนก่อน 3%", "ราคาสินค้าทุกอย่างขึ้น 3% เท่ากัน"], x: "YoY เทียบช่วงเดียวกันของปีก่อน ส่วน MoM เทียบเดือนก่อนหน้า", id: "yoy" },
+    { q: "ตามตารางปกติ FOMC ประชุมปีละกี่ครั้ง", o: ["8 ครั้ง", "4 ครั้ง", "12 ครั้ง"], x: "ประชุมปีละ 8 ครั้ง และจะประกาศมติในวันที่สองของการประชุม", id: "fomc" },
+    { q: "Fed ท่าที Hawkish หมายถึงอะไร", o: ["เอนไปทางขึ้นหรือคงดอกเบี้ยสูงเพื่อสู้เงินเฟ้อ", "เอนไปทางลดดอกเบี้ยเพื่อพยุงเศรษฐกิจ", "ไม่มีท่าทีใดๆ"], x: "ส่วนท่าทีผ่อนปรน เอนไปทางลดดอกเบี้ย เรียกว่า Dovish", id: "hawk-dove" },
+    { q: "CME FedWatch บอกอะไร", o: ["โอกาสที่ตลาดคาดว่า Fed จะขึ้น คงที่ หรือลดดอกเบี้ย", "คำพยากรณ์อย่างเป็นทางการของ Fed", "ราคาพันธบัตรรัฐบาลสหรัฐ"], x: "คำนวณจากราคาสัญญาล่วงหน้าในตลาด เป็นสิ่งที่ตลาดคาดการณ์ และเปลี่ยนได้ทุกวัน", id: "fedwatch" },
+    { q: "บริษัทมี P/E สูง แปลว่าอะไรได้บ้าง", o: ["ตลาดยอมจ่ายหลายเท่าของกำไร อาจเพราะคาดว่าโตเร็ว หรืออาจแพงเกินไปก็ได้", "หุ้นแพงเกินไปแน่นอน", "บริษัทมีกำไรสูงที่สุดในกลุ่ม"], x: "P/E ต้องเทียบกับกลุ่มเดียวกันและอัตราการเติบโต ไม่ควรดูตัวเดียวแล้วสรุป", id: "pe" },
+    { q: "ผลงบจริงสูงกว่าค่าเฉลี่ยที่นักวิเคราะห์คาด เรียกว่าอะไร", o: ["Beat", "Miss", "In-line"], x: "ต่ำกว่าคาดคือ Miss และตรงกับที่คาดคือ In-line", id: "beat-miss" },
+    { q: "งบดี กำไรโต แต่ราคาหุ้นกลับร่วง เกิดจากอะไรได้บ้าง", o: ["ผลต่ำกว่าที่ตลาดคาดไว้ หรือ Guidance อ่อนกว่าที่หวัง", "ตลาดหุ้นมักสวนทางกับงบเสมอ", "เป็นความผิดพลาดของระบบซื้อขาย"], x: "ราคาหุ้นมองไปข้างหน้า และขยับตามว่าเทียบกับที่ตลาดคาดอย่างไร ไม่ใช่แค่กำไรโตหรือไม่", id: "guidance" },
+    { q: "DR ต่างจากการถือหุ้นต่างประเทศโดยตรงอย่างไร", o: ["ซื้อขายเป็นบาทในตลาดหลักทรัพย์ไทย และราคาอาจไม่เท่าหุ้นต้นทางเป๊ะ", "ราคา DR เท่ากับหุ้นต้นทางเสมอ", "ได้สิทธิทุกอย่างเหมือนถือหุ้นต้นทางทุกประการ"], x: "ควรอ่านรายละเอียดของ DR ตัวนั้นก่อนซื้อ โดยเฉพาะส่วนต่างราคาและสิทธิ", id: "dr" },
+    { q: "Market Cap คำนวณอย่างไร", o: ["ราคาหุ้น × จำนวนหุ้นทั้งหมด", "กำไรสุทธิ × 10", "รายได้รวมทั้งปี"], x: "ราคาต่อหุ้นสูงไม่ได้แปลว่าบริษัทใหญ่ ต้องดูมูลค่าตลาดรวม", id: "market-cap" },
+    { q: "PPI วัดอะไร", o: ["ราคาที่ผู้ผลิตขายสินค้าและบริการได้", "ราคาที่ผู้บริโภคจ่าย", "อัตราว่างงาน"], x: "ต้นทุนผู้ผลิตที่ขึ้นแรงอาจถูกส่งต่อไปที่ราคาผู้บริโภคในภายหลัง แต่ไม่ได้ขึ้นตามกันเสมอ", id: "ppi" }
+  ];
+  const shown = new Set(GT.map(t => t.id)), $q = $("quiz");
+  const shuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const escq = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  let round = [], qi = 0, score = 0;
+  function qStart() { round = shuf(QS.filter(x => shown.has(x.id))).slice(0, 5); qi = 0; score = 0; qShow(); }
+  function qShow() {
+    if (qi >= round.length) {
+      $q.innerHTML = `<div class="qq"><div class="qtop"><span>จบรอบนี้</span></div><div class="qscore">${score} / ${round.length}</div><p>${score === round.length ? "เก่งมาก ตอบถูกทุกข้อ" : score >= round.length - 1 ? "เกือบเต็มแล้ว" : "ลองอ่านคำอธิบายใต้แต่ละข้อ หรือกลับไปที่คลังศัพท์แล้วทำใหม่ได้"}</p><button class="btn" id="qAgain" type="button">เล่นอีกรอบ</button><button class="btn alt" id="qBack" type="button">กลับคลังศัพท์</button></div>`;
+      return;
+    }
+    const x = round[qi], opts = shuf(x.o.map((t, i) => ({ t, ok: i === 0 })));
+    $q.innerHTML = `<div class="qq"><div class="qtop"><span>ข้อ ${qi + 1} จาก ${round.length}</span><span>ถูก ${score}</span></div><h2>${escq(x.q)}</h2><div class="qopts">${opts.map((o, i) => `<button type="button" class="qo" data-ok="${o.ok ? 1 : 0}">${escq(o.t)}</button>`).join("")}</div><div id="qx"></div></div>`;
+  }
+  $q.addEventListener("click", e => {
+    const b = e.target.closest(".qo");
+    if (b) {
+      const x = round[qi]; if (!b.parentNode.querySelector(".ok,.no")) {
+        const ok = b.dataset.ok === "1"; if (ok) score++;
+        b.parentNode.querySelectorAll(".qo").forEach(o => { o.disabled = true; if (o.dataset.ok === "1") o.classList.add("ok"); });
+        if (!ok) b.classList.add("no");
+        $("qx").innerHTML = `<div class="qexp"><b>${ok ? "ถูกต้อง" : "ยังไม่ใช่"}</b> ${escq(x.x)} <a href="#${escq(x.id)}" data-go="${escq(x.id)}">อ่านเพิ่ม ›</a></div><button class="btn" id="qNext" type="button">${qi + 1 >= round.length ? "ดูคะแนน" : "ข้อต่อไป"}</button>`;
+      }
+      return;
+    }
+    if (e.target.closest("#qNext")) { qi++; qShow(); return; }
+    if (e.target.closest("#qAgain")) { qStart(); return; }
+    if (e.target.closest("#qBack")) { setMode("list"); return; }
+    const g = e.target.closest("[data-go]"); if (g) { e.preventDefault(); setMode("list"); const el = document.getElementById(g.dataset.go); if (el) { el.classList.add("flash"); el.scrollIntoView({ block: "start" }); } }
+  });
+  function setMode(m) {
+    $("gmList").setAttribute("aria-pressed", m === "list"); $("gmQuiz").setAttribute("aria-pressed", m === "quiz");
+    $("gwrap").hidden = m !== "list"; $q.hidden = m !== "quiz";
+    if (m === "quiz") qStart();
+  }
+  $("gmList").onclick = () => setMode("list"); $("gmQuiz").onclick = () => setMode("quiz");
+  if (/[?&]quiz=1/.test(location.search)) setMode("quiz");
   const h = decodeURIComponent(location.hash.slice(1));
   if (h) {   // หน้าอาจยังถูกล็อกสมาชิกซ่อนอยู่ รอจนมองเห็นจริงก่อนค่อยเลื่อน
     const el = document.getElementById(h);

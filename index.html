@@ -25,8 +25,9 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610160628"></script>
-<script src="gate.js?v=202610160628"></script>
+<script src="site.js?v=202610161204"></script>
+<script src="terms.js?v=202610161204"></script>
+<script src="gate.js?v=202610161204"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -137,6 +138,18 @@ h1 { font-size: clamp(2.2rem, 8vw, 3.4rem); font-weight: 700; line-height: 1.15;
 .macro-next { margin: 0; padding: 9px 14px 11px; text-align: center; font-size: .78rem; line-height: 1.6; color: var(--muted); border-top: 1px solid var(--line); }
 .macro-next[hidden] { display: none; }
 .macro-next b { color: var(--ink); font-weight: 600; }
+.macro-fx { margin: 0; padding: 0 14px 10px; text-align: center; font-size: .74rem; color: var(--muted); }
+.macro-fx[hidden] { display: none; }
+.macro-fx b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+/* ศัพท์วันนี้ */
+.wod { margin: 16px 0 0; padding: 14px 16px 14px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 14px; box-shadow: var(--shadow); }
+.wod[hidden] { display: none; }
+.wod small { display: block; font-size: .74rem; font-weight: 600; letter-spacing: .04em; color: var(--muted); }
+.wod h3 { margin: 2px 0 0; font-size: 1.1rem; line-height: 1.35; }
+.wod h3 span { font-size: .8rem; font-weight: 400; color: var(--muted); margin-left: 6px; }
+.wod p { margin: 6px 0 0; font-size: .92rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.wod a { font-size: .86rem; color: var(--accent); }
+.wod-links { display: flex; gap: 14px; margin-top: 6px; }
 .pick { font-size: 0.95rem; font-weight: 600; color: var(--muted); margin: 30px 4px 12px; letter-spacing: .02em; }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
 .card {
@@ -217,7 +230,10 @@ a.card:hover .go { text-decoration: underline; }
   </div>
 
   <p class="macro-next" id="macroNext" hidden></p>
+  <p class="macro-fx" id="macroFx" hidden></p>
   </section>
+
+  <section class="wod" id="wod" hidden aria-label="ศัพท์การลงทุนวันนี้"></section>
 
   <h2 class="pick">เลือกที่อยากเข้า</h2>
   <section class="cards" id="cards" aria-label="เลือกหน้า"></section>
@@ -351,6 +367,26 @@ inflCard(window.PPI_LATEST, "p", "ppi");
   ev.sort(function (a, b) { return a[0] - b[0]; });
   if (ev.length) { var n = document.getElementById("macroNext"); n.innerHTML = "รอบหน้า: " + ev.map(function (e) { return "<b>" + e[1] + "</b>"; }).join(" · "); n.hidden = false; }
   wrap.hidden = false;
+})();
+
+// ค่าเงินบาท/ดอลลาร์ ใต้การ์ดมหภาค (ดึงอัตโนมัติ ดู fxUsdThb ใน site.js)
+(function () {
+  var el = document.getElementById("macroFx"); if (!el || !window.fxUsdThb) return;
+  fxUsdThb(function (fx) {
+    var d = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short" }).format(new Date(fx.date + "T12:00:00+07:00"));
+    el.innerHTML = "USD/THB <b>" + fx.rate.toFixed(2) + "</b> · อัตราอ้างอิง ECB ณ " + d + (fx.src === "fallback" ? " (ค่าสำรอง ดึงข้อมูลสดไม่ได้)" : "") + " · ไม่ใช่เรทของโบรกเกอร์";
+    el.hidden = false;
+  });
+})();
+
+// ศัพท์วันนี้: เลือกจากคลังศัพท์ที่เปิดแล้ว วนตามวัน (เวลาไทย) ทุกคนเห็นคำเดียวกันในวันเดียวกัน
+(function () {
+  var box = document.getElementById("wod"); if (!box || !window.TERMS || !(window.SITE && SITE.basicsLive)) return;
+  var list = termsShown(false); if (!list.length) return;
+  var day = Math.floor((Date.now() + 7 * 3600e3) / 864e5), t = list[day % list.length];
+  var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  box.innerHTML = "<small>ศัพท์วันนี้</small><h3>" + esc(t.t) + "<span>" + esc(t.en) + "</span></h3><p>" + t.d.replace(/<[^>]+>/g, "") + '</p><div class="wod-links"><a href="basics.html#' + esc(t.id) + '">อ่านต่อ ›</a><a href="basics.html?quiz=1">ลองทำควิซ ›</a></div>';
+  box.hidden = false;
 })();
 
 // ใช้โลโก้เป็น favicon
