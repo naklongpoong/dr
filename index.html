@@ -25,9 +25,9 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610170709"></script>
-<script src="terms.js?v=202610170709"></script>
-<script src="gate.js?v=202610170709"></script>
+<script src="site.js?v=202610171238"></script>
+<script src="terms.js?v=202610171238"></script>
+<script src="gate.js?v=202610171238"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -259,8 +259,8 @@ var PAGES = [
   { key: "earnings", href: "earnings.html", on: SITE.earnings, hidden: !SITE.earnings, title: "พรีวิวงบ & งบ", desc: "พรีวิวงบและงบหุ้นรายตัว กรองตามชื่อหุ้นได้", go: "เข้าดูงบ ›" },
   { key: "basics", href: "basics.html", on: true, hidden: !SITE.basics, badge: SITE.basicsLive ? "" : "Coming Soon", title: "ความรู้พื้นฐาน", desc: "ความรู้เริ่มต้นสำหรับมือใหม่ อ่านเข้าใจง่าย", go: "ดูหน้าความรู้พื้นฐาน ›" },
   { key: "invest", href: "invest.html", on: true, hidden: !SITE.invest, title: "แนวทางการลงทุน", desc: "เกมตอบ 8 ข้อ ดูว่าสไตล์การลงทุนของคุณเป็นแบบไหน", go: "เล่นเกมเลย ›" },
-  { key: "calc", href: "calc.html", on: true, hidden: !SITE.calc, title: "จำลองดอกเบี้ยทบต้น", desc: "กรอกเงินต้น เงินออมต่อเดือน ผลตอบแทน แล้วดูว่าเงินโตแค่ไหน", go: "ลองคำนวณ ›" },
-  { key: "rr", href: "rr.html", on: true, hidden: !SITE.rr, title: "คำนวณ Risk:Reward", desc: "ใส่ราคาเข้า จุดตัดขาดทุน เป้าหมาย ดูสัดส่วนเสี่ยงต่อผลตอบแทนและจำนวนหุ้นตามความเสี่ยงที่ตั้งไว้", go: "ลองคำนวณ ›" },
+  { key: "calc", href: "calc.html", on: true, hidden: !SITE.calc, title: "คำนวณดอกเบี้ยทบต้น", desc: "กรอกเงินต้น เงินออมต่อเดือน ผลตอบแทน แล้วดูว่าเงินโตแค่ไหน", go: "ลองคำนวณ ›" },
+  { key: "rr", href: "rr.html", on: true, hidden: !SITE.rr, title: "คำนวณความคุ้มเสี่ยง (Risk:Reward)", desc: "ใส่ราคาที่ซื้อ ราคาตัดขาดทุน และราคาเป้าหมาย ดูว่าเสี่ยงเสียเท่าไรเทียบกับหวังได้เท่าไร และซื้อได้กี่หุ้นตามเงินที่ยอมเสีย", go: "ลองคำนวณ ›" },
   { key: "etf", href: "etf.html", on: true, hidden: !SITE.etf, badge: "Coming Soon", title: "ETF", desc: "รวมข้อมูลและบทวิเคราะห์ ETF", go: "ดูหน้า ETF ›" }
 ];
 document.getElementById("cards").innerHTML = PAGES.filter(function (p) { return !p.hidden; }).map(function (p) {
