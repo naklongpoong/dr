@@ -223,6 +223,15 @@ service cloud.firestore {
       allow delete: if signedIn() && request.auth.uid == uid;
     }
 
+    // ---------- เป้าหมายในหน้าคำนวณดอกเบี้ยทบต้น ซิงก์ตามบัญชี (เจ้าของเท่านั้น) เก็บได้สูงสุด 10 เป้าหมาย ----------
+    match /goalboard/{uid} {
+      allow get: if isMember() && request.auth.uid == uid;
+      allow create, update: if isMember() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['goals', 'updatedAt'])
+        && request.resource.data.goals is list && request.resource.data.goals.size() <= 10;
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
     // อย่างอื่นปิดหมด
     match /{document=**} {
       allow read, write: if false;

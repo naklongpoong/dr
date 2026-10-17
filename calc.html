@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610171252"></script>
-<script src="gate.js?v=202610171252"></script>
+<script src="site.js?v=202610171259"></script>
+<script src="gate.js?v=202610171259"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -282,6 +282,25 @@ th { color: var(--muted); font-weight: 600; font-size: .8rem; }
 .gitem .acts { display: flex; gap: 16px; margin-top: 6px; }
 #gshare { display: block; margin-top: 14px; }
 #gmsg { min-height: 1.2em; }
+
+/* ---------- แผน B / เปรียบเทียบ ---------- */
+.fgrid .full { grid-column: 1 / -1; }
+.chk { display: flex; align-items: center; gap: 8px; margin: 16px 0 0; font-size: .95rem; font-weight: 600; color: var(--ink); cursor: pointer; }
+.chk input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
+.bbox { margin-top: 10px; padding: 12px 14px 14px; border: 1px dashed var(--line); border-radius: 12px; background: var(--bg); }
+.bbox h3 { margin: 0 0 2px; }
+.cmp-sum td:first-child, .cmp-sum th:first-child { text-align: left; }
+.cmp-sum tr.tot td { font-weight: 700; border-bottom: 0; }
+.legend .ld { display: inline-block; width: 18px; height: 0; border-top: 3px solid; margin-right: 6px; vertical-align: 3px; }
+.legend .ld.b { border-top-style: dashed; }
+#goalBox { white-space: pre-line; }
+#chart2 text { font-size: 14px; }
+@media (max-width: 560px) {
+  #chart2 text { font-size: 20px; }
+  .cmp-sum th, .cmp-sum td { padding: 6px 4px; font-size: .78rem; }
+  .cmp-sum td:first-child { white-space: normal; }
+}
+#gacct { min-height: 1.2em; }
 </style>
 </head>
 <body>
@@ -303,10 +322,22 @@ th { color: var(--muted); font-weight: 600; font-size: .8rem; }
     <div class="fgrid">
       <div class="fld"><label for="p0">เงินต้นเริ่มต้น</label><div class="in"><input id="p0" type="number" inputmode="decimal" min="0" step="any" value="100000"><span class="u">บาท</span></div></div>
       <div class="fld"><label for="pm">เงินลงทุนเพิ่มทุกเดือน</label><div class="in"><input id="pm" type="number" inputmode="decimal" min="0" step="any" value="5000"><span class="u">บาท/เดือน</span></div></div>
+      <div class="fld"><label for="gr">เพิ่มเงินลงทุนทุกปี (ไม่บังคับ)</label><div class="in"><input id="gr" type="number" inputmode="decimal" min="0" max="50" step="any" value="0"><span class="u">% ต่อปี</span></div><small>เช่น เงินเดือนขึ้นปีละ 3–5% แล้วลงเพิ่มตาม ไม่ใส่คือลงเท่าเดิมทุกเดือน</small></div>
       <div class="fld"><label for="rt">ผลตอบแทนที่สมมติ ต่อปี</label><div class="in"><input id="rt" type="number" inputmode="decimal" min="-50" max="100" step="any" value="7"><span class="u">% ต่อปี</span></div><small>ใส่เป็นตัวเลขสมมติเพื่อทดลอง ของจริงขึ้นลงทุกปี</small></div>
       <div class="fld"><label for="yr">ระยะเวลา</label><div class="in"><input id="yr" type="number" inputmode="numeric" min="1" max="60" step="1" value="10"><span class="u">ปี</span></div><small>1–60 ปี</small></div>
       <div class="fld"><label for="inf">เงินเฟ้อที่สมมติ ต่อปี (ไม่บังคับ)</label><div class="in"><input id="inf" type="number" inputmode="decimal" min="0" max="50" step="any" value="0"><span class="u">% ต่อปี</span></div><small>ใส่เพื่อดูมูลค่าเทียบกับเงินวันนี้ ไม่ใส่คือ 0</small></div>
-      <div class="fld"><label for="tg">เป้าหมายเงินก้อน (ไม่บังคับ)</label><div class="in"><input id="tg" type="number" inputmode="decimal" min="0" step="any" value="" placeholder="เช่น 1000000"><span class="u">บาท</span></div><small>ใส่เพื่อดูว่าถึงเป้าเมื่อไร หรือต้องลงเงินเดือนละเท่าไรถึงจะถึงเป้า</small></div>
+      <div class="fld full"><label for="tg">เป้าหมายเงินก้อน (ไม่บังคับ)</label><div class="in"><input id="tg" type="number" inputmode="decimal" min="0" step="any" value="" placeholder="เช่น 1000000"><span class="u">บาท</span></div><small>ใส่เพื่อดูว่าถึงเป้าเมื่อไร หรือต้องลงเงินเดือนละเท่าไรถึงจะถึงเป้า</small></div>
+    </div>
+
+    <label class="chk"><input type="checkbox" id="cmp">เปรียบเทียบกับอีกแผน (แผน B)</label>
+    <div class="bbox" id="cmpBox" hidden>
+      <h3>แผน B</h3>
+      <p class="note">ใส่เฉพาะส่วนที่อยากให้ต่างจากแผน A เงินต้น ระยะเวลา และเงินเฟ้อใช้ค่าเดียวกัน</p>
+      <div class="fgrid">
+        <div class="fld"><label for="pm2">เงินลงทุนเพิ่มทุกเดือน</label><div class="in"><input id="pm2" type="number" inputmode="decimal" min="0" step="any" value=""><span class="u">บาท/เดือน</span></div></div>
+        <div class="fld"><label for="gr2">เพิ่มเงินลงทุนทุกปี</label><div class="in"><input id="gr2" type="number" inputmode="decimal" min="0" max="50" step="any" value=""><span class="u">% ต่อปี</span></div></div>
+        <div class="fld"><label for="rt2">ผลตอบแทนที่สมมติ ต่อปี</label><div class="in"><input id="rt2" type="number" inputmode="decimal" min="-50" max="100" step="any" value=""><span class="u">% ต่อปี</span></div></div>
+      </div>
     </div>
     <p class="err" id="err" hidden></p>
   </section>
@@ -319,21 +350,31 @@ th { color: var(--muted); font-weight: 600; font-size: .8rem; }
       <div class="stat"><span>เงินรวมเป็นกี่เท่าของที่ใส่</span><b id="sX"></b></div>
     </div>
     <div class="late" id="goalBox" hidden></div>
+
+    <div id="cmpOut" hidden>
+      <h3>เทียบแผน A กับแผน B</h3>
+      <div class="late" id="cmpSum"></div>
+      <div class="tbl-w"><table class="cmp-sum"><thead><tr><th></th><th>แผน A</th><th>แผน B</th><th>ต่าง (B − A)</th></tr></thead><tbody id="cmpTb"></tbody></table></div>
+      <div class="legend" id="cmpLg"></div>
+      <svg class="chart" id="chart2" role="img" aria-label="กราฟเส้นเทียบเงินรวมรายปีของแผน A และแผน B"></svg>
+    </div>
+
     <h3>การเติบโตรายปี</h3>
     <div class="legend"><span><i style="background:var(--accent)"></i>เงินที่ใส่เอง</span><span><i style="background:var(--gold)"></i>ผลตอบแทนสะสม</span></div>
     <svg class="chart" id="chart" role="img" aria-label="กราฟแท่งการเติบโตของเงินรายปี"></svg>
     <div class="late" id="late" hidden></div>
     <h3>ตารางรายปี</h3>
-    <div class="tbl-w"><table><thead><tr><th>ปีที่</th><th>เงินที่ใส่สะสม</th><th>ผลตอบแทนสะสม</th><th>เงินรวม</th></tr></thead><tbody id="tb"></tbody></table></div>
-    <p class="note">วิธีคิด: ผลตอบแทนต่อปีที่กรอกถูกแปลงเป็นรายเดือนแบบทบต้น (ให้ครบปีเท่ากับอัตราที่กรอก) เงินลงทุนรายเดือนใส่ปลายเดือน ตัวเลขนี้เป็นการคำนวณสมมติเพื่อการศึกษา ไม่ได้รับประกันผลตอบแทน ไม่รวมภาษี ค่าธรรมเนียม และอัตราแลกเปลี่ยน ของจริงผลตอบแทนแต่ละปีไม่เท่ากัน และไม่ใช่คำแนะนำการลงทุน</p>
+    <div class="tbl-w"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
+    <p class="note">วิธีคิด: ผลตอบแทนต่อปีที่กรอกถูกแปลงเป็นรายเดือนแบบทบต้น (ให้ครบปีเท่ากับอัตราที่กรอก) เงินลงทุนรายเดือนใส่ปลายเดือน ถ้าใส่ % เพิ่มเงินลงทุนทุกปี เงินรายเดือนจะเพิ่มขึ้นตอนต้นปีถัดไป ตัวเลขนี้เป็นการคำนวณสมมติเพื่อการศึกษา ไม่ได้รับประกันผลตอบแทน ไม่รวมภาษี ค่าธรรมเนียม และอัตราแลกเปลี่ยน ของจริงผลตอบแทนแต่ละปีไม่เท่ากัน และไม่ใช่คำแนะนำการลงทุน</p>
   </section>
 
   <section class="cc" id="saved" aria-label="เป้าหมายที่บันทึกไว้">
     <h2>บันทึกเป็นเป้าหมายของฉัน</h2>
-    <p class="note">ตั้งชื่อแผนนี้ เช่น "เงินดาวน์บ้าน" หรือ "เงินเกษียณ" แล้วกดบันทึก กลับมาเปิดดูหรือปรับตัวเลขต่อได้ทีหลัง ข้อมูลเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น ยังไม่ซิงก์ข้ามเครื่อง และถ้าล้างข้อมูลเบราว์เซอร์จะหาย</p>
+    <p class="note">ตั้งชื่อแผนนี้ เช่น "เงินดาวน์บ้าน" หรือ "เงินเกษียณ" แล้วกดบันทึก กลับมาเปิดดูหรือปรับตัวเลขต่อได้ทีหลัง เก็บไว้ในเบราว์เซอร์เครื่องนี้ และถ้าผูกบัญชี Google (ดูด้านล่าง) จะซิงก์ไปเปิดจากเครื่องอื่นได้ด้วย (บันทึกเฉพาะแผน A)</p>
     <div class="grow"><input id="gname" type="text" maxlength="40" placeholder="ชื่อเป้าหมาย เช่น เงินดาวน์บ้าน" aria-label="ชื่อเป้าหมาย"><button class="btn" id="gsave" type="button">บันทึก</button></div>
     <p class="note" id="gmsg" role="status"></p>
     <div id="glist"></div>
+    <p class="note" id="gacct" hidden></p>
     <button class="linkbtn" id="gshare" type="button">คัดลอกลิงก์แผนนี้ (ส่งให้เพื่อนหรือโพสต์ได้)</button>
   </section>
 </main>
@@ -345,13 +386,16 @@ const $ = id => document.getElementById(id);
 const nf = n => Math.round(n).toLocaleString("en-US");
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const num = (id, d) => { const v = parseFloat($(id).value); return isFinite(v) ? v : d; };
+const el = (t, c) => { const e = document.createElement(t); if (c) e.className = c; return e; };
+const sgn = d => (d > 0.5 ? "+" : d < -0.5 ? "−" : "") + nf(Math.abs(d));
 
-// จำลองรายเดือน คืนยอดสิ้นปีของแต่ละปี [{y, put, bal}]
-function sim(p0, pm, rate, years) {
-  const rm = Math.pow(1 + rate / 100, 1 / 12) - 1, out = [];
-  let bal = p0, put = p0;
+// จำลองรายเดือน คืนยอดสิ้นปีของแต่ละปี [{y, put, bal}] step = % ที่เพิ่มเงินลงทุนรายเดือนทุกต้นปี
+function sim(p0, pm, rate, years, step) {
+  const rm = Math.pow(1 + rate / 100, 1 / 12) - 1, sg = 1 + (step || 0) / 100, out = [];
+  let bal = p0, put = p0, c = pm;
   for (let m = 1; m <= years * 12; m++) {
-    bal = bal * (1 + rm) + pm; put += pm;
+    if (m > 1 && (m - 1) % 12 === 0) c *= sg;
+    bal = bal * (1 + rm) + c; put += c;
     if (m % 12 === 0) out.push({ y: m / 12, put: put, bal: bal });
   }
   return out;
@@ -372,76 +416,154 @@ function chart(rows) {
   });
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = g;
 }
+// กราฟเส้นเทียบแผน A (เส้นทึบสีน้ำเงิน) กับแผน B (เส้นประสีเขียว)
+function compact(v) { return v >= 1e6 ? (v / 1e6).toFixed(v >= 1e7 ? 0 : 1).replace(/\.0$/, "") + "M" : v >= 1e3 ? Math.round(v / 1e3) + "K" : String(Math.round(v)); }
+function chart2(A, ra, rb) {
+  const W = 640, H = 270, L = 56, R = 30, T = 12, B = 26, svg = $("chart2"), n = ra.length;
+  const pa = [{ y: 0, bal: A.p0 }].concat(ra), pb = [{ y: 0, bal: A.p0 }].concat(rb);
+  const max = Math.max.apply(null, pa.concat(pb).map(r => r.bal).concat([1]));
+  const X = y => L + (W - L - R) * y / n, Y = v => T + (H - T - B) * (1 - v / max);
+  let g = "";
+  for (let i = 0; i <= 4; i++) { const v = max * i / 4, y = Y(v); g += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y}" y2="${y}"/><text x="${L - 5}" y="${y + 3}" text-anchor="end">${compact(v)}</text>`; }
+  const every = Math.max(1, Math.ceil(n / 10));
+  for (let y = 0; y <= n; y++) if (y % every === 0 || y === n) g += `<text x="${X(y)}" y="${H - 7}" text-anchor="middle">${y}</text>`;
+  const line = (p, col, dash) => `<polyline fill="none" stroke="${col}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"${dash ? ' stroke-dasharray="7 5"' : ""} points="${p.map(r => X(r.y).toFixed(1) + "," + Y(r.bal).toFixed(1)).join(" ")}"/>`;
+  g += line(pa, "var(--accent)", false) + line(pb, "var(--live)", true);
+  const ea = pa[pa.length - 1], eb = pb[pb.length - 1];
+  let ya = Y(ea.bal), yb = Y(eb.bal);
+  if (Math.abs(ya - yb) < 14) { const mid = (ya + yb) / 2, up = ya <= yb; ya = mid + (up ? -7 : 7); yb = mid + (up ? 7 : -7); }
+  g += `<circle cx="${X(n)}" cy="${Y(ea.bal)}" r="4" fill="var(--accent)"/><circle cx="${X(n)}" cy="${Y(eb.bal)}" r="4" fill="var(--live)"/>`;
+  g += `<text x="${X(n) + 8}" y="${ya + 4}" style="fill:var(--accent);font-weight:700">A</text><text x="${X(n) + 8}" y="${yb + 4}" style="fill:var(--live);font-weight:700">B</text>`;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = g;
+}
+
+// แผนที่อ่านจากช่องกรอก (บังคับให้อยู่ในช่วงที่รับได้)
+function planA() {
+  return { p0: clamp(num("p0", 0), 0, 1e12), pm: clamp(num("pm", 0), 0, 1e10), rt: clamp(num("rt", 0), -50, 100),
+           yr: clamp(Math.round(num("yr", 10)), 1, 60), gr: clamp(num("gr", 0), 0, 50), inf: clamp(num("inf", 0), 0, 50), tg: clamp(num("tg", 0), 0, 1e13) };
+}
+function planB(A) { return Object.assign({}, A, { pm: clamp(num("pm2", A.pm), 0, 1e10), rt: clamp(num("rt2", A.rt), -50, 100), gr: clamp(num("gr2", A.gr), 0, 50) }); }
+const run = P => sim(P.p0, P.pm, P.rt, P.yr, P.gr);
+
+// กี่เดือนถึงเป้า (นับตามวิธีเดียวกับ sim) คืน -1 ถ้าไม่ถึงในเวลาที่ตั้ง
+function monthsToGoal(P, tg) {
+  const rm = Math.pow(1 + P.rt / 100, 1 / 12) - 1, sg = 1 + P.gr / 100; let bal = P.p0, c = P.pm;
+  if (bal >= tg) return 0;
+  for (let m = 1; m <= P.yr * 12; m++) { if (m > 1 && (m - 1) % 12 === 0) c *= sg; bal = bal * (1 + rm) + c; if (bal >= tg) return m; }
+  return -1;
+}
+// เงินลงทุนรายเดือนตอนเริ่มที่ต้องใช้ให้ครบเป้าพอดีเมื่อครบกำหนด (ใช้ sim ตัวเดียวกัน เลยตรงกันเสมอ)
+function needPm(P, tg) {
+  const base = sim(P.p0, 0, P.rt, P.yr, P.gr).pop().bal, unit = sim(0, 1, P.rt, P.yr, P.gr).pop().bal;
+  return Math.max(0, (tg - base) / unit);
+}
+function goalText(P, last, tg, label) {
+  const m = monthsToGoal(P, tg), pre = label ? label + ": " : "";
+  if (m === 0) return `${pre}เงินต้นที่ใส่ถึงเป้าหมาย ${nf(tg)} บาท ตั้งแต่วันแรกแล้ว`;
+  if (m > 0) {
+    const y = Math.floor(m / 12), mo = m % 12, parts = [];
+    if (y) parts.push(y + " ปี"); if (mo) parts.push(mo + " เดือน");
+    return `${pre}ถึงเป้าหมาย ${nf(tg)} บาท ภายใน ${parts.join(" ")} (ที่ผลตอบแทนสมมติ ${P.rt}% ต่อปี)`;
+  }
+  return `${pre}ใน ${P.yr} ปี เงินรวมประมาณ ${nf(last.bal)} บาท ยังขาดจากเป้าหมาย ${nf(tg)} บาท อีก ${nf(tg - last.bal)} บาท ถ้าอยากถึงเป้าภายใน ${P.yr} ปี ต้องเริ่มลงเดือนละประมาณ ${nf(Math.ceil(needPm(P, tg)))} บาท${P.gr > 0 ? ` แล้วเพิ่มปีละ ${P.gr}% ตามที่ตั้ง` : ""} (ตอนนี้เริ่มเดือนละ ${nf(P.pm)} บาท)`;
+}
+const desc = P => `ลงเดือนละ ${nf(P.pm)} บาท${P.gr > 0 ? " เพิ่มปีละ " + P.gr + "%" : ""} · ผลตอบแทน ${P.rt}% ต่อปี`;
+
 function calc() {
-  const p0 = clamp(num("p0", 0), 0, 1e12), pm = clamp(num("pm", 0), 0, 1e10), rate = clamp(num("rt", 0), -50, 100),
-        years = clamp(Math.round(num("yr", 10)), 1, 60), inf = clamp(num("inf", 0), 0, 50);
-  const bad = [["p0", "เงินต้น"], ["pm", "เงินลงทุนรายเดือน"]].filter(x => num(x[0], 0) < 0).map(x => x[1]);
+  const A = planA(), on = $("cmp").checked;
+  $("cmpBox").hidden = !on;
+  const bad = [["p0", "เงินต้น"], ["pm", "เงินลงทุนรายเดือน"]].concat(on ? [["pm2", "เงินลงทุนรายเดือนของแผน B"]] : []).filter(x => num(x[0], 0) < 0).map(x => x[1]);
   const e = $("err"); e.hidden = !bad.length; e.textContent = bad.length ? "ค่า" + bad.join(" และ ") + " ต้องไม่ติดลบ ระบบใช้ 0 แทน" : "";
-  if (p0 + pm <= 0) { $("fin").textContent = "—"; $("finSub").textContent = "ใส่เงินต้นหรือเงินลงทุนรายเดือนอย่างน้อยหนึ่งอย่าง"; ["sPut","sGain","sX"].forEach(i => $(i).textContent = "—"); $("chart").innerHTML = ""; $("tb").innerHTML = ""; $("late").hidden = true; $("goalBox").hidden = true; return; }
-  const rows = sim(p0, pm, rate, years), last = rows[rows.length - 1], gain = last.bal - last.put;
+  if (A.p0 + A.pm <= 0) {
+    $("fin").textContent = "—"; $("finSub").textContent = "ใส่เงินต้นหรือเงินลงทุนรายเดือนอย่างน้อยหนึ่งอย่าง";
+    ["sPut", "sGain", "sX"].forEach(i => $(i).textContent = "—");
+    $("chart").innerHTML = ""; $("tb").innerHTML = ""; $("th").innerHTML = ""; $("late").hidden = true; $("goalBox").hidden = true; $("cmpOut").hidden = true; return;
+  }
+  const rows = run(A), last = rows[rows.length - 1], gain = last.bal - last.put;
+  $("bigL").textContent = (on ? "แผน A · " : "") + "เงินรวมเมื่อครบกำหนด";
   $("fin").textContent = nf(last.bal) + " บาท";
-  const real = last.bal / Math.pow(1 + inf / 100, years);
-  $("finSub").textContent = inf > 0 ? `ถ้าเงินเฟ้อ ${inf}% ต่อปี เทียบกำลังซื้อวันนี้ ≈ ${nf(real)} บาท` : `หลังผ่านไป ${years} ปี ที่ผลตอบแทนสมมติ ${rate}% ต่อปี`;
+  const real = last.bal / Math.pow(1 + A.inf / 100, A.yr);
+  let sub = A.inf > 0 ? `ถ้าเงินเฟ้อ ${A.inf}% ต่อปี เทียบกำลังซื้อวันนี้ ≈ ${nf(real)} บาท` : `หลังผ่านไป ${A.yr} ปี ที่ผลตอบแทนสมมติ ${A.rt}% ต่อปี`;
+  if (A.gr > 0) sub += ` · เงินลงทุนรายเดือนปีสุดท้ายเป็น ${nf(A.pm * Math.pow(1 + A.gr / 100, A.yr - 1))} บาท`;
+  $("finSub").textContent = sub;
   $("sPut").textContent = nf(last.put) + " บาท";
   $("sGain").textContent = (gain < 0 ? "−" : "") + nf(Math.abs(gain)) + " บาท";
   $("sX").textContent = (last.bal / last.put).toFixed(2) + " เท่า";
   chart(rows);
-  $("tb").innerHTML = rows.map(r => `<tr><td>${r.y}</td><td>${nf(r.put)}</td><td>${r.bal - r.put < 0 ? "−" : ""}${nf(Math.abs(r.bal - r.put))}</td><td><b>${nf(r.bal)}</b></td></tr>`).join("");
+
+  // แผน B
+  const B = on ? planB(A) : null, okB = B && B.p0 + B.pm > 0, rb = okB ? run(B) : null;
+  $("th").innerHTML = "<tr><th>ปีที่</th><th>เงินที่ใส่สะสม</th><th>ผลตอบแทนสะสม</th><th>เงินรวม" + (okB ? " (A)" : "") + "</th>" + (okB ? "<th>เงินรวม (B)</th><th>B − A</th>" : "") + "</tr>";
+  $("tb").innerHTML = rows.map((r, i) => `<tr><td>${r.y}</td><td>${nf(r.put)}</td><td>${r.bal - r.put < 0 ? "−" : ""}${nf(Math.abs(r.bal - r.put))}</td><td><b>${nf(r.bal)}</b></td>` +
+    (okB ? `<td><b>${nf(rb[i].bal)}</b></td><td>${sgn(rb[i].bal - r.bal)}</td>` : "") + "</tr>").join("");
+  renderCmp(A, B, okB, rows, rb, on);
+
   const L = $("late");
-  if (years > 5 && pm + p0 > 0 && rate !== 0) {
-    // เริ่มช้า 5 ปี: ใช้เวลา years-5 ปี เงินต้นและเงินรายเดือนเท่าเดิม
-    const l = sim(p0, pm, rate, years - 5), lb = l[l.length - 1].bal, d = last.bal - lb;
+  if (A.yr > 5 && A.rt !== 0) {
+    // เริ่มช้า 5 ปี: ใช้เวลา yr-5 ปี เงินต้นและเงินรายเดือนเท่าเดิม
+    const l = sim(A.p0, A.pm, A.rt, A.yr - 5, A.gr), lb = l[l.length - 1].bal, d = last.bal - lb;
     L.hidden = false;
-    L.textContent = `ถ้าเริ่มช้าไป 5 ปี (ลงเงินเท่าเดิม แต่เหลือ ${years - 5} ปี) เงินรวมจะเป็นประมาณ ${nf(lb)} บาท ต่างจากเริ่มวันนี้ ${nf(Math.abs(d))} บาท ${d >= 0 ? "(น้อยลง)" : "(มากขึ้น เพราะผลตอบแทนที่สมมติเป็นลบ)"}`;
+    L.textContent = `ถ้าเริ่มช้าไป 5 ปี (ลงเงินเท่าเดิม แต่เหลือ ${A.yr - 5} ปี) เงินรวมจะเป็นประมาณ ${nf(lb)} บาท ต่างจากเริ่มวันนี้ ${nf(Math.abs(d))} บาท ${d >= 0 ? "(น้อยลง)" : "(มากขึ้น เพราะผลตอบแทนที่สมมติเป็นลบ)"}`;
   } else L.hidden = true;
-  goal(p0, pm, rate, years, inf, last);
+
+  // เป้าหมายเงินก้อน
+  const gb = $("goalBox");
+  if (A.tg > 0) {
+    let t = goalText(A, last, A.tg, okB ? "แผน A" : "");
+    if (okB) t += "\n" + goalText(B, rb[rb.length - 1], A.tg, "แผน B");
+    if (A.inf > 0) t += "\nเป้าหมายนี้เป็นเงินในอนาคต ยังไม่ได้ปรับตามเงินเฟ้อ";
+    gb.textContent = t; gb.hidden = false;
+  } else gb.hidden = true;
 }
-// กี่เดือนถึงเป้า (นับตามวิธีเดียวกับ sim) คืน -1 ถ้าไม่ถึงในเวลาที่ตั้ง
-function monthsToGoal(p0, pm, rate, tg, maxM) {
-  const rm = Math.pow(1 + rate / 100, 1 / 12) - 1; let bal = p0;
-  if (bal >= tg) return 0;
-  for (let m = 1; m <= maxM; m++) { bal = bal * (1 + rm) + pm; if (bal >= tg) return m; }
-  return -1;
-}
-// เงินลงทุนรายเดือนที่ต้องใช้ให้ครบเป้าพอดีเมื่อครบกำหนด (สูตรเดียวกับ sim: ใส่ปลายเดือน)
-function needPm(p0, rate, years, tg) {
-  const n = years * 12, rm = Math.pow(1 + rate / 100, 1 / 12) - 1, g = Math.pow(1 + rm, n), k = rm === 0 ? n : (g - 1) / rm;
-  return Math.max(0, (tg - p0 * g) / k);
-}
-function goal(p0, pm, rate, years, inf, last) {
-  const tg = clamp(num("tg", 0), 0, 1e13), box = $("goalBox");
-  if (!(tg > 0)) { box.hidden = true; return; }
-  const m = monthsToGoal(p0, pm, rate, tg, years * 12);
+function renderCmp(A, B, okB, ra, rb, on) {
+  const box = $("cmpOut");
+  if (!on) { box.hidden = true; return; }
+  box.hidden = false;
+  if (!okB) { $("cmpSum").textContent = "แผน B ต้องมีเงินต้นหรือเงินลงทุนรายเดือนอย่างน้อยหนึ่งอย่าง"; $("cmpTb").innerHTML = ""; $("cmpLg").innerHTML = ""; $("chart2").innerHTML = ""; return; }
+  const a = ra[ra.length - 1], b = rb[rb.length - 1], dBal = b.bal - a.bal, dPut = b.put - a.put, ga = a.bal - a.put, gb = b.bal - b.put;
+  const pct = Math.abs(dBal) / a.bal * 100;
   let t;
-  if (m === 0) t = `เงินต้นที่ใส่ถึงเป้าหมาย ${nf(tg)} บาท ตั้งแต่วันแรกแล้ว`;
-  else if (m > 0) {
-    const y = Math.floor(m / 12), mo = m % 12, parts = [];
-    if (y) parts.push(y + " ปี"); if (mo) parts.push(mo + " เดือน");
-    t = `ถึงเป้าหมาย ${nf(tg)} บาท ภายใน ${parts.join(" ")} (ที่ผลตอบแทนสมมติ ${rate}% ต่อปี)`;
+  if (Math.abs(dBal) < 1) t = "ทั้งสองแผนได้เงินรวมใกล้เคียงกันมาก";
+  else if (dBal > 0) {
+    t = `แผน B ได้เงินรวมมากกว่าแผน A อีก ${nf(dBal)} บาท (+${pct.toFixed(1)}%)`;
+    if (dPut >= 1) t += ` โดยลงเงินสะสมเพิ่ม ${nf(dPut)} บาท เฉลี่ยทุก 1 บาทที่ลงเพิ่มโตเป็นประมาณ ${(dBal / dPut).toFixed(2)} บาท`;
+    else if (dPut <= -1) t += ` ทั้งที่ลงเงินสะสมน้อยกว่า ${nf(-dPut)} บาท`;
   } else {
-    t = `ใน ${years} ปี เงินรวมประมาณ ${nf(last.bal)} บาท ยังขาดจากเป้าหมาย ${nf(tg)} บาท อีก ${nf(tg - last.bal)} บาท ถ้าอยากถึงเป้าภายใน ${years} ปี ต้องลงเงินเพิ่มเป็นเดือนละประมาณ ${nf(Math.ceil(needPm(p0, rate, years, tg)))} บาท (ตอนนี้เดือนละ ${nf(pm)} บาท)`;
+    t = `แผน B ได้เงินรวมน้อยกว่าแผน A ${nf(-dBal)} บาท (−${pct.toFixed(1)}%)`;
+    if (dPut <= -1) t += ` โดยลงเงินสะสมน้อยกว่า ${nf(-dPut)} บาท`;
+    else if (dPut >= 1) t += ` ทั้งที่ลงเงินสะสมมากกว่า ${nf(dPut)} บาท`;
   }
-  if (inf > 0) t += " เป้าหมายนี้เป็นเงินในอนาคต ยังไม่ได้ปรับตามเงินเฟ้อ";
-  box.textContent = t; box.hidden = false;
+  $("cmpSum").textContent = t;
+  const row = (n, x, y, cls) => `<tr${cls ? ` class="${cls}"` : ""}><td>${n}</td><td>${(x < 0 ? "−" : "") + nf(Math.abs(x))}</td><td>${(y < 0 ? "−" : "") + nf(Math.abs(y))}</td><td>${sgn(y - x)}</td></tr>`;
+  $("cmpTb").innerHTML = row("เงินที่ใส่เอง", a.put, b.put) + row("ผลตอบแทนสะสม", ga, gb) + row("เงินรวม", a.bal, b.bal, "tot");
+  $("cmpLg").innerHTML = `<span><i class="ld" style="border-color:var(--accent)"></i>แผน A: ${desc(A)}</span><span><i class="ld b" style="border-color:var(--live)"></i>แผน B: ${desc(B)}</span>`;
+  chart2(A, ra, rb);
 }
-["p0","pm","rt","yr","inf","tg"].forEach(i => $(i).addEventListener("input", calc));
-// ---- เป้าหมายที่บันทึก (เก็บในเบราว์เซอร์เครื่องนี้) ----
+["p0", "pm", "gr", "rt", "yr", "inf", "tg", "pm2", "gr2", "rt2"].forEach(i => $(i).addEventListener("input", calc));
+$("cmp").addEventListener("change", () => {
+  if ($("cmp").checked && $("pm2").value === "" && $("rt2").value === "" && $("gr2").value === "") {   // เปิดครั้งแรก: ใส่ค่าตัวอย่างให้ B (เงินรายเดือนมากกว่า A ราว 1.6 เท่า)
+    const A = planA(), t = A.pm > 0 ? A.pm * 1.6 : 5000, mag = Math.pow(10, Math.floor(Math.log10(t)) - 1);
+    $("pm2").value = Math.round(t / mag) * mag; $("rt2").value = A.rt; $("gr2").value = A.gr;
+  }
+  calc();
+});
+
+// ---- เป้าหมายที่บันทึก: เก็บในเบราว์เซอร์ และซิงก์กับบัญชี (Firestore goalboard/{uid}) ถ้าซิงก์ไม่ได้ ใช้ค่าในเครื่องต่อ ----
 const GK = "nlp_goals_v1", GMAX = 10;
-const el = (t, c) => { const e = document.createElement(t); if (c) e.className = c; return e; };
-function gload() {
-  try {
-    const a = JSON.parse(localStorage.getItem(GK) || "[]");
-    return (Array.isArray(a) ? a : []).filter(g => g && typeof g.name === "string" && isFinite(g.p0) && isFinite(g.pm) && isFinite(g.rt) && isFinite(g.yr)).slice(0, GMAX);
-  } catch (e) { return []; }
+let cloud = "off";   // off | ok | denied
+function gclean(g) {   // บังคับชนิดและช่วงค่าก่อนใช้ หรือก่อนส่งขึ้นคลาวด์
+  if (!g || typeof g.name !== "string") return null;
+  const f = (v, a, b, d) => { v = parseFloat(v); return isFinite(v) ? clamp(v, a, b) : d; }, name = g.name.trim().slice(0, 40);
+  if (!name) return null;
+  return { name, p0: f(g.p0, 0, 1e12, 0), pm: f(g.pm, 0, 1e10, 0), rt: f(g.rt, -50, 100, 0), yr: Math.round(f(g.yr, 1, 60, 10)),
+           gr: f(g.gr, 0, 50, 0), inf: f(g.inf, 0, 50, 0), tg: f(g.tg, 0, 1e13, 0), at: Math.max(1, f(g.at, 0, 1e15, 1)) };
 }
+function gclist(a) { return (Array.isArray(a) ? a : []).map(gclean).filter(Boolean).slice(0, GMAX); }
+function gload() { try { return gclist(JSON.parse(localStorage.getItem(GK) || "[]")); } catch (e) { return []; } }
 function gstore(a) { try { localStorage.setItem(GK, JSON.stringify(a)); return true; } catch (e) { return false; } }
-function curPlan() {
-  return { p0: clamp(num("p0", 0), 0, 1e12), pm: clamp(num("pm", 0), 0, 1e10), rt: clamp(num("rt", 0), -50, 100),
-           yr: clamp(Math.round(num("yr", 10)), 1, 60), inf: clamp(num("inf", 0), 0, 50), tg: clamp(num("tg", 0), 0, 1e13) };
-}
 function gsum(g) {
-  const f = sim(g.p0, g.pm, clamp(g.rt, -50, 100), clamp(Math.round(g.yr), 1, 60)).pop().bal;
-  let t = `เงินต้น ${nf(g.p0)} + เดือนละ ${nf(g.pm)} บาท · ${g.rt}% ต่อปี · ${g.yr} ปี → ประมาณ ${nf(f)} บาท`;
+  const f = run(g).pop().bal;
+  let t = `เงินต้น ${nf(g.p0)} + เดือนละ ${nf(g.pm)} บาท${g.gr > 0 ? " (เพิ่มปีละ " + g.gr + "%)" : ""} · ${g.rt}% ต่อปี · ${g.yr} ปี → ประมาณ ${nf(f)} บาท`;
   if (g.tg > 0) t += f >= g.tg ? ` · ถึงเป้า ${nf(g.tg)} บาท` : ` · ยังไม่ถึงเป้า ${nf(g.tg)} บาท`;
   return t;
 }
@@ -454,29 +576,87 @@ function grender() {
     b.textContent = g.name; s.textContent = gsum(g);
     o.type = x.type = "button"; o.textContent = "เปิดดู / แก้ตัวเลข"; x.textContent = "ลบ";
     o.addEventListener("click", () => {
-      ["p0", "pm", "rt", "yr", "inf"].forEach(k => { $(k).value = g[k]; }); $("tg").value = g.tg > 0 ? g.tg : "";
+      ["p0", "pm", "gr", "rt", "yr", "inf"].forEach(k => { $(k).value = g[k]; }); $("tg").value = g.tg > 0 ? g.tg : "";
       $("gname").value = g.name; calc(); gmsg("เปิดเป้าหมาย \"" + g.name + "\" แล้ว"); window.scrollTo({ top: 0, behavior: "smooth" });
     });
     x.addEventListener("click", () => {
       if (!confirm("ลบเป้าหมาย \"" + g.name + "\" ?")) return;
-      const l = gload(); l.splice(i, 1); gstore(l); grender(); gmsg("ลบแล้ว");
+      const l = gload(); l.splice(i, 1); gstore(l); grender(); gmsg("ลบแล้ว"); gpush(l);
     });
     acts.appendChild(o); acts.appendChild(x); d.appendChild(b); d.appendChild(s); d.appendChild(acts); box.appendChild(d);
   });
 }
+// ---- ซิงก์กับบัญชี ----
+const gsyncKey = u => "nlp_goals_sync_" + u.uid;   // เวลาที่ซิงก์สำเร็จล่าสุด แยกตามบัญชี
+function gUser() { const N = window.NLP; return N && N.auth && N.auth.currentUser; }
+async function gpush(list) {
+  try {
+    const N = window.NLP, u = gUser(); if (!u) return;
+    await N.F.setDoc(N.F.doc(N.db, "goalboard", u.uid), { goals: gclist(list), updatedAt: N.F.serverTimestamp() });
+    cloud = "ok"; try { localStorage.setItem(gsyncKey(u), String(Date.now())); } catch (e) {}
+  } catch (e) { cloud = e && e.code === "permission-denied" ? "denied" : "off"; }
+  gstatus();
+}
+// รวมของในเครื่องกับของบนคลาวด์: ชื่อเดียวกันเอาอันที่แก้ล่าสุด, ของในเครื่องที่ยังไม่เคยซิงก์เก็บไว้, ของในเครื่องที่ซิงก์แล้วแต่หายจากคลาวด์ = ถูกลบจากอีกเครื่อง
+function gmerge(local, remote, lastSync) {
+  const by = new Map(); remote.forEach(g => by.set(g.name, g));
+  local.forEach(g => { const r = by.get(g.name); if (r) { if (g.at > r.at) by.set(g.name, g); } else if (g.at > lastSync) by.set(g.name, g); });
+  return Array.from(by.values()).sort((x, y) => y.at - x.at).slice(0, GMAX);
+}
+const gkey = a => JSON.stringify(a.slice().sort((x, y) => x.name < y.name ? -1 : 1));
+async function gcloudLoad() {
+  try {
+    const N = window.NLP, u = gUser(); if (!u) return;
+    const s = await N.F.getDoc(N.F.doc(N.db, "goalboard", u.uid));
+    cloud = "ok";
+    const remote = s.exists() ? gclist(s.data().goals) : [];
+    let last = 0; try { last = parseInt(localStorage.getItem(gsyncKey(u)) || "0", 10) || 0; } catch (e) {}
+    const merged = gmerge(gload(), remote, last);
+    gstore(merged);
+    if (gkey(merged) !== gkey(remote)) await gpush(merged); else { try { localStorage.setItem(gsyncKey(u), String(Date.now())); } catch (e) {} }
+    grender();
+  } catch (e) { cloud = e && e.code === "permission-denied" ? "denied" : "off"; }
+  gstatus();
+}
+function gstatus() {
+  const box = $("gacct"), u = gUser(); box.textContent = "";
+  if (!u) { box.hidden = true; return; }
+  box.hidden = false;
+  const btn = (id, t) => { const b = el("button", "linkbtn"); b.type = "button"; b.id = id; b.textContent = t; return b; };
+  if (cloud === "denied") box.textContent = "ซิงก์ข้ามเครื่องยังไม่เปิดใช้ ตอนนี้เก็บในเครื่องนี้ก่อน";
+  else if (u.isAnonymous) box.append("เป้าหมายเก็บตามเครื่องนี้ ถ้าอยากเปิดจากมือถือหรือเครื่องอื่นได้ ", btn("linkG", "ผูกบัญชี Google"));
+  else { const b = el("b"); b.textContent = u.email || "Google"; box.append("ซิงก์กับบัญชี ", b, " ใช้ได้ทุกเครื่อง ", btn("outG", "ออกจากระบบ")); }
+}
+async function linkGoogle() {
+  const N = window.NLP;
+  try {
+    await N.A.linkWithPopup(N.auth.currentUser, new N.A.GoogleAuthProvider());   // ผูกกับตัวตนเดิม สิทธิ์สมาชิกและข้อมูลไม่หาย
+    await gcloudLoad(); gmsg("ผูกบัญชี Google แล้ว");
+  } catch (err) {
+    if (err && err.code === "auth/credential-already-in-use") {   // บัญชี Google นี้เคยผูกไว้แล้ว (เช่นบนเครื่องอื่น) เข้าด้วยตัวตนเดิมนั้น
+      try { await N.A.signInWithCredential(N.auth, N.A.GoogleAuthProvider.credentialFromError(err)); location.reload(); } catch (e2) { gmsg("เข้าสู่ระบบไม่สำเร็จ: " + (e2.code || e2.message)); }
+    } else if (!err || err.code !== "auth/popup-closed-by-user") gmsg("ผูกบัญชีไม่สำเร็จ: " + ((err && (err.code || err.message)) || err));
+  }
+}
+$("saved").addEventListener("click", e => {
+  const t = e.target.closest && e.target.closest("#linkG, #outG"); if (!t) return;
+  if (t.id === "linkG") linkGoogle(); else { const N = window.NLP; N.A.signOut(N.auth).then(() => location.reload()); }
+});
 $("gsave").addEventListener("click", () => {
-  const name = $("gname").value.trim(), pl = curPlan();
+  const name = $("gname").value.trim(), pl = planA();
   if (!name) return gmsg("ตั้งชื่อเป้าหมายก่อน เช่น เงินดาวน์บ้าน");
   if (pl.p0 + pl.pm <= 0) return gmsg("ใส่เงินต้นหรือเงินลงทุนรายเดือนก่อน");
   const a = gload(), i = a.findIndex(g => g.name === name);
   if (i < 0 && a.length >= GMAX) return gmsg("เก็บได้สูงสุด " + GMAX + " เป้าหมาย ลบอันเก่าก่อนนะ");
-  pl.name = name; if (i >= 0) a[i] = pl; else a.unshift(pl);
-  if (!gstore(a)) return gmsg("บันทึกไม่ได้ เบราว์เซอร์นี้อาจปิดการเก็บข้อมูลไว้");
-  grender(); gmsg(i >= 0 ? "อัปเดตเป้าหมาย \"" + name + "\" แล้ว" : "บันทึกเป้าหมาย \"" + name + "\" แล้ว");
+  pl.name = name; pl.at = Date.now(); if (i >= 0) a[i] = pl; else a.unshift(pl);
+  const list = gclist(a);
+  if (!gstore(list)) return gmsg("บันทึกไม่ได้ เบราว์เซอร์นี้อาจปิดการเก็บข้อมูลไว้");
+  grender(); gmsg(i >= 0 ? "อัปเดตเป้าหมาย \"" + name + "\" แล้ว" : "บันทึกเป้าหมาย \"" + name + "\" แล้ว"); gpush(list);
 });
 $("gshare").addEventListener("click", () => {
-  const pl = curPlan(), q = new URLSearchParams();
-  ["p0", "pm", "rt", "yr", "inf"].forEach(k => q.set(k, pl[k])); if (pl.tg > 0) q.set("tg", pl.tg);
+  const pl = planA(), q = new URLSearchParams();
+  ["p0", "pm", "gr", "rt", "yr", "inf"].forEach(k => q.set(k, pl[k])); if (pl.tg > 0) q.set("tg", pl.tg);
+  if ($("cmp").checked) { const B = planB(pl); q.set("cmp", "1"); q.set("pm2", B.pm); q.set("gr2", B.gr); q.set("rt2", B.rt); }
   const url = location.href.split("#")[0].split("?")[0] + "?" + q.toString();
   const ok = () => gmsg("คัดลอกลิงก์แล้ว คนที่เปิดลิงก์จะเห็นตัวเลขชุดเดียวกับคุณ");
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(ok, () => window.prompt("คัดลอกลิงก์นี้", url));
@@ -485,11 +665,13 @@ $("gshare").addEventListener("click", () => {
 // เปิดจากลิงก์ที่มีตัวเลขแนบมา (?p0=...&pm=...)
 try {
   const q = new URLSearchParams(location.search);
-  const R = { p0: [0, 1e12], pm: [0, 1e10], rt: [-50, 100], yr: [1, 60], inf: [0, 50], tg: [0, 1e13] };   // ค่านอกช่วงจากลิงก์จะถูกปรับให้อยู่ในช่วงเดียวกับที่กรอกเอง
+  const R = { p0: [0, 1e12], pm: [0, 1e10], gr: [0, 50], rt: [-50, 100], yr: [1, 60], inf: [0, 50], tg: [0, 1e13], pm2: [0, 1e10], gr2: [0, 50], rt2: [-50, 100] };   // ค่านอกช่วงจากลิงก์จะถูกปรับให้อยู่ในช่วงเดียวกับที่กรอกเอง
   Object.keys(R).forEach(k => { const v = parseFloat(q.get(k)); if (q.has(k) && isFinite(v)) $(k).value = k === "yr" ? clamp(Math.round(v), 1, 60) : clamp(v, R[k][0], R[k][1]); });
+  if (q.get("cmp") === "1") $("cmp").checked = true;
 } catch (e) {}
 grender();
 calc();
+if (window.NLP && NLP.ready) NLP.ready.then(() => gcloudLoad());
 </script>
 </body>
 </html>
