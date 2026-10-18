@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>คำนวณดอกเบี้ยทบต้น | นักลงพุง</title>
-<meta name="description" content="กรอกเงินต้น เงินออมต่อเดือน ผลตอบแทน ปันผล (รีอินเวสต์หรือรับเป็นเงินสด) และระยะเวลา ดูว่าเงินโตแค่ไหนเมื่อทบต้น (ตัวอย่างสมมติ ไม่ใช่คำแนะนำการลงทุน)">
+<meta name="description" content="กรอกเงินต้น เงินออมต่อเดือน ผลตอบแทน ปันผล (Re-invest หรือรับเป็นเงินสด) และระยะเวลา ดูว่าเงินโตแค่ไหนเมื่อทบต้น (ตัวอย่างสมมติ ไม่ใช่คำแนะนำการลงทุน)">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="th_TH">
 <meta property="og:site_name" content="นักลงพุง">
 <meta property="og:title" content="คำนวณดอกเบี้ยทบต้น | นักลงพุง">
-<meta property="og:description" content="กรอกเงินต้น เงินออมต่อเดือน ผลตอบแทน ปันผล (รีอินเวสต์หรือรับเป็นเงินสด) และระยะเวลา ดูว่าเงินโตแค่ไหนเมื่อทบต้น (ตัวอย่างสมมติ ไม่ใช่คำแนะนำการลงทุน)">
+<meta property="og:description" content="กรอกเงินต้น เงินออมต่อเดือน ผลตอบแทน ปันผล (Re-invest หรือรับเป็นเงินสด) และระยะเวลา ดูว่าเงินโตแค่ไหนเมื่อทบต้น (ตัวอย่างสมมติ ไม่ใช่คำแนะนำการลงทุน)">
 <meta property="og:url" content="https://naklongpoong.github.io/dr/calc.html">
 <meta property="og:image" content="https://naklongpoong.github.io/dr/og-home.png">
 <meta property="og:image:width" content="1200">
@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610181230"></script>
-<script src="gate.js?v=202610181230"></script>
+<script src="site.js?v=202610181234"></script>
+<script src="gate.js?v=202610181234"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -302,7 +302,7 @@ th { color: var(--muted); font-weight: 600; font-size: .8rem; }
 }
 #gacct { min-height: 1.2em; }
 
-/* ---------- ปันผล: รีอินเวสต์ / ไม่รี ---------- */
+/* ---------- ปันผล: Re-invest / ไม่ Re-invest ---------- */
 .seg-row { margin-top: 16px; }
 .seg-row > span { display: block; font-size: .88rem; font-weight: 600; margin-bottom: 4px; }
 .seg-row small { display: block; color: var(--muted); font-size: .76rem; margin-top: 4px; }
@@ -349,8 +349,8 @@ th { color: var(--muted); font-weight: 600; font-size: .8rem; }
 
     <div class="seg-row"><span>ปันผลที่ได้รับ</span>
       <div class="seg" data-g="ri" role="group" aria-label="ปันผลที่ได้รับ">
-        <button type="button" data-v="re" aria-pressed="true">รีอินเวสต์ (เอาไปซื้อเพิ่ม)</button>
-        <button type="button" data-v="cash" aria-pressed="false">รับเป็นเงินสด (ไม่รี)</button>
+        <button type="button" data-v="re" aria-pressed="true">Re-invest (เอาไปซื้อเพิ่ม)</button>
+        <button type="button" data-v="cash" aria-pressed="false">รับเป็นเงินสด (ไม่ Re-invest)</button>
       </div><small>มีผลเมื่อใส่ปันผลมากกว่า 0 ผลของทั้งสองแบบเทียบให้ดูด้านล่างทุกครั้ง</small></div>
 
     <label class="chk"><input type="checkbox" id="cmp">เปรียบเทียบกับอีกแผน (แผน B)</label>
@@ -374,13 +374,13 @@ th { color: var(--muted); font-weight: 600; font-size: .8rem; }
       <div class="stat"><span>เงินรวมเป็นกี่เท่าของที่ใส่</span><b id="sX"></b></div>
     </div>
     <div id="dvOut" hidden>
-      <h3>ปันผล: รีอินเวสต์ เทียบกับรับเป็นเงินสด</h3>
+      <h3>ปันผล: Re-invest เทียบกับรับเป็นเงินสด</h3>
       <div class="late" id="dvVerdict"></div>
       <div class="two-c">
-        <div class="opt a"><h4>รีอินเวสต์ปันผล</h4><span class="v" id="dAT"></span><small>เงินรวมเมื่อครบกำหนด (มูลค่ากองทุนที่ถืออยู่ทั้งหมด)</small>
+        <div class="opt a"><h4>Re-invest ปันผล</h4><span class="v" id="dAT"></span><small>เงินรวมเมื่อครบกำหนด (มูลค่ากองทุนที่ถืออยู่ทั้งหมด)</small>
           <div class="row"><span>ปันผลหลังภาษีที่ได้ในปีสุดท้าย</span><b id="dAD"></b></div>
           <div class="row"><span>เฉลี่ยต่อเดือน</span><b id="dAM"></b></div></div>
-        <div class="opt b"><h4>รับปันผลเป็นเงินสด (ไม่รี)</h4><span class="v" id="dBT"></span><small>เงินรวมเมื่อครบกำหนด (กองทุน + ปันผลสะสมที่เก็บเป็นเงินสด)</small>
+        <div class="opt b"><h4>รับปันผลเป็นเงินสด (ไม่ Re-invest)</h4><span class="v" id="dBT"></span><small>เงินรวมเมื่อครบกำหนด (กองทุน + ปันผลสะสมที่เก็บเป็นเงินสด)</small>
           <div class="row"><span>มูลค่ากองทุนที่ถืออยู่</span><b id="dBP"></b></div>
           <div class="row"><span>ปันผลสะสมที่ได้เป็นเงินสด</span><b id="dBC"></b></div>
           <div class="row"><span>ปันผลหลังภาษีที่ได้ในปีสุดท้าย</span><b id="dBD"></b></div>
@@ -404,7 +404,7 @@ th { color: var(--muted); font-weight: 600; font-size: .8rem; }
     <div class="late" id="late" hidden></div>
     <h3>ตารางรายปี</h3>
     <div class="tbl-w"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
-    <p class="note">วิธีคิด: ผลตอบแทนต่อปีที่กรอกถูกแปลงเป็นรายเดือนแบบทบต้น (ให้ครบปีเท่ากับอัตราที่กรอก) เงินลงทุนรายเดือนใส่ปลายเดือน ถ้าใส่ % เพิ่มเงินลงทุนทุกปี เงินรายเดือนจะเพิ่มขึ้นตอนต้นปีถัดไป ถ้าใส่ปันผล ปันผลคิดรายเดือนเท่ากับ ปันผลต่อปี ÷ 12 ของมูลค่ากองทุนตอนนั้น (หลังหักภาษีที่ใส่) ถ้ารีอินเวสต์ จะถูกนำไปซื้อกองทุนเพิ่มทันที ถ้ารับเป็นเงินสด จะเก็บเป็นเงินสดไว้เฉยๆ โดยไม่มีดอกเบี้ยและไม่ปรับตามเงินเฟ้อ เงินรวมในตารางนับทั้งกองทุนและเงินสดที่เก็บไว้ บางโบรกเกอร์ไม่มีรีอินเวสต์ปันผลอัตโนมัติ ต้องกดซื้อเพิ่มเองจากปันผลที่ได้รับ ตัวเลขนี้เป็นการคำนวณสมมติเพื่อการศึกษา ไม่ได้รับประกันผลตอบแทน ไม่รวมภาษี ค่าธรรมเนียม และอัตราแลกเปลี่ยน ของจริงผลตอบแทนแต่ละปีไม่เท่ากัน และไม่ใช่คำแนะนำการลงทุน</p>
+    <p class="note">วิธีคิด: ผลตอบแทนต่อปีที่กรอกถูกแปลงเป็นรายเดือนแบบทบต้น (ให้ครบปีเท่ากับอัตราที่กรอก) เงินลงทุนรายเดือนใส่ปลายเดือน ถ้าใส่ % เพิ่มเงินลงทุนทุกปี เงินรายเดือนจะเพิ่มขึ้นตอนต้นปีถัดไป ถ้าใส่ปันผล ปันผลคิดรายเดือนเท่ากับ ปันผลต่อปี ÷ 12 ของมูลค่ากองทุนตอนนั้น (หลังหักภาษีที่ใส่) ถ้า Re-invest จะถูกนำไปซื้อกองทุนเพิ่มทันที ถ้ารับเป็นเงินสด จะเก็บเป็นเงินสดไว้เฉยๆ โดยไม่มีดอกเบี้ยและไม่ปรับตามเงินเฟ้อ เงินรวมในตารางนับทั้งกองทุนและเงินสดที่เก็บไว้ บางโบรกเกอร์ไม่มี Re-invest ปันผลอัตโนมัติ ต้องกดซื้อเพิ่มเองจากปันผลที่ได้รับ ตัวเลขนี้เป็นการคำนวณสมมติเพื่อการศึกษา ไม่ได้รับประกันผลตอบแทน ไม่รวมภาษี ค่าธรรมเนียม และอัตราแลกเปลี่ยน ของจริงผลตอบแทนแต่ละปีไม่เท่ากัน และไม่ใช่คำแนะนำการลงทุน</p>
   </section>
 
   <section class="cc" id="saved" aria-label="เป้าหมายที่บันทึกไว้">
@@ -428,9 +428,9 @@ const num = (id, d) => { const v = parseFloat($(id).value); return isFinite(v) ?
 const el = (t, c) => { const e = document.createElement(t); if (c) e.className = c; return e; };
 const sgn = d => (d > 0.5 ? "+" : d < -0.5 ? "−" : "") + nf(Math.abs(d));
 
-let riMode = "re";   // re = รีอินเวสต์ปันผล, cash = รับเป็นเงินสด (เก็บไว้เฉยๆ ไม่มีดอกเบี้ย)
+let riMode = "re";   // re = Re-invest ปันผล, cash = รับเป็นเงินสด (เก็บไว้เฉยๆ ไม่มีดอกเบี้ย)
 // จำลองรายเดือน คืนยอดสิ้นปีของแต่ละปี [{y, put, bal, pos, cash, div}] step = % ที่เพิ่มเงินลงทุนรายเดือนทุกต้นปี
-// dv = {dy, tx, ri} ปันผลต่อปี %, ภาษีหัก ณ ที่จ่าย %, ri false = ไม่รีอินเวสต์ bal = มูลค่ากองทุน + ปันผลเงินสดที่เก็บไว้
+// dv = {dy, tx, ri} ปันผลต่อปี %, ภาษีหัก ณ ที่จ่าย %, ri false = ไม่ Re-invest bal = มูลค่ากองทุน + ปันผลเงินสดที่เก็บไว้
 function sim(p0, pm, rate, years, step, dv) {
   const rm = Math.pow(1 + rate / 100, 1 / 12) - 1, sg = 1 + (step || 0) / 100, out = [];
   const dm = dv && dv.dy > 0 ? dv.dy / 100 / 12 * (1 - (dv.tx || 0) / 100) : 0, ri = !dv || dv.ri !== false;
@@ -517,7 +517,7 @@ function goalText(P, last, tg, label) {
   }
   return `${pre}ใน ${P.yr} ปี เงินรวมประมาณ ${nf(last.bal)} บาท ยังขาดจากเป้าหมาย ${nf(tg)} บาท อีก ${nf(tg - last.bal)} บาท ถ้าอยากถึงเป้าภายใน ${P.yr} ปี ต้องเริ่มลงเดือนละประมาณ ${nf(Math.ceil(needPm(P, tg)))} บาท${P.gr > 0 ? ` แล้วเพิ่มปีละ ${P.gr}% ตามที่ตั้ง` : ""} (ตอนนี้เริ่มเดือนละ ${nf(P.pm)} บาท)`;
 }
-const desc = P => `ลงเดือนละ ${nf(P.pm)} บาท${P.gr > 0 ? " เพิ่มปีละ " + P.gr + "%" : ""} · ผลตอบแทน ${P.rt}% ต่อปี${P.dy > 0 ? " + ปันผล " + P.dy + "% (" + (P.ri ? "รีอินเวสต์" : "รับเงินสด") + ")" : ""}`;
+const desc = P => `ลงเดือนละ ${nf(P.pm)} บาท${P.gr > 0 ? " เพิ่มปีละ " + P.gr + "%" : ""} · ผลตอบแทน ${P.rt}% ต่อปี${P.dy > 0 ? " + ปันผล " + P.dy + "% (" + (P.ri ? "Re-invest" : "รับเงินสด") + ")" : ""}`;
 
 function calc() {
   const A = planA(), on = $("cmp").checked;
@@ -530,7 +530,7 @@ function calc() {
     $("chart").innerHTML = ""; $("tb").innerHTML = ""; $("th").innerHTML = ""; $("late").hidden = true; $("goalBox").hidden = true; $("cmpOut").hidden = true; $("dvOut").hidden = true; return;
   }
   const rows = run(A), last = rows[rows.length - 1], gain = last.bal - last.put;
-  $("bigL").textContent = (on ? "แผน A · " : "") + "เงินรวมเมื่อครบกำหนด" + (A.dy > 0 ? (A.ri ? " (รีอินเวสต์ปันผล)" : " (รับปันผลเป็นเงินสด)") : "");
+  $("bigL").textContent = (on ? "แผน A · " : "") + "เงินรวมเมื่อครบกำหนด" + (A.dy > 0 ? (A.ri ? " (Re-invest ปันผล)" : " (รับปันผลเป็นเงินสด)") : "");
   $("fin").textContent = nf(last.bal) + " บาท";
   const real = last.bal / Math.pow(1 + A.inf / 100, A.yr);
   let sub = A.inf > 0 ? `ถ้าเงินเฟ้อ ${A.inf}% ต่อปี เทียบกำลังซื้อวันนี้ ≈ ${nf(real)} บาท` : (A.dy > 0 ? `หลังผ่านไป ${A.yr} ปี ที่ราคาโต ${A.rt}% + ปันผล ${A.dy}% ต่อปี` : `หลังผ่านไป ${A.yr} ปี ที่ผลตอบแทนสมมติ ${A.rt}% ต่อปี`);
@@ -601,11 +601,11 @@ function renderDiv(A) {
   $("dBD").textContent = nf(c.div) + " บาท"; $("dBM").textContent = nf(c.div / 12) + " บาท";
   let t;
   if (Math.abs(diff) < 1) t = "สองแบบได้เงินรวมใกล้เคียงกันมาก";
-  else if (diff > 0) t = `รีอินเวสต์ได้เงินรวมมากกว่ารับเป็นเงินสดอีก ${nf(diff)} บาท (+${(diff / c.bal * 100).toFixed(1)}%) เพราะปันผลถูกนำไปซื้อกองทุนเพิ่มและโตต่อ แต่ถ้ารับเป็นเงินสด คุณได้เงินสดมาใช้ระหว่างทางรวม ${nf(c.cash)} บาท (ปีสุดท้ายประมาณเดือนละ ${nf(c.div / 12)} บาท)`;
+  else if (diff > 0) t = `Re-invest ได้เงินรวมมากกว่ารับเป็นเงินสดอีก ${nf(diff)} บาท (+${(diff / c.bal * 100).toFixed(1)}%) เพราะปันผลถูกนำไปซื้อกองทุนเพิ่มและโตต่อ แต่ถ้ารับเป็นเงินสด คุณได้เงินสดมาใช้ระหว่างทางรวม ${nf(c.cash)} บาท (ปีสุดท้ายประมาณเดือนละ ${nf(c.div / 12)} บาท)`;
   else t = `ในตัวเลขชุดนี้ รับเป็นเงินสดได้เงินรวมมากกว่า ${nf(-diff)} บาท เพราะราคากองทุนที่ใส่ติดลบ การเอาปันผลไปซื้อเพิ่มจึงไม่ช่วย`;
   $("dvVerdict").textContent = t;
   const gm = Math.pow(1 + A.rt / 100, 1 / 12) - 1, dm = A.dy / 100 / 12 * (1 - A.tx / 100), tr = (Math.pow((1 + gm) * (1 + dm), 12) - 1) * 100;
-  $("dvTr").textContent = `ราคาโต ${A.rt}% + ปันผล ${A.dy}%${A.tx > 0 ? " (หลังภาษี " + (A.dy * (1 - A.tx / 100)).toFixed(2) + "%)" : ""} ≈ ผลตอบแทนรวม ${tr.toFixed(2)}% ต่อปี เมื่อรีอินเวสต์ ปันผลสูงไม่ได้แปลว่าดีกว่า เพราะตอนจ่ายปันผล ราคาต่อหน่วยจะลดลงตามที่จ่ายออกมา ให้ดูผลตอบแทนรวม (ราคาโต + ปันผล)`;
+  $("dvTr").textContent = `ราคาโต ${A.rt}% + ปันผล ${A.dy}%${A.tx > 0 ? " (หลังภาษี " + (A.dy * (1 - A.tx / 100)).toFixed(2) + "%)" : ""} ≈ ผลตอบแทนรวม ${tr.toFixed(2)}% ต่อปี เมื่อ Re-invest ปันผลสูงไม่ได้แปลว่าดีกว่า เพราะตอนจ่ายปันผล ราคาต่อหน่วยจะลดลงตามที่จ่ายออกมา ให้ดูผลตอบแทนรวม (ราคาโต + ปันผล)`;
 }
 function setRi(v) { riMode = v ? "re" : "cash"; document.querySelectorAll('[data-g="ri"] button').forEach(b => b.setAttribute("aria-pressed", String((b.dataset.v === "re") === v))); }
 document.querySelectorAll('[data-g="ri"] button').forEach(b => b.addEventListener("click", () => { setRi(b.dataset.v === "re"); calc(); }));
@@ -634,7 +634,7 @@ function gstore(a) { try { localStorage.setItem(GK, JSON.stringify(a)); return t
 function gsum(g) {
   const f = run(g).pop().bal;
   let t = `เงินต้น ${nf(g.p0)} + เดือนละ ${nf(g.pm)} บาท${g.gr > 0 ? " (เพิ่มปีละ " + g.gr + "%)" : ""} · ${g.rt}% ต่อปี · ${g.yr} ปี → ประมาณ ${nf(f)} บาท`;
-  if (g.dy > 0) t += ` · ปันผล ${g.dy}% (${g.ri ? "รีอินเวสต์" : "รับเงินสด"})`;
+  if (g.dy > 0) t += ` · ปันผล ${g.dy}% (${g.ri ? "Re-invest" : "รับเงินสด"})`;
   if (g.tg > 0) t += f >= g.tg ? ` · ถึงเป้า ${nf(g.tg)} บาท` : ` · ยังไม่ถึงเป้า ${nf(g.tg)} บาท`;
   return t;
 }
