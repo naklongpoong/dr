@@ -25,9 +25,9 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610171259"></script>
-<script src="terms.js?v=202610171259"></script>
-<script src="gate.js?v=202610171259"></script>
+<script src="site.js?v=202610180846"></script>
+<script src="terms.js?v=202610180846"></script>
+<script src="gate.js?v=202610180846"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -261,7 +261,7 @@ var PAGES = [
   { key: "invest", href: "invest.html", on: true, hidden: !SITE.invest, title: "แนวทางการลงทุน", desc: "เกมตอบ 8 ข้อ ดูว่าสไตล์การลงทุนของคุณเป็นแบบไหน", go: "เล่นเกมเลย ›" },
   { key: "calc", href: "calc.html", on: true, hidden: !SITE.calc, title: "คำนวณดอกเบี้ยทบต้น", desc: "กรอกเงินต้น เงินออมต่อเดือน ผลตอบแทน แล้วดูว่าเงินโตแค่ไหน", go: "ลองคำนวณ ›" },
   { key: "rr", href: "rr.html", on: true, hidden: !SITE.rr, title: "คำนวณความคุ้มเสี่ยง (Risk:Reward)", desc: "ใส่ราคาที่ซื้อ ราคาตัดขาดทุน และราคาเป้าหมาย ดูว่าเสี่ยงเสียเท่าไรเทียบกับหวังได้เท่าไร และซื้อได้กี่หุ้นตามเงินที่ยอมเสีย", go: "ลองคำนวณ ›" },
-  { key: "etf", href: "etf.html", on: true, hidden: !SITE.etf, badge: "Coming Soon", title: "ETF", desc: "รวมข้อมูลและบทวิเคราะห์ ETF", go: "ดูหน้า ETF ›" }
+  { key: "etf", href: "etf.html", on: true, hidden: !SITE.etf, title: "ETF", desc: "รีอินเวสต์ปันผลหรือไม่รี เงินต่างกันแค่ไหน พร้อมรายชื่อ ETF ใหญ่ของสหรัฐ", go: "ลองคำนวณ ›" }
 ];
 document.getElementById("cards").innerHTML = PAGES.filter(function (p) { return !p.hidden; }).map(function (p) {
   var inner = '<span class="ico" aria-hidden="true">' + ICON[p.key] + '</span><h2>' + p.title + '</h2><p>' + p.desc + '</p>' +
