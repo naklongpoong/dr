@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610182229"></script>
-<script src="gate.js?v=202610182229"></script>
+<script src="site.js?v=202610190014"></script>
+<script src="gate.js?v=202610190014"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -370,16 +370,13 @@ th { color: var(--muted); font-weight: 600; font-size: .8rem; }
     <p class="note">คัดจากหน้า IPO รายปีของ stockanalysis.com ณ <span id="asof"></span> เฉพาะบริษัทจริง ตัด SPAC (บริษัทเช็คเปล่า) หุ้นเล็กจิ๋วที่ราคา IPO ต่ำกว่า 12 ดอลลาร์ และบริษัทไบโอเทคที่ยังไม่มีรายได้ออก (ยกเว้น CRDO และ ATAT ที่เลือกใส่เอง) ราคา IPO ไม่ใช่ราคาปัจจุบัน และไม่ใช่ทุกตัวที่ยังซื้อขายอยู่ บางตัวอาจเปลี่ยนชื่อย่อ ถูกซื้อกิจการ หรือถูกถอดจากตลาดแล้ว ให้เช็กในหน้า dashboard</p>
     <div class="etools">
       <input type="text" id="q" placeholder="ค้นหาชื่อย่อหรือชื่อบริษัท" aria-label="ค้นหาหุ้น IPO">
-      <div class="seg" data-g="win" role="group" aria-label="ช่วงเวลา">
-        <button type="button" data-v="1" aria-pressed="false">1 ปี</button>
-        <button type="button" data-v="3" aria-pressed="false">3 ปี</button>
-        <button type="button" data-v="5" aria-pressed="true">5 ปี</button>
-      </div>
       <div class="seg" data-g="sort" role="group" aria-label="เรียงตาม">
         <button type="button" data-v="new" aria-pressed="true">ใหม่สุด</button>
         <button type="button" data-v="price" aria-pressed="false">ราคา IPO สูงสุด</button>
       </div>
     </div>
+    <div class="cats" id="bands" role="group" aria-label="เลือกอายุหุ้นหลัง IPO"></div>
+    <p class="note" id="range"></p>
     <div class="tbl-w"><table class="etbl itbl"><thead><tr><th>วันที่ IPO</th><th>ชื่อย่อ</th><th class="hide-m">บริษัท</th><th>ราคา IPO</th></tr></thead><tbody id="etb"></tbody></table></div>
     <p class="note" id="ecount"></p>
     <div class="hw"><b>ทำการบ้านต่อ:</b> กดชื่อย่อเพื่อเปิด dashboard ของหุ้นตัวนั้น ดูกราฟ Finviz ข่าว งบ และจดโน้ตการบ้านไว้ได้เลย ลองดูว่าหลัง IPO ราคาไปทางไหน ช่วงปลดล็อกหุ้นผู้ถือเดิม (lock-up) เป็นยังไง และงบหลายไตรมาสที่ออกมาแล้วเป็นไปตามที่บริษัทเคยบอกไหม</div>
@@ -655,13 +652,26 @@ const MON = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "
 const fmtD = s => { const a = s.split("-"); return (+a[2]) + " " + MON[+a[1] - 1] + " " + a[0]; };
 const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 const fmtP = p => "$" + (Number.isInteger(p) ? p.toFixed(0) : p.toFixed(2));
-let win = 5, sort = "new", qs = "";
+let band = 0, sort = "new", qs = "";   // band 0 = ทั้งหมด, 1 = ไม่ถึง 1 ปี, 2 = 1-2 ปี ... 5 = 4-5 ปี (แยกช่วง ไม่ซ้อนกัน)
+const BANDS = ["ทั้งหมด", "ไม่ถึง 1 ปี", "1-2 ปี", "2-3 ปี", "3-4 ปี", "4-5 ปี"];
+const ago = n => { const d = new Date(); d.setFullYear(d.getFullYear() - n); return iso(d); };
+const range = b => b === 0 ? [ago(5), "9999-12-31"] : [ago(b), b === 1 ? "9999-12-31" : ago(b - 1)];   // [จากวันที่ (รวม), ถึงวันที่ (ไม่รวม)]
+const inBand = (r, b) => { const g = range(b); return r[0] >= g[0] && r[0] < g[1]; };
+function bands() {
+  const box = $("bands"); box.textContent = "";
+  BANDS.forEach((n, i) => {
+    const b = el("button", "chip"); b.type = "button"; b.setAttribute("aria-pressed", String(band === i)); b.appendChild(document.createTextNode(n));
+    const c = el("span", "n"); c.textContent = IPOS.filter(r => inBand(r, i)).length; b.appendChild(c);
+    b.addEventListener("click", () => { band = i; bands(); list(); }); box.appendChild(b);
+  });
+}
 const el = (t, c) => { const e = document.createElement(t); if (c) e.className = c; return e; };
 function list() {
-  const cut = new Date(); cut.setFullYear(cut.getFullYear() - win); const from = iso(cut), q = qs.trim().toLowerCase();
-  let a = IPOS.filter(r => r[0] >= from && (!q || (r[1] + " " + r[2]).toLowerCase().indexOf(q) >= 0));
-  const inWin = IPOS.filter(r => r[0] >= from).length;
+  const q = qs.trim().toLowerCase();
+  let a = IPOS.filter(r => inBand(r, band) && (!q || (r[1] + " " + r[2]).toLowerCase().indexOf(q) >= 0));
+  const inWin = IPOS.filter(r => inBand(r, band)).length, g = range(band);
   a = a.slice().sort((x, y) => sort === "price" ? (y[3] - x[3]) || (x[0] < y[0] ? 1 : -1) : (x[0] < y[0] ? 1 : x[0] > y[0] ? -1 : 0));
+  $("range").textContent = band === 1 ? "IPO ตั้งแต่ " + fmtD(g[0]) + " จนถึงปัจจุบัน" : band === 0 ? "IPO ตั้งแต่ " + fmtD(g[0]) + " จนถึงปัจจุบัน (รวมทุกช่วงอายุ)" : "IPO ระหว่าง " + fmtD(g[0]) + " ถึง " + fmtD(iso(new Date(new Date(g[1] + "T00:00:00").getTime() - 864e5)));
   const tb = $("etb"); tb.textContent = "";
   a.forEach(r => {
     const tr = el("tr"), c = t => { const d = el("td"); d.textContent = t; return d; };
@@ -671,17 +681,16 @@ function list() {
     const t3 = c(r[2]); t3.className = "hide-m"; tr.appendChild(t3);
     tr.appendChild(c(fmtP(r[3]))); tb.appendChild(tr);
   });
-  $("ecount").textContent = a.length ? "แสดง " + a.length + " จาก " + inWin + " ตัวที่เข้าตลาดใน " + win + " ปีที่ผ่านมา" : "ไม่พบหุ้นที่ตรงกับที่ค้นหา";
+  $("ecount").textContent = a.length ? "แสดง " + a.length + " จาก " + inWin + " ตัวในช่วงนี้" : "ไม่พบหุ้นที่ตรงกับที่ค้นหา";
 }
 if (live) {
   $("soon").hidden = true; $("list").hidden = false; $("pv").hidden = !(preview && !(window.SITE && SITE.ipoLive));
   $("asof").textContent = fmtD(IPO_ASOF);
   $("q").addEventListener("input", e => { qs = e.target.value; list(); });
-  [["win", v => { win = +v; }], ["sort", v => { sort = v; }]].forEach(g => {
-    document.querySelectorAll('[data-g="' + g[0] + '"] button').forEach(b => b.addEventListener("click", () => {
-      g[1](b.dataset.v); document.querySelectorAll('[data-g="' + g[0] + '"] button').forEach(x => x.setAttribute("aria-pressed", String(x === b))); list();
-    }));
-  });
+  document.querySelectorAll('[data-g="sort"] button').forEach(b => b.addEventListener("click", () => {
+    sort = b.dataset.v; document.querySelectorAll('[data-g="sort"] button').forEach(x => x.setAttribute("aria-pressed", String(x === b))); list();
+  }));
+  bands();
   list();
 }
 </script>
