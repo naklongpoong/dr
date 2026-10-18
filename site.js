@@ -8,6 +8,8 @@ window.SITE = {
   invest: true,    // แท็บ แนวทางการลงทุน (เกมตอบคำถามดูสไตล์นักลงทุน) false = ซ่อนทั้งเมนูและการ์ด
   calc: true,      // แท็บ คำนวณดอกเบี้ยทบต้น (เงินต้น/เงินออม/ผลตอบแทน/ปันผล Re-invest หรือไม่ Re-invest) false = ซ่อนทั้งเมนูและการ์ด
   rr: true,        // แท็บ คำนวณความคุ้มเสี่ยง Risk:Reward (เครื่องมือสายเทรด ใส่ราคาซื้อ/ตัดขาดทุน/เป้าหมาย) false = ซ่อนทั้งเมนูและการ์ด
+  ipo: true,        // แท็บ หุ้น IPO ใหม่ (หุ้นสหรัฐที่เข้าตลาดใน 1-5 ปี ลิงก์ไปทำการบ้านต่อในหน้า dashboard) false = ซ่อนทั้งเมนูและการ์ด
+  ipoLive: false,   // false = สมาชิกเห็นหน้า Coming Soon (ดูตัวจริงที่ ipo.html?preview=1) true = เปิดรายชื่อจริง
   etf: true,        // แท็บ ETF (รายชื่อ ETF ใหญ่ของสหรัฐ ค้นหา/กรอง/เรียงได้) false = ซ่อนทั้งเมนูและการ์ด
   newHours: 48,     // โพสต์ที่ใหม่กว่านี้ (ชั่วโมง) จะมีป้าย NEW
   listHours: 24,    // หน้าข่าวโหลดเฉพาะโพสต์ย้อนหลังกี่ชั่วโมง (เก่ากว่านั้นกดปุ่ม "โหลดเพิ่ม")
@@ -86,6 +88,7 @@ window.buildNav = function (current) {
   if (SITE.invest) extra.push(["invest", "invest.html", "แนวทางการลงทุน"]);
   if (SITE.calc) extra.push(["calc", "calc.html", "คำนวณดอกเบี้ยทบต้น"]);
   if (SITE.rr) extra.push(["rr", "rr.html", "คำนวณความคุ้มเสี่ยง"]);
+  if (SITE.ipo) extra.push(["ipo", "ipo.html", "หุ้น IPO ใหม่"]);
   if (SITE.etf) extra.push(["etf", "etf.html", "ETF"]);
   function link(i, cls) {
     return '<a' + (cls ? ' class="' + cls + '"' : "") + ' href="' + i[1] + '"' + (i[0] === current ? ' aria-current="page"' : "") + ">" + i[2] + "</a>";
