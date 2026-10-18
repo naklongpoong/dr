@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ETF | นักลงพุง</title>
-<meta name="description" content="รายชื่อ ETF ใหญ่ของสหรัฐจากผู้ออก 25 รายที่ใหญ่สุด ค้นหา กรองตามประเภท เรียงตามขนาดกองทุน (ข้อมูลอ้างอิงจากโพสต์ของ @TheETFTracker ไม่ใช่คำแนะนำการลงทุน)">
+<meta name="description" content="รายชื่อ ETF ใหญ่ของสหรัฐจากผู้ออก 25 รายที่ใหญ่สุด ค้นหา กรองตามประเภท เรียงตามขนาด ค่าธรรมเนียม ปันผล (ดูขนาด ค่าธรรมเนียม และปันผลต่อปี ไม่ใช่คำแนะนำการลงทุน)">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="th_TH">
 <meta property="og:site_name" content="นักลงพุง">
 <meta property="og:title" content="ETF | นักลงพุง">
-<meta property="og:description" content="รายชื่อ ETF ใหญ่ของสหรัฐจากผู้ออก 25 รายที่ใหญ่สุด ค้นหา กรองตามประเภท เรียงตามขนาดกองทุน (ข้อมูลอ้างอิงจากโพสต์ของ @TheETFTracker ไม่ใช่คำแนะนำการลงทุน)">
+<meta property="og:description" content="รายชื่อ ETF ใหญ่ของสหรัฐจากผู้ออก 25 รายที่ใหญ่สุด ค้นหา กรองตามประเภท เรียงตามขนาด ค่าธรรมเนียม ปันผล (ดูขนาด ค่าธรรมเนียม และปันผลต่อปี ไม่ใช่คำแนะนำการลงทุน)">
 <meta property="og:url" content="https://naklongpoong.github.io/dr/etf.html">
 <meta property="og:image" content="https://naklongpoong.github.io/dr/og-home.png">
 <meta property="og:image:width" content="1200">
@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610190023"></script>
-<script src="gate.js?v=202610190023"></script>
+<script src="site.js?v=202610190524"></script>
+<script src="gate.js?v=202610190524"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -95,7 +95,7 @@ textarea, input[type="text"], input[type="url"] {
 textarea { min-height: 120px; resize: vertical; }
 textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.seg { display: inline-flex; padding: 3px; gap: 2px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; }
+.seg { display: inline-flex; flex-wrap: wrap; padding: 3px; gap: 2px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; }
 .seg button { font: inherit; font-size: 0.9rem; cursor: pointer; border: 0; background: transparent; color: var(--ink); padding: 4px 16px; border-radius: 999px; }
 .seg button[aria-pressed="true"] { background: var(--gold); color: var(--gold-ink); font-weight: 600; }
 .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
@@ -334,7 +334,8 @@ th { color: var(--muted); font-weight: 600; font-size: .8rem; }
   .etbl .hide-m2 { display: none; }
 }
 .etbl .cat-m { display: none; font-size: .72rem; color: var(--muted); }
-@media (max-width: 560px) { .etbl .cat-m { display: block; } }
+@media (max-width: 560px) { .etbl .cat-m { display: none; } .etbl td:nth-child(2) { white-space: normal; } .etbl th, .etbl td { padding-left: 4px; padding-right: 4px; } .etbl .iss { white-space: normal; } .etbl td { font-size: .76rem; } .etbl th { font-size: .7rem; } }
+.etbl td:nth-child(7) .iss { text-align: right; }
 </style>
 </head>
 <body>
@@ -352,18 +353,20 @@ th { color: var(--muted); font-weight: 600; font-size: .8rem; }
 
   <section class="cc" id="list" aria-label="รายชื่อ ETF">
     <h2>ETF ใหญ่ของสหรัฐ จากผู้ออก 25 รายที่ใหญ่สุด</h2>
-    <p class="note">ETF ที่ใหญ่สุดของผู้ออกแต่ละราย 25 ราย ข้อมูลจากโพสต์ของ @TheETFTracker (ต้นทาง ETFdb.com และ VettaFi) ไม่ระบุวันที่ ขนาดกองทุนเปลี่ยนทุกวัน ปุ่ม "ตามผู้ออก" เรียงตามขนาดของผู้ออก (เช่น Vanguard, iShares) ซึ่งไม่ใช่ขนาดของกองทุน ถ้าอยากเรียงตามขนาดกองทุนกดปุ่ม "ตามขนาดกองทุน" ช่อง "ประเภท" เป็นการจัดกลุ่มคร่าวๆ จากชื่อกองทุน ตารางนี้ไม่มีตัวเลขผลตอบแทนหรือปันผลของแต่ละกอง ต้องเช็กกับหน้ากองทุนของผู้ออกเอง</p>
+    <p class="note">ETF ที่ใหญ่สุดของผู้ออกแต่ละราย 25 ราย รายชื่อและลำดับผู้ออกจากโพสต์ของ @TheETFTracker (ต้นทาง ETFdb.com และ VettaFi) ส่วนขนาดกองทุน ค่าธรรมเนียม และปันผล ดึงจาก stockanalysis.com ณ ปิดตลาด 16 ต.ค. 2026 (บางกองเป็นข้อมูล 15 ต.ค.) ตัวเลขเปลี่ยนทุกวัน ปุ่ม "ตามผู้ออก" เรียงตามขนาดของผู้ออก (เช่น Vanguard, iShares) ไม่ใช่ขนาดของกองทุน ช่อง "ประเภท" เป็นการจัดกลุ่มคร่าวๆ จากชื่อกองทุน</p>
     <div class="etools">
       <input type="text" id="q" placeholder="ค้นหาชื่อย่อ ชื่อกองทุน หรือผู้ออก" aria-label="ค้นหา ETF">
       <div class="seg" data-g="sort" role="group" aria-label="เรียงตาม">
         <button type="button" data-v="rank" aria-pressed="true">ตามผู้ออก</button>
         <button type="button" data-v="aum" aria-pressed="false">ตามขนาดกองทุน</button>
+        <button type="button" data-v="fee" aria-pressed="false">ค่าธรรมเนียมต่ำสุด</button>
+        <button type="button" data-v="yld" aria-pressed="false">ปันผลสูงสุด</button>
       </div>
     </div>
     <div class="cats" id="cats"></div>
-    <div class="tbl-w"><table class="etbl"><thead><tr><th>#</th><th>ชื่อย่อ</th><th class="hide-m">กองทุน</th><th class="hide-m2">ประเภท</th><th>ขนาดกองทุน</th></tr></thead><tbody id="etb"></tbody></table></div>
+    <div class="tbl-w"><table class="etbl"><thead><tr><th>#</th><th>ชื่อย่อ</th><th class="hide-m">กองทุน</th><th class="hide-m2">ประเภท</th><th>ขนาด<span class="hide-m">กองทุน</span></th><th title="ค่าธรรมเนียมต่อปี (expense ratio)">ค่าธรรมเนียม<span class="hide-m">/ปี</span></th><th title="ปันผลย้อนหลัง 12 เดือน หารราคาปัจจุบัน">ปันผล<span class="hide-m">/ปี</span></th></tr></thead><tbody id="etb"></tbody></table></div>
     <p class="note" id="ecount"></p>
-    <p class="note">ชื่อย่อกดไปดูกราฟและข่าวในหน้า dashboard ของหุ้นได้ กองเลเวอเรจ (เช่น 3 เท่า) ปรับตัวคูณรายวัน ผลระยะยาวไม่เท่ากับ 3 เท่าของดัชนีและผันผวนหนักมาก กองปันผลสูงบางกองใช้กลยุทธ์ออปชัน ผลตอบแทนอาจโตตามตลาดได้ไม่เต็มที่ ก่อนซื้อควรอ่านหนังสือชี้ชวนและค่าธรรมเนียมของแต่ละกอง ดู DR ที่เป็น ETF ในตลาดหุ้นไทยได้ที่ <a class="lk" href="dr.html?sector=etf">รวม DR › กลุ่ม ETF</a> ไม่ใช่คำแนะนำการลงทุน</p>
+    <p class="note">ชื่อย่อกดไปดูกราฟและข่าวในหน้า dashboard ของหุ้นได้ กองเลเวอเรจ (เช่น 3 เท่า) ปรับตัวคูณรายวัน ผลระยะยาวไม่เท่ากับ 3 เท่าของดัชนีและผันผวนหนักมาก ปันผล/ปี คือปันผลที่จ่ายจริงย้อนหลัง 12 เดือนหารราคาปัจจุบัน ไม่ใช่ตัวเลขที่รับประกันในอนาคต กองปันผลสูงมาก (เช่น JEPI, QQQI) ใช้กลยุทธ์ออปชัน ปันผลเปลี่ยนไปตามตลาดได้และผลตอบแทนอาจโตตามตลาดได้ไม่เต็มที่ ปันผลสูงไม่ได้แปลว่าผลตอบแทนรวมดีกว่า ทองคำ (GLD) และ BOXX ไม่จ่ายปันผล ตารางนี้ยังไม่มีผลตอบแทนด้านราคา ก่อนซื้อควรอ่านหนังสือชี้ชวนของแต่ละกอง ดู DR ที่เป็น ETF ในตลาดหุ้นไทยได้ที่ <a class="lk" href="dr.html?sector=etf">รวม DR › กลุ่ม ETF</a> ไม่ใช่คำแนะนำการลงทุน</p>
     <p class="note">อยากรู้ว่าถ้า ETF จ่ายปันผล จะ Re-invest หรือรับเป็นเงินสด เงินต่างกันเท่าไร ลองที่ <a class="lk" href="calc.html">คำนวณดอกเบี้ยทบต้น ›</a> (ใส่ปันผลแล้วเลือก Re-invest หรือไม่ Re-invest ได้) ส่วน ETF คืออะไร อ่านที่ <a class="lk" href="basics.html#etf">ความรู้พื้นฐาน ›</a></p>
   </section>
 </main>
@@ -375,34 +378,36 @@ const $ = id => document.getElementById(id);
 
 // ---- รายชื่อ ETF (จากภาพโพสต์ @TheETFTracker ข้อมูลต้นทาง ETFdb.com และ VettaFi) ----
 const CATS = ["ดัชนีหลัก/หุ้นสหรัฐวงกว้าง", "หุ้นปันผล/รายได้", "หุ้น Value/ขนาดเล็ก", "ธีม/อุตสาหกรรม", "เลเวอเรจ", "ตราสารหนี้/เงินสด", "ทองคำ"];
-// [ลำดับในภาพ, ชื่อย่อ, ผู้ออก, ชื่อกองทุน, ประเภท(ดัชนีใน CATS), ขนาดกองทุน(พันล้านดอลลาร์), ข้อความขนาดตามภาพ]
+// [ลำดับผู้ออก (จากโพสต์ @TheETFTracker), ชื่อย่อ, ผู้ออก, ชื่อกองทุน, ประเภท(ดัชนีใน CATS), ขนาดกองทุน(พันล้านดอลลาร์), ข้อความขนาด, ค่าธรรมเนียม %/ปี, ปันผลย้อนหลัง 12 เดือน % (null = ไม่จ่าย), ความถี่ M/Q/S/A]
+// ขนาดกองทุน ค่าธรรมเนียม ปันผล: stockanalysis.com ปิดตลาด 16 ต.ค. 2026 (บางกองข้อมูล 15 ต.ค.) ลำดับผู้ออกและชื่อ: โพสต์ @TheETFTracker
 const ETFS = [
-  [1, "VOO", "Vanguard", "Vanguard S&P 500 ETF", 0, 1050, "$1.05T"],
-  [2, "IVV", "iShares", "iShares Core S&P 500 ETF", 0, 896.5, "$896.5B"],
-  [3, "SPY", "State Street", "State Street SPDR S&P 500 ETF", 0, 820.4, "$820.4B"],
-  [4, "QQQ", "Invesco", "Invesco QQQ Trust", 0, 501.9, "$501.9B"],
-  [5, "SCHD", "Schwab", "Schwab US Dividend Equity ETF", 1, 112.8, "$112.8B"],
-  [6, "JEPI", "JPMorgan", "JPMorgan Equity Premium Income ETF", 1, 45.6, "$45.6B"],
-  [7, "DFAC", "Dimensional", "Dimensional US Core Equity 2 ETF", 0, 49.1, "$49.1B"],
-  [8, "RDVY", "First Trust", "First Trust Rising Dividend Achievers ETF", 1, 25.5, "$25.5B"],
-  [9, "FBND", "Fidelity", "Fidelity Total Bond ETF", 5, 28.1, "$28.1B"],
-  [10, "GLD", "SPDR Gold (World Gold Council)", "SPDR Gold Shares", 6, 138.5, "$138.5B"],
-  [11, "AVUV", "Avantis", "Avantis US Small Cap Value ETF", 2, 30.9, "$30.9B"],
-  [12, "SMH", "VanEck", "VanEck Semiconductor ETF", 3, 68.5, "$68.5B"],
-  [13, "CGDV", "Capital Group", "Capital Group Dividend Value ETF", 1, 39.0, "$39.0B"],
-  [14, "TQQQ", "ProShares", "ProShares UltraPro QQQ", 4, 39.0, "$39.0B"],
-  [15, "GSLC", "Goldman Sachs", "Goldman Sachs ActiveBeta US Large Cap Equity ETF", 0, 15.2, "$15.2B"],
-  [16, "USFR", "WisdomTree", "WisdomTree Floating Rate Treasury Fund", 5, 20.9, "$20.9B"],
-  [17, "PAVE", "Global X", "Global X US Infrastructure Development ETF", 3, 13.6, "$13.6B"],
-  [18, "MINT", "PIMCO", "PIMCO Enhanced Short Maturity Active ETF", 5, 18.9, "$18.9B"],
-  [19, "SOXL", "Direxion", "Direxion Daily Semiconductor Bull 3X ETF", 4, 20.7, "$20.7B"],
-  [20, "PVAL", "Franklin Templeton", "Putnam Focused Large Cap Value ETF", 2, 14.9, "$14.9B"],
-  [21, "JAAA", "Janus Henderson", "Janus Henderson AAA CLO ETF", 5, 32.4, "$32.4B"],
-  [22, "COWZ", "Pacer", "Pacer US Cash Cows 100 ETF", 2, 19.2, "$19.2B"],
-  [23, "BOXX", "Alpha Architect", "Alpha Architect 1-3 Month Box ETF", 5, 14.3, "$14.3B"],
-  [24, "GRNY", "Fundstrat", "Fundstrat Granny Shots US Large Cap ETF", 0, 4.4, "$4.4B"],
-  [25, "QQQI", "NEOS", "NEOS Nasdaq-100 High Income ETF", 1, 15.4, "$15.4B"]
+  [1, "VOO", "Vanguard", "Vanguard S&P 500 ETF", 0, 1060, "$1.06T", 0.03, 1.06, "Q"],
+  [2, "IVV", "iShares", "iShares Core S&P 500 ETF", 0, 889.34, "$889.3B", 0.03, 1.1, "Q"],
+  [3, "SPY", "State Street", "State Street SPDR S&P 500 ETF", 0, 818.71, "$818.7B", 0.09, 0.99, "Q"],
+  [4, "QQQ", "Invesco", "Invesco QQQ Trust", 0, 489.15, "$489.2B", 0.18, 0.44, "Q"],
+  [5, "SCHD", "Schwab", "Schwab US Dividend Equity ETF", 1, 114.14, "$114.1B", 0.06, 3.07, "Q"],
+  [6, "JEPI", "JPMorgan", "JPMorgan Equity Premium Income ETF", 1, 45.83, "$45.8B", 0.35, 8.0, "M"],
+  [7, "DFAC", "Dimensional", "Dimensional US Core Equity 2 ETF", 0, 49.42, "$49.4B", 0.17, 0.88, "Q"],
+  [8, "RDVY", "First Trust", "First Trust Rising Dividend Achievers ETF", 1, 25.53, "$25.5B", 0.47, 0.86, "Q"],
+  [9, "FBND", "Fidelity", "Fidelity Total Bond ETF", 5, 28.04, "$28.0B", 0.36, 4.83, "M"],
+  [10, "GLD", "SPDR Gold (World Gold Council)", "SPDR Gold Shares", 6, 141.36, "$141.4B", 0.4, null, ""],
+  [11, "AVUV", "Avantis", "Avantis US Small Cap Value ETF", 2, 31.26, "$31.3B", 0.25, 1.26, "Q"],
+  [12, "SMH", "VanEck", "VanEck Semiconductor ETF", 3, 67.99, "$68.0B", 0.35, 0.2, "A"],
+  [13, "CGDV", "Capital Group", "Capital Group Dividend Value ETF", 1, 39.18, "$39.2B", 0.33, 1.23, "Q"],
+  [14, "TQQQ", "ProShares", "ProShares UltraPro QQQ", 4, 37.06, "$37.1B", 0.78, 0.71, "Q"],
+  [15, "GSLC", "Goldman Sachs", "Goldman Sachs ActiveBeta US Large Cap Equity ETF", 0, 15.35, "$15.4B", 0.09, 1.01, "Q"],
+  [16, "USFR", "WisdomTree", "WisdomTree Floating Rate Treasury Fund", 5, 20.93, "$20.9B", 0.15, 3.72, "M"],
+  [17, "PAVE", "Global X", "Global X US Infrastructure Development ETF", 3, 13.58, "$13.6B", 0.47, 0.82, "S"],
+  [18, "MINT", "PIMCO", "PIMCO Enhanced Short Maturity Active ETF", 5, 18.65, "$18.7B", 0.36, 4.09, "M"],
+  [19, "SOXL", "Direxion", "Direxion Daily Semiconductor Bull 3X ETF", 4, 22.41, "$22.4B", 0.75, 0.1, "Q"],
+  [20, "PVAL", "Franklin Templeton", "Putnam Focused Large Cap Value ETF", 2, 15.04, "$15.0B", 0.55, 0.88, "Q"],
+  [21, "JAAA", "Janus Henderson", "Janus Henderson AAA CLO ETF", 5, 32.34, "$32.3B", 0.2, 4.84, "M"],
+  [22, "COWZ", "Pacer", "Pacer US Cash Cows 100 ETF", 2, 19.18, "$19.2B", 0.49, 1.93, "Q"],
+  [23, "BOXX", "Alpha Architect", "Alpha Architect 1-3 Month Box ETF", 5, 14.3, "$14.3B", 0.19, null, ""],
+  [24, "GRNY", "Fundstrat", "Fundstrat Granny Shots US Large Cap ETF", 0, 4.44, "$4.4B", 0.75, 0.13, "Q"],
+  [25, "QQQI", "NEOS", "NEOS Nasdaq-100 High Income ETF", 1, 15.24, "$15.2B", 0.68, 14.25, "M"]
 ];
+const FQ = { M: "รายเดือน", Q: "รายไตรมาส", S: "ราย 6 เดือน", A: "รายปี" };
 let cat = -1, sort = "rank", qs = "";
 const el = (t, c) => { const e = document.createElement(t); if (c) e.className = c; return e; };
 function cats() {
@@ -415,17 +420,21 @@ function cats() {
 function list() {
   const q = qs.trim().toLowerCase();
   let a = ETFS.filter(r => (cat < 0 || r[4] === cat) && (!q || (r[1] + " " + r[2] + " " + r[3]).toLowerCase().indexOf(q) >= 0));
-  a = a.slice().sort((x, y) => sort === "aum" ? (y[5] - x[5]) || (x[0] - y[0]) : x[0] - y[0]);
+  const num = { aum: r => -r[5], fee: r => r[7], yld: r => -(r[8] || 0) };
+  a = a.slice().sort((x, y) => sort === "rank" ? x[0] - y[0] : (num[sort](x) - num[sort](y)) || (x[0] - y[0]));
   const tb = $("etb"); tb.textContent = "";
   a.forEach((r, i) => {
     const tr = el("tr"), c = (t) => { const d = el("td"); if (t != null) d.textContent = t; return d; };
-    tr.appendChild(c(sort === "aum" ? i + 1 : r[0]));
+    tr.appendChild(c(sort === "rank" ? r[0] : i + 1));
     const t2 = el("td"), lk = el("a", "tk"); lk.href = "stock.html?t=" + encodeURIComponent(r[1]); lk.textContent = r[1]; t2.appendChild(lk);
     const m = el("span", "iss"); m.textContent = r[2]; t2.appendChild(m); tr.appendChild(t2);
     const t3 = c(r[3]); t3.className = "hide-m"; tr.appendChild(t3);
     const cm = el("span", "cat-m"); cm.textContent = CATS[r[4]]; t2.appendChild(cm);
     const t4 = el("td", "cat hide-m2"); t4.textContent = CATS[r[4]]; tr.appendChild(t4);
-    tr.appendChild(c(r[6])); tb.appendChild(tr);
+    tr.appendChild(c(r[6]));
+    tr.appendChild(c(r[7].toFixed(2) + "%"));
+    const ty = c(r[8] == null ? "ไม่จ่าย" : r[8].toFixed(2) + "%"); if (r[8] != null) { const f = el("span", "iss"); f.textContent = FQ[r[9]]; ty.appendChild(f); } tr.appendChild(ty);
+    tb.appendChild(tr);
   });
   $("ecount").textContent = a.length ? `แสดง ${a.length} จาก ${ETFS.length} กองทุน` : "ไม่พบกองทุนที่ตรงกับที่ค้นหา";
 }
