@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ETF | นักลงพุง</title>
-<meta name="description" content="รายชื่อ ETF ใหญ่ของสหรัฐจากผู้ออก 25 รายที่ใหญ่สุด ค้นหา กรองตามประเภท เรียงตามขนาดกองทุน (ข้อมูลอ้างอิงตามภาพโพสต์ ไม่ใช่คำแนะนำการลงทุน)">
+<meta name="description" content="รายชื่อ ETF ใหญ่ของสหรัฐจากผู้ออก 25 รายที่ใหญ่สุด ค้นหา กรองตามประเภท เรียงตามขนาดกองทุน (ข้อมูลอ้างอิงจากโพสต์ของ @TheETFTracker ไม่ใช่คำแนะนำการลงทุน)">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="th_TH">
 <meta property="og:site_name" content="นักลงพุง">
 <meta property="og:title" content="ETF | นักลงพุง">
-<meta property="og:description" content="รายชื่อ ETF ใหญ่ของสหรัฐจากผู้ออก 25 รายที่ใหญ่สุด ค้นหา กรองตามประเภท เรียงตามขนาดกองทุน (ข้อมูลอ้างอิงตามภาพโพสต์ ไม่ใช่คำแนะนำการลงทุน)">
+<meta property="og:description" content="รายชื่อ ETF ใหญ่ของสหรัฐจากผู้ออก 25 รายที่ใหญ่สุด ค้นหา กรองตามประเภท เรียงตามขนาดกองทุน (ข้อมูลอ้างอิงจากโพสต์ของ @TheETFTracker ไม่ใช่คำแนะนำการลงทุน)">
 <meta property="og:url" content="https://naklongpoong.github.io/dr/etf.html">
 <meta property="og:image" content="https://naklongpoong.github.io/dr/og-home.png">
 <meta property="og:image:width" content="1200">
@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610190014"></script>
-<script src="gate.js?v=202610190014"></script>
+<script src="site.js?v=202610190023"></script>
+<script src="gate.js?v=202610190023"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -352,11 +352,11 @@ th { color: var(--muted); font-weight: 600; font-size: .8rem; }
 
   <section class="cc" id="list" aria-label="รายชื่อ ETF">
     <h2>ETF ใหญ่ของสหรัฐ จากผู้ออก 25 รายที่ใหญ่สุด</h2>
-    <p class="note">ETF ที่ใหญ่สุดของผู้ออกแต่ละราย 25 ราย ตามภาพโพสต์ของ @TheETFTracker (ข้อมูลต้นทาง ETFdb.com และ VettaFi) ภาพไม่ระบุวันที่ ขนาดกองทุนเปลี่ยนทุกวัน ลำดับ "ตามภาพ" เรียงตามขนาดของผู้ออก ไม่ใช่ตามขนาดของกองทุน ใช้ปุ่มเรียงด้านล่างถ้าอยากเรียงตามขนาดกองทุน ช่อง "ประเภท" เป็นการจัดกลุ่มคร่าวๆ จากชื่อกองทุน ตารางนี้ไม่มีตัวเลขผลตอบแทนหรือปันผลของแต่ละกอง ต้องเช็กกับหน้ากองทุนของผู้ออกเอง</p>
+    <p class="note">ETF ที่ใหญ่สุดของผู้ออกแต่ละราย 25 ราย ข้อมูลจากโพสต์ของ @TheETFTracker (ต้นทาง ETFdb.com และ VettaFi) ไม่ระบุวันที่ ขนาดกองทุนเปลี่ยนทุกวัน ปุ่ม "ตามผู้ออก" เรียงตามขนาดของผู้ออก (เช่น Vanguard, iShares) ซึ่งไม่ใช่ขนาดของกองทุน ถ้าอยากเรียงตามขนาดกองทุนกดปุ่ม "ตามขนาดกองทุน" ช่อง "ประเภท" เป็นการจัดกลุ่มคร่าวๆ จากชื่อกองทุน ตารางนี้ไม่มีตัวเลขผลตอบแทนหรือปันผลของแต่ละกอง ต้องเช็กกับหน้ากองทุนของผู้ออกเอง</p>
     <div class="etools">
       <input type="text" id="q" placeholder="ค้นหาชื่อย่อ ชื่อกองทุน หรือผู้ออก" aria-label="ค้นหา ETF">
       <div class="seg" data-g="sort" role="group" aria-label="เรียงตาม">
-        <button type="button" data-v="rank" aria-pressed="true">ตามภาพ</button>
+        <button type="button" data-v="rank" aria-pressed="true">ตามผู้ออก</button>
         <button type="button" data-v="aum" aria-pressed="false">ตามขนาดกองทุน</button>
       </div>
     </div>
