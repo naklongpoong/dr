@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>คำนวณดอกเบี้ยทบต้น | นักลงพุง</title>
-<meta name="description" content="กรอกเงินต้น เงินออมต่อเดือน ผลตอบแทน และระยะเวลา ดูว่าเงินโตแค่ไหนเมื่อทบต้น (ตัวอย่างสมมติ ไม่ใช่คำแนะนำการลงทุน)">
+<meta name="description" content="กรอกเงินต้น เงินออมต่อเดือน ผลตอบแทน ปันผล (รีอินเวสต์หรือรับเป็นเงินสด) และระยะเวลา ดูว่าเงินโตแค่ไหนเมื่อทบต้น (ตัวอย่างสมมติ ไม่ใช่คำแนะนำการลงทุน)">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="th_TH">
 <meta property="og:site_name" content="นักลงพุง">
 <meta property="og:title" content="คำนวณดอกเบี้ยทบต้น | นักลงพุง">
-<meta property="og:description" content="กรอกเงินต้น เงินออมต่อเดือน ผลตอบแทน และระยะเวลา ดูว่าเงินโตแค่ไหนเมื่อทบต้น (ตัวอย่างสมมติ ไม่ใช่คำแนะนำการลงทุน)">
+<meta property="og:description" content="กรอกเงินต้น เงินออมต่อเดือน ผลตอบแทน ปันผล (รีอินเวสต์หรือรับเป็นเงินสด) และระยะเวลา ดูว่าเงินโตแค่ไหนเมื่อทบต้น (ตัวอย่างสมมติ ไม่ใช่คำแนะนำการลงทุน)">
 <meta property="og:url" content="https://naklongpoong.github.io/dr/calc.html">
 <meta property="og:image" content="https://naklongpoong.github.io/dr/og-home.png">
 <meta property="og:image:width" content="1200">
@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610180846"></script>
-<script src="gate.js?v=202610180846"></script>
+<script src="site.js?v=202610181230"></script>
+<script src="gate.js?v=202610181230"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -301,6 +301,22 @@ th { color: var(--muted); font-weight: 600; font-size: .8rem; }
   .cmp-sum td:first-child { white-space: normal; }
 }
 #gacct { min-height: 1.2em; }
+
+/* ---------- ปันผล: รีอินเวสต์ / ไม่รี ---------- */
+.seg-row { margin-top: 16px; }
+.seg-row > span { display: block; font-size: .88rem; font-weight: 600; margin-bottom: 4px; }
+.seg-row small { display: block; color: var(--muted); font-size: .76rem; margin-top: 4px; }
+.two-c { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.opt { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.opt h4 { margin: 0 0 2px; font-size: .95rem; }
+.opt .v { display: block; font-size: 1.35rem; font-weight: 700; overflow-wrap: anywhere; }
+.opt.a { border-top: 4px solid var(--accent); }
+.opt.b { border-top: 4px solid var(--live); }
+.opt small { display: block; color: var(--muted); font-size: .8rem; margin-top: 4px; line-height: 1.5; }
+.opt .row { display: flex; justify-content: space-between; gap: 8px; font-size: .85rem; margin-top: 6px; }
+.opt .row span:first-child { color: var(--muted); }
+.opt .row b { text-align: right; overflow-wrap: anywhere; }
+@media (max-width: 560px) { .two-c { grid-template-columns: minmax(0, 1fr); } }
 </style>
 </head>
 <body>
@@ -323,11 +339,19 @@ th { color: var(--muted); font-weight: 600; font-size: .8rem; }
       <div class="fld"><label for="p0">เงินต้นเริ่มต้น</label><div class="in"><input id="p0" type="number" inputmode="decimal" min="0" step="any" value="100000"><span class="u">บาท</span></div></div>
       <div class="fld"><label for="pm">เงินลงทุนเพิ่มทุกเดือน</label><div class="in"><input id="pm" type="number" inputmode="decimal" min="0" step="any" value="5000"><span class="u">บาท/เดือน</span></div></div>
       <div class="fld"><label for="gr">เพิ่มเงินลงทุนทุกปี (ไม่บังคับ)</label><div class="in"><input id="gr" type="number" inputmode="decimal" min="0" max="50" step="any" value="0"><span class="u">% ต่อปี</span></div><small>เช่น เงินเดือนขึ้นปีละ 3–5% แล้วลงเพิ่มตาม ไม่ใส่คือลงเท่าเดิมทุกเดือน</small></div>
-      <div class="fld"><label for="rt">ผลตอบแทนที่สมมติ ต่อปี</label><div class="in"><input id="rt" type="number" inputmode="decimal" min="-50" max="100" step="any" value="7"><span class="u">% ต่อปี</span></div><small>ใส่เป็นตัวเลขสมมติเพื่อทดลอง ของจริงขึ้นลงทุกปี</small></div>
+      <div class="fld"><label for="rt">ผลตอบแทนที่สมมติ ต่อปี</label><div class="in"><input id="rt" type="number" inputmode="decimal" min="-50" max="100" step="any" value="7"><span class="u">% ต่อปี</span></div><small>ใส่เป็นตัวเลขสมมติเพื่อทดลอง ของจริงขึ้นลงทุกปี ถ้าใส่ปันผลแยกด้านล่าง ช่องนี้ให้ใส่เฉพาะส่วนที่ราคาโต (ไม่รวมปันผล)</small></div>
+      <div class="fld"><label for="dy">ปันผลต่อปี (ไม่บังคับ)</label><div class="in"><input id="dy" type="number" inputmode="decimal" min="0" max="30" step="any" value="0"><span class="u">% ต่อปี</span></div><small>เช่น ETF ที่จ่ายปันผล 3.5% ต่อปี ไม่มีปันผลใส่ 0 (เรียกว่า Dividend yield)</small></div>
+      <div class="fld"><label for="tx">ภาษีหัก ณ ที่จ่ายของปันผล (ไม่บังคับ)</label><div class="in"><input id="tx" type="number" inputmode="decimal" min="0" max="60" step="any" value="0"><span class="u">%</span></div><small>ใส่ตามที่โบรกเกอร์หักจริง ไม่รู้ก็ปล่อย 0</small></div>
       <div class="fld"><label for="yr">ระยะเวลา</label><div class="in"><input id="yr" type="number" inputmode="numeric" min="1" max="60" step="1" value="10"><span class="u">ปี</span></div><small>1–60 ปี</small></div>
       <div class="fld"><label for="inf">เงินเฟ้อที่สมมติ ต่อปี (ไม่บังคับ)</label><div class="in"><input id="inf" type="number" inputmode="decimal" min="0" max="50" step="any" value="0"><span class="u">% ต่อปี</span></div><small>ใส่เพื่อดูมูลค่าเทียบกับเงินวันนี้ ไม่ใส่คือ 0</small></div>
       <div class="fld full"><label for="tg">เป้าหมายเงินก้อน (ไม่บังคับ)</label><div class="in"><input id="tg" type="number" inputmode="decimal" min="0" step="any" value="" placeholder="เช่น 1000000"><span class="u">บาท</span></div><small>ใส่เพื่อดูว่าถึงเป้าเมื่อไร หรือต้องลงเงินเดือนละเท่าไรถึงจะถึงเป้า</small></div>
     </div>
+
+    <div class="seg-row"><span>ปันผลที่ได้รับ</span>
+      <div class="seg" data-g="ri" role="group" aria-label="ปันผลที่ได้รับ">
+        <button type="button" data-v="re" aria-pressed="true">รีอินเวสต์ (เอาไปซื้อเพิ่ม)</button>
+        <button type="button" data-v="cash" aria-pressed="false">รับเป็นเงินสด (ไม่รี)</button>
+      </div><small>มีผลเมื่อใส่ปันผลมากกว่า 0 ผลของทั้งสองแบบเทียบให้ดูด้านล่างทุกครั้ง</small></div>
 
     <label class="chk"><input type="checkbox" id="cmp">เปรียบเทียบกับอีกแผน (แผน B)</label>
     <div class="bbox" id="cmpBox" hidden>
@@ -349,6 +373,21 @@ th { color: var(--muted); font-weight: 600; font-size: .8rem; }
       <div class="stat"><span>ผลตอบแทนสะสม (สมมติ)</span><b id="sGain"></b></div>
       <div class="stat"><span>เงินรวมเป็นกี่เท่าของที่ใส่</span><b id="sX"></b></div>
     </div>
+    <div id="dvOut" hidden>
+      <h3>ปันผล: รีอินเวสต์ เทียบกับรับเป็นเงินสด</h3>
+      <div class="late" id="dvVerdict"></div>
+      <div class="two-c">
+        <div class="opt a"><h4>รีอินเวสต์ปันผล</h4><span class="v" id="dAT"></span><small>เงินรวมเมื่อครบกำหนด (มูลค่ากองทุนที่ถืออยู่ทั้งหมด)</small>
+          <div class="row"><span>ปันผลหลังภาษีที่ได้ในปีสุดท้าย</span><b id="dAD"></b></div>
+          <div class="row"><span>เฉลี่ยต่อเดือน</span><b id="dAM"></b></div></div>
+        <div class="opt b"><h4>รับปันผลเป็นเงินสด (ไม่รี)</h4><span class="v" id="dBT"></span><small>เงินรวมเมื่อครบกำหนด (กองทุน + ปันผลสะสมที่เก็บเป็นเงินสด)</small>
+          <div class="row"><span>มูลค่ากองทุนที่ถืออยู่</span><b id="dBP"></b></div>
+          <div class="row"><span>ปันผลสะสมที่ได้เป็นเงินสด</span><b id="dBC"></b></div>
+          <div class="row"><span>ปันผลหลังภาษีที่ได้ในปีสุดท้าย</span><b id="dBD"></b></div>
+          <div class="row"><span>เฉลี่ยต่อเดือน</span><b id="dBM"></b></div></div>
+      </div>
+      <p class="note" id="dvTr" style="margin-top:10px"></p>
+    </div>
     <div class="late" id="goalBox" hidden></div>
 
     <div id="cmpOut" hidden>
@@ -365,7 +404,7 @@ th { color: var(--muted); font-weight: 600; font-size: .8rem; }
     <div class="late" id="late" hidden></div>
     <h3>ตารางรายปี</h3>
     <div class="tbl-w"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
-    <p class="note">วิธีคิด: ผลตอบแทนต่อปีที่กรอกถูกแปลงเป็นรายเดือนแบบทบต้น (ให้ครบปีเท่ากับอัตราที่กรอก) เงินลงทุนรายเดือนใส่ปลายเดือน ถ้าใส่ % เพิ่มเงินลงทุนทุกปี เงินรายเดือนจะเพิ่มขึ้นตอนต้นปีถัดไป ตัวเลขนี้เป็นการคำนวณสมมติเพื่อการศึกษา ไม่ได้รับประกันผลตอบแทน ไม่รวมภาษี ค่าธรรมเนียม และอัตราแลกเปลี่ยน ของจริงผลตอบแทนแต่ละปีไม่เท่ากัน และไม่ใช่คำแนะนำการลงทุน</p>
+    <p class="note">วิธีคิด: ผลตอบแทนต่อปีที่กรอกถูกแปลงเป็นรายเดือนแบบทบต้น (ให้ครบปีเท่ากับอัตราที่กรอก) เงินลงทุนรายเดือนใส่ปลายเดือน ถ้าใส่ % เพิ่มเงินลงทุนทุกปี เงินรายเดือนจะเพิ่มขึ้นตอนต้นปีถัดไป ถ้าใส่ปันผล ปันผลคิดรายเดือนเท่ากับ ปันผลต่อปี ÷ 12 ของมูลค่ากองทุนตอนนั้น (หลังหักภาษีที่ใส่) ถ้ารีอินเวสต์ จะถูกนำไปซื้อกองทุนเพิ่มทันที ถ้ารับเป็นเงินสด จะเก็บเป็นเงินสดไว้เฉยๆ โดยไม่มีดอกเบี้ยและไม่ปรับตามเงินเฟ้อ เงินรวมในตารางนับทั้งกองทุนและเงินสดที่เก็บไว้ บางโบรกเกอร์ไม่มีรีอินเวสต์ปันผลอัตโนมัติ ต้องกดซื้อเพิ่มเองจากปันผลที่ได้รับ ตัวเลขนี้เป็นการคำนวณสมมติเพื่อการศึกษา ไม่ได้รับประกันผลตอบแทน ไม่รวมภาษี ค่าธรรมเนียม และอัตราแลกเปลี่ยน ของจริงผลตอบแทนแต่ละปีไม่เท่ากัน และไม่ใช่คำแนะนำการลงทุน</p>
   </section>
 
   <section class="cc" id="saved" aria-label="เป้าหมายที่บันทึกไว้">
@@ -389,14 +428,19 @@ const num = (id, d) => { const v = parseFloat($(id).value); return isFinite(v) ?
 const el = (t, c) => { const e = document.createElement(t); if (c) e.className = c; return e; };
 const sgn = d => (d > 0.5 ? "+" : d < -0.5 ? "−" : "") + nf(Math.abs(d));
 
-// จำลองรายเดือน คืนยอดสิ้นปีของแต่ละปี [{y, put, bal}] step = % ที่เพิ่มเงินลงทุนรายเดือนทุกต้นปี
-function sim(p0, pm, rate, years, step) {
+let riMode = "re";   // re = รีอินเวสต์ปันผล, cash = รับเป็นเงินสด (เก็บไว้เฉยๆ ไม่มีดอกเบี้ย)
+// จำลองรายเดือน คืนยอดสิ้นปีของแต่ละปี [{y, put, bal, pos, cash, div}] step = % ที่เพิ่มเงินลงทุนรายเดือนทุกต้นปี
+// dv = {dy, tx, ri} ปันผลต่อปี %, ภาษีหัก ณ ที่จ่าย %, ri false = ไม่รีอินเวสต์ bal = มูลค่ากองทุน + ปันผลเงินสดที่เก็บไว้
+function sim(p0, pm, rate, years, step, dv) {
   const rm = Math.pow(1 + rate / 100, 1 / 12) - 1, sg = 1 + (step || 0) / 100, out = [];
-  let bal = p0, put = p0, c = pm;
+  const dm = dv && dv.dy > 0 ? dv.dy / 100 / 12 * (1 - (dv.tx || 0) / 100) : 0, ri = !dv || dv.ri !== false;
+  let v = p0, cash = 0, put = p0, c = pm, yd = 0;
   for (let m = 1; m <= years * 12; m++) {
     if (m > 1 && (m - 1) % 12 === 0) c *= sg;
-    bal = bal * (1 + rm) + c; put += c;
-    if (m % 12 === 0) out.push({ y: m / 12, put: put, bal: bal });
+    v *= 1 + rm;
+    const dd = v * dm; if (ri) v += dd; else cash += dd; yd += dd;
+    v += c; put += c;
+    if (m % 12 === 0) { out.push({ y: m / 12, put: put, bal: v + cash, pos: v, cash: cash, div: yd }); yd = 0; }
   }
   return out;
 }
@@ -440,21 +484,27 @@ function chart2(A, ra, rb) {
 // แผนที่อ่านจากช่องกรอก (บังคับให้อยู่ในช่วงที่รับได้)
 function planA() {
   return { p0: clamp(num("p0", 0), 0, 1e12), pm: clamp(num("pm", 0), 0, 1e10), rt: clamp(num("rt", 0), -50, 100),
-           yr: clamp(Math.round(num("yr", 10)), 1, 60), gr: clamp(num("gr", 0), 0, 50), inf: clamp(num("inf", 0), 0, 50), tg: clamp(num("tg", 0), 0, 1e13) };
+           yr: clamp(Math.round(num("yr", 10)), 1, 60), gr: clamp(num("gr", 0), 0, 50), inf: clamp(num("inf", 0), 0, 50), tg: clamp(num("tg", 0), 0, 1e13),
+           dy: clamp(num("dy", 0), 0, 30), tx: clamp(num("tx", 0), 0, 60), ri: riMode !== "cash" };
 }
 function planB(A) { return Object.assign({}, A, { pm: clamp(num("pm2", A.pm), 0, 1e10), rt: clamp(num("rt2", A.rt), -50, 100), gr: clamp(num("gr2", A.gr), 0, 50) }); }
-const run = P => sim(P.p0, P.pm, P.rt, P.yr, P.gr);
+const run = P => sim(P.p0, P.pm, P.rt, P.yr, P.gr, P);
 
 // กี่เดือนถึงเป้า (นับตามวิธีเดียวกับ sim) คืน -1 ถ้าไม่ถึงในเวลาที่ตั้ง
 function monthsToGoal(P, tg) {
-  const rm = Math.pow(1 + P.rt / 100, 1 / 12) - 1, sg = 1 + P.gr / 100; let bal = P.p0, c = P.pm;
-  if (bal >= tg) return 0;
-  for (let m = 1; m <= P.yr * 12; m++) { if (m > 1 && (m - 1) % 12 === 0) c *= sg; bal = bal * (1 + rm) + c; if (bal >= tg) return m; }
+  const rm = Math.pow(1 + P.rt / 100, 1 / 12) - 1, sg = 1 + P.gr / 100, dm = P.dy > 0 ? P.dy / 100 / 12 * (1 - P.tx / 100) : 0, ri = P.ri !== false;
+  let v = P.p0, cash = 0, c = P.pm;
+  if (v >= tg) return 0;
+  for (let m = 1; m <= P.yr * 12; m++) {
+    if (m > 1 && (m - 1) % 12 === 0) c *= sg;
+    v *= 1 + rm; const dd = v * dm; if (ri) v += dd; else cash += dd; v += c;
+    if (v + cash >= tg) return m;
+  }
   return -1;
 }
 // เงินลงทุนรายเดือนตอนเริ่มที่ต้องใช้ให้ครบเป้าพอดีเมื่อครบกำหนด (ใช้ sim ตัวเดียวกัน เลยตรงกันเสมอ)
 function needPm(P, tg) {
-  const base = sim(P.p0, 0, P.rt, P.yr, P.gr).pop().bal, unit = sim(0, 1, P.rt, P.yr, P.gr).pop().bal;
+  const base = sim(P.p0, 0, P.rt, P.yr, P.gr, P).pop().bal, unit = sim(0, 1, P.rt, P.yr, P.gr, P).pop().bal;
   return Math.max(0, (tg - base) / unit);
 }
 function goalText(P, last, tg, label) {
@@ -467,7 +517,7 @@ function goalText(P, last, tg, label) {
   }
   return `${pre}ใน ${P.yr} ปี เงินรวมประมาณ ${nf(last.bal)} บาท ยังขาดจากเป้าหมาย ${nf(tg)} บาท อีก ${nf(tg - last.bal)} บาท ถ้าอยากถึงเป้าภายใน ${P.yr} ปี ต้องเริ่มลงเดือนละประมาณ ${nf(Math.ceil(needPm(P, tg)))} บาท${P.gr > 0 ? ` แล้วเพิ่มปีละ ${P.gr}% ตามที่ตั้ง` : ""} (ตอนนี้เริ่มเดือนละ ${nf(P.pm)} บาท)`;
 }
-const desc = P => `ลงเดือนละ ${nf(P.pm)} บาท${P.gr > 0 ? " เพิ่มปีละ " + P.gr + "%" : ""} · ผลตอบแทน ${P.rt}% ต่อปี`;
+const desc = P => `ลงเดือนละ ${nf(P.pm)} บาท${P.gr > 0 ? " เพิ่มปีละ " + P.gr + "%" : ""} · ผลตอบแทน ${P.rt}% ต่อปี${P.dy > 0 ? " + ปันผล " + P.dy + "% (" + (P.ri ? "รีอินเวสต์" : "รับเงินสด") + ")" : ""}`;
 
 function calc() {
   const A = planA(), on = $("cmp").checked;
@@ -477,13 +527,13 @@ function calc() {
   if (A.p0 + A.pm <= 0) {
     $("fin").textContent = "—"; $("finSub").textContent = "ใส่เงินต้นหรือเงินลงทุนรายเดือนอย่างน้อยหนึ่งอย่าง";
     ["sPut", "sGain", "sX"].forEach(i => $(i).textContent = "—");
-    $("chart").innerHTML = ""; $("tb").innerHTML = ""; $("th").innerHTML = ""; $("late").hidden = true; $("goalBox").hidden = true; $("cmpOut").hidden = true; return;
+    $("chart").innerHTML = ""; $("tb").innerHTML = ""; $("th").innerHTML = ""; $("late").hidden = true; $("goalBox").hidden = true; $("cmpOut").hidden = true; $("dvOut").hidden = true; return;
   }
   const rows = run(A), last = rows[rows.length - 1], gain = last.bal - last.put;
-  $("bigL").textContent = (on ? "แผน A · " : "") + "เงินรวมเมื่อครบกำหนด";
+  $("bigL").textContent = (on ? "แผน A · " : "") + "เงินรวมเมื่อครบกำหนด" + (A.dy > 0 ? (A.ri ? " (รีอินเวสต์ปันผล)" : " (รับปันผลเป็นเงินสด)") : "");
   $("fin").textContent = nf(last.bal) + " บาท";
   const real = last.bal / Math.pow(1 + A.inf / 100, A.yr);
-  let sub = A.inf > 0 ? `ถ้าเงินเฟ้อ ${A.inf}% ต่อปี เทียบกำลังซื้อวันนี้ ≈ ${nf(real)} บาท` : `หลังผ่านไป ${A.yr} ปี ที่ผลตอบแทนสมมติ ${A.rt}% ต่อปี`;
+  let sub = A.inf > 0 ? `ถ้าเงินเฟ้อ ${A.inf}% ต่อปี เทียบกำลังซื้อวันนี้ ≈ ${nf(real)} บาท` : (A.dy > 0 ? `หลังผ่านไป ${A.yr} ปี ที่ราคาโต ${A.rt}% + ปันผล ${A.dy}% ต่อปี` : `หลังผ่านไป ${A.yr} ปี ที่ผลตอบแทนสมมติ ${A.rt}% ต่อปี`);
   if (A.gr > 0) sub += ` · เงินลงทุนรายเดือนปีสุดท้ายเป็น ${nf(A.pm * Math.pow(1 + A.gr / 100, A.yr - 1))} บาท`;
   $("finSub").textContent = sub;
   $("sPut").textContent = nf(last.put) + " บาท";
@@ -497,11 +547,12 @@ function calc() {
   $("tb").innerHTML = rows.map((r, i) => `<tr><td>${r.y}</td><td>${nf(r.put)}</td><td>${r.bal - r.put < 0 ? "−" : ""}${nf(Math.abs(r.bal - r.put))}</td><td><b>${nf(r.bal)}</b></td>` +
     (okB ? `<td><b>${nf(rb[i].bal)}</b></td><td>${sgn(rb[i].bal - r.bal)}</td>` : "") + "</tr>").join("");
   renderCmp(A, B, okB, rows, rb, on);
+  renderDiv(A);
 
   const L = $("late");
   if (A.yr > 5 && A.rt !== 0) {
     // เริ่มช้า 5 ปี: ใช้เวลา yr-5 ปี เงินต้นและเงินรายเดือนเท่าเดิม
-    const l = sim(A.p0, A.pm, A.rt, A.yr - 5, A.gr), lb = l[l.length - 1].bal, d = last.bal - lb;
+    const l = sim(A.p0, A.pm, A.rt, A.yr - 5, A.gr, A), lb = l[l.length - 1].bal, d = last.bal - lb;
     L.hidden = false;
     L.textContent = `ถ้าเริ่มช้าไป 5 ปี (ลงเงินเท่าเดิม แต่เหลือ ${A.yr - 5} ปี) เงินรวมจะเป็นประมาณ ${nf(lb)} บาท ต่างจากเริ่มวันนี้ ${nf(Math.abs(d))} บาท ${d >= 0 ? "(น้อยลง)" : "(มากขึ้น เพราะผลตอบแทนที่สมมติเป็นลบ)"}`;
   } else L.hidden = true;
@@ -539,7 +590,26 @@ function renderCmp(A, B, okB, ra, rb, on) {
   $("cmpLg").innerHTML = `<span><i class="ld" style="border-color:var(--accent)"></i>แผน A: ${desc(A)}</span><span><i class="ld b" style="border-color:var(--live)"></i>แผน B: ${desc(B)}</span>`;
   chart2(A, ra, rb);
 }
-["p0", "pm", "gr", "rt", "yr", "inf", "tg", "pm2", "gr2", "rt2"].forEach(i => $(i).addEventListener("input", calc));
+function renderDiv(A) {
+  const box = $("dvOut");
+  if (!(A.dy > 0)) { box.hidden = true; return; }
+  box.hidden = false;
+  const ra = sim(A.p0, A.pm, A.rt, A.yr, A.gr, Object.assign({}, A, { ri: true })), rc = sim(A.p0, A.pm, A.rt, A.yr, A.gr, Object.assign({}, A, { ri: false }));
+  const a = ra[ra.length - 1], c = rc[rc.length - 1], diff = a.bal - c.bal;
+  $("dAT").textContent = nf(a.bal) + " บาท"; $("dAD").textContent = nf(a.div) + " บาท"; $("dAM").textContent = nf(a.div / 12) + " บาท";
+  $("dBT").textContent = nf(c.bal) + " บาท"; $("dBP").textContent = nf(c.pos) + " บาท"; $("dBC").textContent = nf(c.cash) + " บาท";
+  $("dBD").textContent = nf(c.div) + " บาท"; $("dBM").textContent = nf(c.div / 12) + " บาท";
+  let t;
+  if (Math.abs(diff) < 1) t = "สองแบบได้เงินรวมใกล้เคียงกันมาก";
+  else if (diff > 0) t = `รีอินเวสต์ได้เงินรวมมากกว่ารับเป็นเงินสดอีก ${nf(diff)} บาท (+${(diff / c.bal * 100).toFixed(1)}%) เพราะปันผลถูกนำไปซื้อกองทุนเพิ่มและโตต่อ แต่ถ้ารับเป็นเงินสด คุณได้เงินสดมาใช้ระหว่างทางรวม ${nf(c.cash)} บาท (ปีสุดท้ายประมาณเดือนละ ${nf(c.div / 12)} บาท)`;
+  else t = `ในตัวเลขชุดนี้ รับเป็นเงินสดได้เงินรวมมากกว่า ${nf(-diff)} บาท เพราะราคากองทุนที่ใส่ติดลบ การเอาปันผลไปซื้อเพิ่มจึงไม่ช่วย`;
+  $("dvVerdict").textContent = t;
+  const gm = Math.pow(1 + A.rt / 100, 1 / 12) - 1, dm = A.dy / 100 / 12 * (1 - A.tx / 100), tr = (Math.pow((1 + gm) * (1 + dm), 12) - 1) * 100;
+  $("dvTr").textContent = `ราคาโต ${A.rt}% + ปันผล ${A.dy}%${A.tx > 0 ? " (หลังภาษี " + (A.dy * (1 - A.tx / 100)).toFixed(2) + "%)" : ""} ≈ ผลตอบแทนรวม ${tr.toFixed(2)}% ต่อปี เมื่อรีอินเวสต์ ปันผลสูงไม่ได้แปลว่าดีกว่า เพราะตอนจ่ายปันผล ราคาต่อหน่วยจะลดลงตามที่จ่ายออกมา ให้ดูผลตอบแทนรวม (ราคาโต + ปันผล)`;
+}
+function setRi(v) { riMode = v ? "re" : "cash"; document.querySelectorAll('[data-g="ri"] button').forEach(b => b.setAttribute("aria-pressed", String((b.dataset.v === "re") === v))); }
+document.querySelectorAll('[data-g="ri"] button').forEach(b => b.addEventListener("click", () => { setRi(b.dataset.v === "re"); calc(); }));
+["p0", "pm", "gr", "rt", "dy", "tx", "yr", "inf", "tg", "pm2", "gr2", "rt2"].forEach(i => $(i).addEventListener("input", calc));
 $("cmp").addEventListener("change", () => {
   if ($("cmp").checked && $("pm2").value === "" && $("rt2").value === "" && $("gr2").value === "") {   // เปิดครั้งแรก: ใส่ค่าตัวอย่างให้ B (เงินรายเดือนมากกว่า A ราว 1.6 เท่า)
     const A = planA(), t = A.pm > 0 ? A.pm * 1.6 : 5000, mag = Math.pow(10, Math.floor(Math.log10(t)) - 1);
@@ -556,7 +626,7 @@ function gclean(g) {   // บังคับชนิดและช่วงค
   const f = (v, a, b, d) => { v = parseFloat(v); return isFinite(v) ? clamp(v, a, b) : d; }, name = g.name.trim().slice(0, 40);
   if (!name) return null;
   return { name, p0: f(g.p0, 0, 1e12, 0), pm: f(g.pm, 0, 1e10, 0), rt: f(g.rt, -50, 100, 0), yr: Math.round(f(g.yr, 1, 60, 10)),
-           gr: f(g.gr, 0, 50, 0), inf: f(g.inf, 0, 50, 0), tg: f(g.tg, 0, 1e13, 0), at: Math.max(1, f(g.at, 0, 1e15, 1)) };
+           gr: f(g.gr, 0, 50, 0), inf: f(g.inf, 0, 50, 0), tg: f(g.tg, 0, 1e13, 0), dy: f(g.dy, 0, 30, 0), tx: f(g.tx, 0, 60, 0), ri: g.ri !== false, at: Math.max(1, f(g.at, 0, 1e15, 1)) };
 }
 function gclist(a) { return (Array.isArray(a) ? a : []).map(gclean).filter(Boolean).slice(0, GMAX); }
 function gload() { try { return gclist(JSON.parse(localStorage.getItem(GK) || "[]")); } catch (e) { return []; } }
@@ -564,6 +634,7 @@ function gstore(a) { try { localStorage.setItem(GK, JSON.stringify(a)); return t
 function gsum(g) {
   const f = run(g).pop().bal;
   let t = `เงินต้น ${nf(g.p0)} + เดือนละ ${nf(g.pm)} บาท${g.gr > 0 ? " (เพิ่มปีละ " + g.gr + "%)" : ""} · ${g.rt}% ต่อปี · ${g.yr} ปี → ประมาณ ${nf(f)} บาท`;
+  if (g.dy > 0) t += ` · ปันผล ${g.dy}% (${g.ri ? "รีอินเวสต์" : "รับเงินสด"})`;
   if (g.tg > 0) t += f >= g.tg ? ` · ถึงเป้า ${nf(g.tg)} บาท` : ` · ยังไม่ถึงเป้า ${nf(g.tg)} บาท`;
   return t;
 }
@@ -576,7 +647,7 @@ function grender() {
     b.textContent = g.name; s.textContent = gsum(g);
     o.type = x.type = "button"; o.textContent = "เปิดดู / แก้ตัวเลข"; x.textContent = "ลบ";
     o.addEventListener("click", () => {
-      ["p0", "pm", "gr", "rt", "yr", "inf"].forEach(k => { $(k).value = g[k]; }); $("tg").value = g.tg > 0 ? g.tg : "";
+      ["p0", "pm", "gr", "rt", "yr", "inf", "dy", "tx"].forEach(k => { $(k).value = g[k]; }); $("tg").value = g.tg > 0 ? g.tg : ""; setRi(g.ri !== false);
       $("gname").value = g.name; calc(); gmsg("เปิดเป้าหมาย \"" + g.name + "\" แล้ว"); window.scrollTo({ top: 0, behavior: "smooth" });
     });
     x.addEventListener("click", () => {
@@ -656,6 +727,7 @@ $("gsave").addEventListener("click", () => {
 $("gshare").addEventListener("click", () => {
   const pl = planA(), q = new URLSearchParams();
   ["p0", "pm", "gr", "rt", "yr", "inf"].forEach(k => q.set(k, pl[k])); if (pl.tg > 0) q.set("tg", pl.tg);
+  if (pl.dy > 0) { q.set("dy", pl.dy); q.set("tx", pl.tx); q.set("ri", pl.ri ? "1" : "0"); }
   if ($("cmp").checked) { const B = planB(pl); q.set("cmp", "1"); q.set("pm2", B.pm); q.set("gr2", B.gr); q.set("rt2", B.rt); }
   const url = location.href.split("#")[0].split("?")[0] + "?" + q.toString();
   const ok = () => gmsg("คัดลอกลิงก์แล้ว คนที่เปิดลิงก์จะเห็นตัวเลขชุดเดียวกับคุณ");
@@ -665,9 +737,10 @@ $("gshare").addEventListener("click", () => {
 // เปิดจากลิงก์ที่มีตัวเลขแนบมา (?p0=...&pm=...)
 try {
   const q = new URLSearchParams(location.search);
-  const R = { p0: [0, 1e12], pm: [0, 1e10], gr: [0, 50], rt: [-50, 100], yr: [1, 60], inf: [0, 50], tg: [0, 1e13], pm2: [0, 1e10], gr2: [0, 50], rt2: [-50, 100] };   // ค่านอกช่วงจากลิงก์จะถูกปรับให้อยู่ในช่วงเดียวกับที่กรอกเอง
+  const R = { p0: [0, 1e12], pm: [0, 1e10], gr: [0, 50], rt: [-50, 100], yr: [1, 60], inf: [0, 50], tg: [0, 1e13], pm2: [0, 1e10], gr2: [0, 50], rt2: [-50, 100], dy: [0, 30], tx: [0, 60] };   // ค่านอกช่วงจากลิงก์จะถูกปรับให้อยู่ในช่วงเดียวกับที่กรอกเอง
   Object.keys(R).forEach(k => { const v = parseFloat(q.get(k)); if (q.has(k) && isFinite(v)) $(k).value = k === "yr" ? clamp(Math.round(v), 1, 60) : clamp(v, R[k][0], R[k][1]); });
   if (q.get("cmp") === "1") $("cmp").checked = true;
+  if (q.get("ri") === "0") setRi(false);
 } catch (e) {}
 grender();
 calc();
