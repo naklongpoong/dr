@@ -18,8 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610191818"></script>
-<script src="gate.js?v=202610191818"></script>
+<script src="site.js?v=202610200540"></script>
+<script src="gate.js?v=202610200540"></script>
+<script src="terms.js?v=202610200540"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -334,6 +335,7 @@ async function showReader(id) {
       <button class="linkbtn" type="button" data-copyurl>คัดลอกลิงก์บทความ</button>
       <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.origin + location.pathname + "?id=" + encodeURIComponent(id))}" target="_blank" rel="noopener noreferrer">แชร์ Facebook</a>
     </div>`;
+  if (window.termTips) { try { termTips(r.querySelector(".rbody")); } catch (e) {} }   // ศัพท์เด้ง (terms.js) พังก็ไม่กระทบการอ่านบทความ
   // นับคนดู: เปิดอ่านบทความครั้งแรกของเครื่องนี้ +1
   if (window.NLP && NLP.trackView) NLP.trackView("articles", id).then(ok => {
     if (!ok) return;

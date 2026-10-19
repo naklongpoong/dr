@@ -169,3 +169,161 @@ window.TERMS = [
 // เปิดให้สมาชิกเห็นทุกคำใหม่: เปลี่ยน false เป็น true บรรทัดล่างแล้วรัน sh bump-version.sh
 window.TERMS_NEW_LIVE = true;
 window.termsShown = function (preview) { return window.TERMS.filter(function (x) { return !x.n || window.TERMS_NEW_LIVE || preview; }); };
+
+// ===== ศัพท์เด้งในบทความ: termTips(el) =====
+// ไฮไลต์คำศัพท์ในข้อความ (เฉพาะครั้งแรกของแต่ละคำ) แตะหรือชี้แล้วมีคำอธิบายสั้น ๆ เด้ง ดึงจาก TERMS ข้างบน
+// เพิ่มคำที่อยากให้จับ: ใส่ในรายการ TERM_MATCH ด้านล่าง (id ต้องตรงกับ TERMS) ข้อความภาษาอังกฤษแยกตัวพิมพ์เล็ก/ใหญ่
+// คำที่ไม่ใส่ไว้ (เช่น Revenue, Beat, Miss, Margin เดี่ยว ๆ) ตั้งใจเว้น เพราะเป็นคำทั่วไป จับผิดที่ง่าย
+window.TERM_MATCH = {
+  "inflation": ["เงินเฟ้อ", "Inflation"],
+  "cpi": ["CPI"],
+  "core-cpi": ["Core CPI"],
+  "ppi": ["PPI", "Core PPI"],
+  "pce": ["PCE", "Core PCE"],
+  "yoy": ["YoY", "MoM", "QoQ"],
+  "fomc": ["FOMC"],
+  "fed-funds": ["ดอกเบี้ยนโยบาย", "Fed Funds Rate", "Federal Funds Rate"],
+  "hawk-dove": ["Hawkish", "Dovish"],
+  "fedwatch": ["FedWatch", "CME FedWatch"],
+  "revenue-profit": ["กำไรสุทธิ", "Net Income"],
+  "eps": ["EPS"],
+  "pe": ["P/E", "Forward P/E", "Trailing P/E"],
+  "beat-miss": ["Consensus"],
+  "guidance": ["Guidance"],
+  "market-cap": ["Market Cap", "มูลค่าตลาด"],
+  "dr": ["DR"],
+  "etf": ["ETF"],
+  "nfp": ["NFP", "Nonfarm Payrolls"],
+  "treasury-yield": ["Treasury Yield"],
+  "dot-plot": ["Dot Plot"],
+  "qe-qt": ["QE", "QT"],
+  "usd-thb": ["USD/THB"],
+  "recession": ["Recession", "ภาวะถดถอย", "เศรษฐกิจถดถอย"],
+  "gross-margin": ["Gross Margin"],
+  "fcf": ["Free Cash Flow", "FCF"],
+  "dividend": ["Dividend Yield", "ปันผล"],
+  "buyback": ["Buyback", "ซื้อหุ้นคืน"],
+  "stock-split": ["Stock Split", "แตกหุ้น"],
+  "adr": ["ADR"],
+  "index": ["S&P 500", "Nasdaq-100"],
+  "bull-bear": ["Bull Market", "Bear Market", "ตลาดกระทิง", "ตลาดหมี"],
+  "vix": ["VIX"],
+  "dca": ["DCA"],
+  "gdp": ["GDP"],
+  "jobless-claims": ["Jobless Claims"],
+  "pmi": ["PMI"],
+  "dxy": ["DXY"],
+  "sec-filings": ["10-K", "10-Q", "8-K"],
+  "ebitda": ["EBITDA"],
+  "roe": ["ROE"],
+  "de": ["D/E"],
+  "pb": ["P/B"],
+  "order-types": ["Market Order", "Limit Order"],
+  "settlement": ["T+1"],
+  "ipo": ["IPO"],
+  "diversification": ["การกระจายความเสี่ยง"],
+  "margin": ["Margin Call", "มาร์จิน"],
+  "compounding": ["ดอกเบี้ยทบต้น", "ผลตอบแทนทบต้น", "Compounding"]
+};
+
+window.termTips = function (root) {
+  if (!root || !window.TERMS || !window.termsShown) return;
+  if (!(window.SITE && SITE.basicsLive)) return;   // ปลายทางลิงก์คือ basics.html ถ้ายังไม่เปิดก็ไม่ทำ
+  if (root.getAttribute("data-tt-done")) return; root.setAttribute("data-tt-done", "1");
+
+  var shown = {}; window.termsShown(false).forEach(function (t) { shown[t.id] = t; });
+  var map = {}, words = [];
+  Object.keys(window.TERM_MATCH).forEach(function (id) {
+    if (!shown[id]) return;
+    window.TERM_MATCH[id].forEach(function (w) { if (!map[w]) { map[w] = id; words.push(w); } });
+  });
+  if (!words.length) return;
+  words.sort(function (a, b) { return b.length - a.length; });   // คำยาวก่อน เช่น Core CPI ก่อน CPI
+  var re = new RegExp(words.map(function (w) { return w.replace(/[.*+?^${}()|[\]\\\/]/g, "\\$&"); }).join("|"), "g");
+  var isAscii = function (ch) { return !!ch && /[A-Za-z0-9]/.test(ch); };
+
+  var used = {}, nodes = [], tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), n;
+  while ((n = tw.nextNode())) { if (!n.parentNode.closest("a, button, .tt")) nodes.push(n); }
+
+  nodes.forEach(function (node) {
+    var s = node.nodeValue, last = 0, m, frag = null;
+    re.lastIndex = 0;
+    while ((m = re.exec(s))) {
+      var w = m[0], id = map[w], st = m.index, en = st + w.length;
+      var asciiEdge = /^[A-Za-z0-9]/.test(w) || /[A-Za-z0-9+]$/.test(w);
+      if (asciiEdge && (/^[A-Za-z0-9]/.test(w) && isAscii(s.charAt(st - 1)) || /[A-Za-z0-9]$/.test(w) && isAscii(s.charAt(en)))) continue;   // อยู่กลางคำอังกฤษ เช่น ADR ไม่ใช่ DR
+      if (used[id]) continue;
+      used[id] = 1;
+      if (!frag) frag = document.createDocumentFragment();
+      if (st > last) frag.appendChild(document.createTextNode(s.slice(last, st)));
+      var sp = document.createElement("span");
+      sp.className = "tt"; sp.tabIndex = 0; sp.setAttribute("role", "button"); sp.setAttribute("aria-expanded", "false");
+      sp.setAttribute("data-term", id); sp.textContent = w;
+      frag.appendChild(sp); last = en;
+    }
+    if (frag) { if (last < s.length) frag.appendChild(document.createTextNode(s.slice(last))); node.parentNode.replaceChild(frag, node); }
+  });
+  if (!root.querySelector(".tt")) return;
+
+  if (!document.getElementById("tt-style")) {
+    var css = document.createElement("style"); css.id = "tt-style";
+    css.textContent =
+      ".tt{border-bottom:1.5px dotted var(--accent,#1f4fa8);cursor:help;border-radius:2px}" +
+      ".tt:hover,.tt[aria-expanded=true]{background:var(--accent-soft,#e3ebfa)}" +
+      ".tt:focus-visible{outline:2px solid var(--accent,#1f4fa8);outline-offset:2px}" +
+      "#tt-pop{position:absolute;z-index:9999;width:min(340px,calc(100vw - 24px));max-height:60vh;overflow:auto;box-sizing:border-box;" +
+      "background:var(--surface,#fff);color:var(--ink,#14213d);border:1px solid var(--line,#dde3ef);border-radius:12px;" +
+      "box-shadow:0 10px 30px rgba(15,30,70,.22);padding:12px 14px;font-size:.92rem;line-height:1.6;white-space:normal}" +
+      "#tt-pop[hidden]{display:none}" +
+      "#tt-pop .tt-h{font-weight:700;margin:0}" +
+      "#tt-pop .tt-en{color:var(--muted,#5b6982);font-size:.8rem;margin:0 0 6px}" +
+      "#tt-pop .tt-d{margin:0}" +
+      "#tt-pop a{color:var(--accent,#1f4fa8)}" +
+      "#tt-pop .tt-more{display:inline-block;margin-top:8px;font-weight:600}";
+    document.head.appendChild(css);
+  }
+  var pop = document.getElementById("tt-pop");
+  if (!pop) {
+    pop = document.createElement("div"); pop.id = "tt-pop"; pop.hidden = true; pop.setAttribute("role", "dialog");
+    document.body.appendChild(pop);
+  }
+  var cur = null, hideT = null, showT = null;
+  var close = function () { clearTimeout(hideT); clearTimeout(showT); pop.hidden = true; if (cur) cur.setAttribute("aria-expanded", "false"); cur = null; };
+  var place = function (el) {
+    var r = el.getBoundingClientRect(), sx = window.pageXOffset, sy = window.pageYOffset, vw = document.documentElement.clientWidth;
+    var pw = pop.offsetWidth, ph = pop.offsetHeight;
+    var left = Math.max(12, Math.min(r.left + sx, sx + vw - pw - 12));
+    var below = r.bottom + 8 + ph <= window.innerHeight || r.top - 8 - ph < 0;
+    pop.style.left = left + "px";
+    pop.style.top = (below ? r.bottom + sy + 8 : r.top + sy - ph - 8) + "px";
+  };
+  var open = function (el) {
+    clearTimeout(hideT); clearTimeout(showT);
+    var t = shown[el.getAttribute("data-term")]; if (!t) return;
+    if (cur && cur !== el) cur.setAttribute("aria-expanded", "false");
+    cur = el; el.setAttribute("aria-expanded", "true");
+    pop.setAttribute("aria-label", t.t);
+    pop.innerHTML = '<p class="tt-h"></p><p class="tt-en"></p><p class="tt-d">' + t.d + '</p><a class="tt-more" href="basics.html#' + t.id + '">อ่านเพิ่มที่ความรู้พื้นฐาน ›</a>';
+    pop.firstChild.textContent = t.t; pop.children[1].textContent = t.en || ""; if (!t.en) pop.children[1].hidden = true;
+    pop.hidden = false; place(el);
+  };
+  var canHover = window.matchMedia && matchMedia("(hover: hover)").matches;
+  root.addEventListener("click", function (e) {
+    var el = e.target.closest(".tt"); if (!el) return;
+    e.preventDefault(); if (cur === el && !pop.hidden) close(); else open(el);
+  });
+  root.addEventListener("keydown", function (e) {
+    var el = e.target.closest && e.target.closest(".tt");
+    if (el && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); if (cur === el && !pop.hidden) close(); else open(el); }
+  });
+  if (canHover) {
+    root.addEventListener("mouseover", function (e) { var el = e.target.closest(".tt"); if (!el || el === cur) return; clearTimeout(hideT); clearTimeout(showT); showT = setTimeout(function () { open(el); }, 180); });
+    root.addEventListener("mouseout", function (e) { if (e.target.closest(".tt")) { clearTimeout(showT); hideT = setTimeout(close, 250); } });
+    pop.addEventListener("mouseenter", function () { clearTimeout(hideT); });
+    pop.addEventListener("mouseleave", function () { hideT = setTimeout(close, 250); });
+  }
+  document.addEventListener("click", function (e) { if (!pop.hidden && !e.target.closest(".tt") && !e.target.closest("#tt-pop")) close(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+  window.addEventListener("scroll", function () { if (cur && !pop.hidden) place(cur); }, { passive: true });
+  window.addEventListener("resize", function () { if (cur && !pop.hidden) place(cur); });
+};
