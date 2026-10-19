@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>window.NLP_NO_GATE = true;</script>
-<script src="site.js?v=202610191556"></script>
-<script src="gate.js?v=202610191556"></script>
+<script src="site.js?v=202610191818"></script>
+<script src="gate.js?v=202610191818"></script>
 <style>
 :root {
   --navy: #0f1e46; --gold: #f5b301; --bg: #f2f5fb; --surface: #ffffff; --ink: #14213d; --muted: #5b6982;
@@ -108,6 +108,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <button class="tab" type="button" data-p="picks" aria-pressed="false">หุ้นสแกน</button>
       <button class="tab" type="button" data-p="popup" aria-pressed="false">การ์ดเด้ง</button>
       <button class="tab" type="button" data-p="popwk" aria-pressed="false">การ์ดงบสัปดาห์</button>
+      <button class="tab" type="button" data-p="fed" aria-pressed="false">FedWatch</button>
       <button class="tab" type="button" data-p="code" aria-pressed="false">รหัสสมาชิก</button>
     </div>
 
@@ -211,6 +212,24 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
     </section>
 
     <!-- การ์ดเด้งงบประจำสัปดาห์ -->
+    <section class="card" id="p-fed" hidden>
+      <h2>โอกาสปรับดอกเบี้ย (CME FedWatch)</h2>
+      <p class="help">ใส่ตัวเลขจากหน้า CME FedWatch ของการประชุมครั้งถัดไป (ช่อง PROBABILITIES: EASE / NO CHANGE / HIKE) แล้วกดบันทึก การ์ดนับถอยหลัง FOMC ในหน้าแรกจะอัปเดตภายในไม่กี่นาที (เครื่องผู้อ่านจำข้อมูลไว้ 3 นาที) ซ่อนเองถ้าข้อมูลเก่าเกิน 3 วัน</p>
+      <div class="grid2">
+        <div><label for="fMeet">วันประชุม</label><select id="fMeet"></select></div>
+        <div><label for="fAsOf">ตัวเลข ณ วันที่</label><input id="fAsOf" type="date"></div>
+      </div>
+      <div class="grid2">
+        <div><label for="fHold">ไม่เปลี่ยน (NO CHANGE) %</label><input id="fHold" type="number" inputmode="decimal" step="0.1" min="0" max="100" placeholder="85.1"></div>
+        <div><label for="fHike">ขึ้น (HIKE) %</label><input id="fHike" type="number" inputmode="decimal" step="0.1" min="0" max="100" placeholder="14.9"></div>
+      </div>
+      <div class="grid2">
+        <div><label for="fEase">ลด (EASE) %</label><input id="fEase" type="number" inputmode="decimal" step="0.1" min="0" max="100" placeholder="0.0"></div>
+        <div><label>รวม</label><div id="fSum" class="help" style="margin:10px 0 0">-</div></div>
+      </div>
+      <p class="msg" id="fMsg" role="alert" hidden></p>
+      <button class="btn alt" id="fLoad" type="button">โหลดค่าปัจจุบัน</button><button class="btn" id="fSave" type="button">บันทึก</button>
+    </section>
     <section class="card" id="p-popwk" hidden>
       <h2>การ์ดเด้งงบประจำสัปดาห์</h2>
       <p class="help">เด้งกลางจอให้สมาชิกวันละครั้งต่อเครื่อง พร้อมรูป (เช่นตารางงบที่จะออกสัปดาห์นี้) สลับกับ "การ์ดเด้ง" ปกติ: ถ้าการ์ดประกาศยังไม่เคยถูกปิดในเครื่องนั้น จะเด้งการ์ดประกาศก่อน แล้วการ์ดงบจะเด้งในการเปิดเว็บครั้งถัดไป เมนูจะมีปุ่ม "📊 งบสัปดาห์นี้" ให้เปิดซ้ำได้ ขึ้นการ์ดที่มีรูปอย่างเดียวก็ได้</p>
@@ -280,8 +299,8 @@ $("btnOut").onclick = () => N.A.signOut(N.auth);
 $("tabs").addEventListener("click", e => {
   const b = e.target.closest("[data-p]"); if (!b) return;
   document.querySelectorAll("#tabs .tab").forEach(t => t.setAttribute("aria-pressed", t === b));
-  ["news", "art", "dr", "picks", "popup", "popwk", "code"].forEach(p => { $("p-" + p).hidden = p !== b.dataset.p; });
-  if (!loaded[b.dataset.p]) { loaded[b.dataset.p] = true; ({ art: loadArticles, dr: loadDr, picks: loadPicks, popup: loadPopup, popwk: loadWk, code: loadCode })[b.dataset.p](); }
+  ["news", "art", "dr", "picks", "popup", "popwk", "fed", "code"].forEach(p => { $("p-" + p).hidden = p !== b.dataset.p; });
+  if (!loaded[b.dataset.p]) { loaded[b.dataset.p] = true; ({ art: loadArticles, dr: loadDr, picks: loadPicks, popup: loadPopup, popwk: loadWk, fed: loadFed, code: loadCode })[b.dataset.p](); }
 });
 
 // ---------- ย้ายหมวด ----------
@@ -673,6 +692,47 @@ async function loadPopup() {
   } catch (e) { fail("uMsg", e); }
 }
 $("uLoad").onclick = loadPopup;
+
+// ---------- โอกาสปรับดอกเบี้ย FedWatch (content/fedwatch) ----------
+const bkkToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date());   // YYYY-MM-DD ตามเวลาไทย
+function fInit() {
+  const sel = $("fMeet"); if (sel.options.length) return;
+  const list = (window.FOMC || []).filter(m => Date.parse(m.at) > Date.now() - 864e5);   // ประชุมที่ยังไม่ผ่านไปเกิน 1 วัน
+  list.forEach(m => { const o = document.createElement("option"); o.value = m.at.slice(0, 10); o.textContent = m.d + " (" + m.at.slice(0, 10) + ")"; sel.appendChild(o); });
+  $("fAsOf").value = bkkToday();
+}
+const fNum = id => { const v = $(id).value.trim(); return v === "" ? null : +v; };
+function fSumShow() {
+  const h = fNum("fHold"), k = fNum("fHike"), e = fNum("fEase") ?? 0, s = $("fSum");
+  if (h == null || k == null) { s.textContent = "-"; return; }
+  const t = Math.round((h + k + e) * 10) / 10; s.textContent = t.toFixed(1) + "%" + (t < 99 || t > 101 ? " (ควรได้ราว 100)" : "");
+}
+["fHold", "fHike", "fEase"].forEach(i => $(i).addEventListener("input", fSumShow));
+$("fSave").onclick = async () => {
+  const h = fNum("fHold"), k = fNum("fHike"), e = fNum("fEase") ?? 0, meet = $("fMeet").value, asOf = $("fAsOf").value;
+  if (!meet) return note("fMsg", "ไม่พบการประชุมครั้งถัดไปในตาราง FOMC (site.js) ต้องเพิ่มตารางปีหน้าก่อน");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(asOf)) return note("fMsg", "ใส่วันที่ของตัวเลขให้ถูกต้อง");
+  if (h == null || k == null || [h, k, e].some(v => !(v >= 0 && v <= 100))) return note("fMsg", "ใส่ตัวเลข ไม่เปลี่ยน และ ขึ้น เป็น 0-100 (ลดไม่ใส่ = 0)");
+  const t = h + k + e; if (t < 98 || t > 102) return note("fMsg", "สามตัวเลขรวมกันได้ " + t.toFixed(1) + "% ควรได้ราว 100 เช็กอีกครั้ง");
+  note("fMsg", ""); $("fSave").disabled = true;
+  try {
+    await N.F.setDoc(N.F.doc(N.db, "content", "fedwatch"), { meeting: meet, asOf, hold: h, hike: k, ease: e, updatedAt: N.F.serverTimestamp() });
+    note("fMsg", "บันทึกแล้ว การ์ดในหน้าแรกจะเปลี่ยนภายในประมาณ 3 นาที (รีเฟรชแรงๆ เพื่อดูทันที)", true);
+  } catch (x) { fail("fMsg", x); }
+  $("fSave").disabled = false;
+};
+async function loadFed() {
+  fInit();
+  try {
+    const s = await N.F.getDoc(N.F.doc(N.db, "content", "fedwatch"));
+    if (!s.exists()) return note("fMsg", "ยังไม่มีข้อมูลในระบบ กรอกตัวเลขแล้วกดบันทึก");
+    const d = s.data(); if ([...$("fMeet").options].some(o => o.value === d.meeting)) $("fMeet").value = d.meeting;
+    $("fAsOf").value = d.asOf || ""; $("fHold").value = d.hold; $("fHike").value = d.hike; $("fEase").value = d.ease; fSumShow();
+    note("fMsg", "โหลดค่าปัจจุบันแล้ว บันทึกเมื่อ " + fmtTime(d.updatedAt), true);
+  } catch (x) { fail("fMsg", x); }
+}
+$("fLoad").onclick = loadFed;
+fInit();
 
 // ---------- การ์ดเด้งงบประจำสัปดาห์ (content/popupWeekly) ----------
 const wData = () => ({ title: $("wTitle").value.trim(), body: $("wBody").value.trim(), images: wImgs.slice() });

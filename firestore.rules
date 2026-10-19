@@ -81,10 +81,23 @@ service cloud.firestore {
         && d.updatedAt is timestamp;
     }
 
+    // โอกาสปรับดอกเบี้ย (content/fedwatch): แอดมินกรอกตัวเลขจาก CME FedWatch เอง meeting = วันประชุม, asOf = วันที่ของตัวเลข (YYYY-MM-DD)
+    function fedwatchValid() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['meeting', 'asOf', 'hold', 'hike', 'ease', 'updatedAt'])
+        && d.meeting is string && d.meeting.size() == 10
+        && d.asOf is string && d.asOf.size() == 10
+        && d.hold is number && d.hold >= 0 && d.hold <= 100
+        && d.hike is number && d.hike >= 0 && d.hike <= 100
+        && d.ease is number && d.ease >= 0 && d.ease <= 100
+        && d.hold + d.hike + d.ease >= 98 && d.hold + d.hike + d.ease <= 102
+        && d.updatedAt is timestamp;
+    }
+
     match /content/{docId} {
       allow get: if isMember();
       allow create, update: if isAdmin()
-        && ((docId == 'dr' && drValid()) || (docId in ['picks', 'adminPicks'] && picksValid()) || (docId == 'popup' && popupValid()) || (docId == 'popupWeekly' && popupWeeklyValid()));
+        && ((docId == 'dr' && drValid()) || (docId in ['picks', 'adminPicks'] && picksValid()) || (docId == 'popup' && popupValid()) || (docId == 'popupWeekly' && popupWeeklyValid()) || (docId == 'fedwatch' && fedwatchValid()));
       allow delete: if isAdmin();
     }
 

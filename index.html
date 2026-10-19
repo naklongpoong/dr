@@ -25,9 +25,9 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610191556"></script>
-<script src="terms.js?v=202610191556"></script>
-<script src="gate.js?v=202610191556"></script>
+<script src="site.js?v=202610191818"></script>
+<script src="terms.js?v=202610191818"></script>
+<script src="gate.js?v=202610191818"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -295,14 +295,27 @@ if (window.NLP && NLP.ready) NLP.ready.then(function (N) {
   var t = Date.parse(next.at), ids = ["fD", "fH", "fM", "fS"].map(function (k) { return document.getElementById(k); });
   var th = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(t));
   document.getElementById("fMeet").textContent = next.d; document.getElementById("fAt").textContent = th + " น. (เวลาไทย)";
-  (function () {   // โอกาสปรับดอกเบี้ย (ตัวเลขที่อัปเดตเอง) โชว์เมื่อเป็นของการประชุมถัดไปและไม่เก่าเกินกำหนด
-    var o = window.FOMC_ODDS; if (!o || next.at.slice(0, 10) !== o.meeting) return;
-    var asOf = Date.parse(o.asOf + "T00:00:00+07:00"); if (!asOf || Date.now() - asOf > ((o.maxAgeDays || 3) + 1) * 86400000) return;
+  function renderOdds(o) {   // โอกาสปรับดอกเบี้ย โชว์เมื่อเป็นของการประชุมถัดไปและไม่เก่าเกินกำหนด
+    var box2 = document.getElementById("fOdds");
+    if (!o || next.at.slice(0, 10) !== o.meeting) return;
+    var asOf = Date.parse(o.asOf + "T00:00:00+07:00"); if (!asOf || Date.now() - asOf > ((o.maxAgeDays || (window.FOMC_ODDS && FOMC_ODDS.maxAgeDays) || 3) + 1) * 86400000) return;
     function pc(v) { return (+v).toFixed(1) + "%"; }
     document.getElementById("oHold").textContent = pc(o.hold); document.getElementById("oHike").textContent = pc(o.hike); document.getElementById("oEase").textContent = pc(o.ease);
     document.getElementById("oSrc").textContent = "ข้อมูล ณ " + new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short" }).format(new Date(asOf)) + " · CME FedWatch";
-    document.getElementById("fOdds").hidden = false;
-  })();
+    box2.hidden = false;
+  }
+  renderOdds(window.FOMC_ODDS);   // ค่าในไฟล์ site.js (สำรอง) แล้วใช้ค่าที่แอดมินกรอกในหลังบ้าน (content/fedwatch) ถ้ามีและใหม่กว่า
+  if (!window.NLP_NO_GATE && window.NLP && NLP.ready) NLP.ready.then(function (N) {
+    var c = window.cacheGet && cacheGet("fedwatch", (window.SITE && SITE.cacheMinutes) || 0);
+    return c ? (c.none ? null : c) : N.F.getDoc(N.F.doc(N.db, "content", "fedwatch")).then(function (s) {
+      var d = s.exists() ? s.data() : null; if (d) d = { meeting: d.meeting, asOf: d.asOf, hold: d.hold, hike: d.hike, ease: d.ease };
+      if (window.cachePut) cachePut("fedwatch", d || { none: true }); return d;
+    });
+  }).then(function (d) {
+    if (!d || !d.meeting || !d.asOf) return;
+    var f = window.FOMC_ODDS; if (f && f.asOf > d.asOf) return;   // ค่าในไฟล์ site.js ใหม่กว่าก็ใช้ไฟล์
+    renderOdds(d);
+  }).catch(function () {});
   function two(n) { return n < 10 ? "0" + n : String(n); }
   function tick() {
     var s = Math.max(0, Math.floor((t - Date.now()) / 1000));
