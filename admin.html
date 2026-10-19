@@ -249,6 +249,9 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const safeUrl = u => /^https?:\/\//i.test(u || "") ? u : "";
 const TK_OK = /^[A-Z0-9.\-]{1,12}$/;
 const parseTk = (s, max = 10) => String(s || "").split(/[,\s]+/).map(t => t.trim().toUpperCase()).filter(t => TK_OK.test(t)).slice(0, max);
+// ช่องพิมพ์ชื่อหุ้น: แปลงเป็นตัวพิมพ์ใหญ่ทันทีที่พิมพ์/วาง (เก็บตำแหน่งเคอร์เซอร์ไว้ ไม่แตะตอนพิมพ์ด้วยคีย์บอร์ดภาษาไทยที่ยังไม่ยืนยัน)
+["nTickers", "aTickers", "pTickers"].forEach(id => { const e = document.getElementById(id); if (!e) return;
+  e.addEventListener("input", ev => { if (ev.isComposing) return; const u = e.value.toUpperCase(); if (u === e.value) return; const a = e.selectionStart, b = e.selectionEnd; e.value = u; try { e.setSelectionRange(a, b); } catch (x) {} }); });
 const fmtTime = ts => { const d = ts && ts.toDate ? ts.toDate() : null; return d ? d.toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" }) : ""; };
 const fmtCode = c => (c.match(/.{1,4}/g) || []).join("-");
 let N = null;
