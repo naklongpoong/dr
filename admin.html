@@ -478,7 +478,7 @@ $("nList").addEventListener("click", async e => {
     newsPick.draw();
     nEditing = { col: r.col, id: r.id, createdAt: r.createdAt, imgCreatedAt: imgCreated, hadImages: !!r.hasImages };
     setNType(r.col === "news" ? "news" : (r.kind === "preview" ? "preview" : "result")); lockTypes();
-    $("nText").value = r.text || ""; $("nTickers").value = (r.tickers || []).join(", "); $("nPeriod").value = r.period || ""; $("nLink").value = r.link || "";
+    $("nText").value = r.text || ""; $("nTickers").value = (r.tickers || []).join(", "); $("nPeriod").value = r.period || ""; $("nLink").value = r.link || ""; autoPer = ""; $("nPerHint").hidden = true; fillPeriod();   // โพสต์เก่าที่ยังไม่มีงวด: เปิดแก้ไขแล้วเติมให้จากข้อความ
     $("nEditTitle").textContent = ((r.tickers || []).join(", ") + " " + (r.text || "")).trim().slice(0, 40); $("nEditBar").hidden = false; $("nPost").textContent = "บันทึกการแก้ไข";
     $("nText").scrollIntoView({ behavior: "smooth", block: "center" });
     return;
