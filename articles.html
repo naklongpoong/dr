@@ -333,7 +333,6 @@ async function showReader(id) {
       ${u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ ›</a>` : ""}
       ${a.body ? '<button class="linkbtn" type="button" data-copytext>คัดลอกข้อความ</button>' : ""}
       <button class="linkbtn" type="button" data-copyurl>คัดลอกลิงก์บทความ</button>
-      <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.origin + location.pathname + "?id=" + encodeURIComponent(id))}" target="_blank" rel="noopener noreferrer">แชร์ Facebook</a>
     </div>`;
   if (window.termTips) { try { termTips(r.querySelector(".rbody")); } catch (e) {} }   // ศัพท์เด้ง (terms.js) พังก็ไม่กระทบการอ่านบทความ
   // นับคนดู: เปิดอ่านบทความครั้งแรกของเครื่องนี้ +1
