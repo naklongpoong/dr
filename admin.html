@@ -120,7 +120,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <label for="nText">ข้อความ (แปะจากเฟสได้เลย)</label>
       <textarea id="nText" maxlength="20000" style="min-height:220px"></textarea>
       <div class="grid2">
-        <div><label for="nTickers">ชื่อหุ้น คั่นด้วยคอมมา (พรีวิวงบ/งบหุ้นรายตัวต้องมีอย่างน้อย 1 ตัว)</label><input id="nTickers" type="text" placeholder="NVDA, AMD" autocomplete="off"></div>
+        <div><label for="nTickers">ชื่อหุ้น คั่นด้วยคอมมา (พรีวิวงบ/งบหุ้นรายตัวต้องมีอย่างน้อย 1 ตัว ดึงจากข้อความให้เองถ้าเจอ)</label><input id="nTickers" type="text" placeholder="NVDA, AMD" autocomplete="off"><small id="nTkHint" class="hint" hidden></small></div>
         <div id="nPerBox" hidden><label for="nPeriod">งวดงบ เช่น Q3/2026 (ดึงจากข้อความให้เองถ้าเจอ)</label><input id="nPeriod" type="text" maxlength="20" autocomplete="off"><small id="nPerHint" class="hint" hidden></small></div>
         <div><label for="nLink">ลิงก์ต้นฉบับ (ไม่ใส่ก็ได้)</label><input id="nLink" type="url" placeholder="https://" autocomplete="off"></div>
       </div>
@@ -379,6 +379,30 @@ function guessPeriod(text) {
   hits.sort((a, b) => a[0] - b[0]);
   return hits.length ? hits[0][1] : "";
 }
+// ดึงชื่อหุ้นจากข้อความที่แปะ: จับเฉพาะรูปแบบที่ชัดเจน $NVDA, (NOC), NYSE: NOC, NASDAQ:NVDA
+// พรีวิวงบ/งบรายตัวที่ไม่เจอรูปแบบพวกนี้ จะใช้คำตัวพิมพ์ใหญ่คำแรกที่ไม่ใช่ศัพท์ทั่วไป (EPS, CEO, GDP ฯลฯ) เป็นตัวเลือกให้ ตรวจก่อนโพสต์
+const TK_STOP = new Set("A I AI US UK EU USA USD THB EPS GDP CPI PPI PCE PMI NFP FOMC FED SEC CEO CFO COO CTO ETF IPO DR FY QOQ YOY MOM YTD TTM ATH GAAP FCF EBITDA ROE ROI PE NEW BEAT MISS NYSE NASDAQ AMEX OTC EV OK TV PC IT HR PR OEM API SAAS CAPEX ESG NFT BTC ETH FDA DOJ IMF OPEC NATO UN WTI USDA EBIT TAM ARR LLC INC LTD PLC CORP Q1 Q2 Q3 Q4 H1 H2 AM PM ET PT EST PST".split(" "));
+function guessTickers(text, fallback) {
+  const t = String(text || ""), found = [], seen = new Set();
+  const T = "([A-Z]{1,5}(?:\\.[A-Z])?)";
+  const push = (idx, v) => { if (!v || seen.has(v) || TK_STOP.has(v) || !TK_OK.test(v)) return; seen.add(v); found.push([idx, v]); };
+  let m;
+  const rs = [new RegExp("\\$" + T + "(?![A-Za-z])", "g"), new RegExp("\\b(?:NYSE|NASDAQ|NYSEARCA|AMEX|NYSEAMERICAN|OTC)\\s*[:：]\\s*" + T + "(?![A-Za-z])", "g"), new RegExp("\\(" + T + "\\)", "g")];
+  rs.forEach(r => { while ((m = r.exec(t))) push(m.index, m[1]); });
+  found.sort((a, b) => a[0] - b[0]);
+  let out = found.map(x => x[1]).slice(0, 5);
+  if (!out.length && fallback) {
+    const r = /(?<![A-Za-z0-9$.\/\-])([A-Z]{2,5})(?![A-Za-z0-9])/g;
+    while ((m = r.exec(t))) { if (!TK_STOP.has(m[1])) { out = [m[1]]; break; } }
+  }
+  return out;
+}
+let autoTk = "";   // ชื่อหุ้นที่ระบบเติมให้ล่าสุด (ทับใหม่ได้เฉพาะเมื่อช่องยังเป็นค่านี้ ไม่ทับที่พิมพ์เอง)
+function fillTickers() {
+  const el = $("nTickers"), hint = $("nTkHint"), g = guessTickers($("nText").value, nType !== "news").join(", ");
+  if (g && (!el.value.trim() || el.value === autoTk)) { el.value = g; autoTk = g; hint.textContent = "เติมให้จากข้อความ ตรวจก่อนโพสต์ แก้ได้"; hint.hidden = false; }
+  else if (!g && autoTk && el.value === autoTk) { el.value = ""; autoTk = ""; hint.hidden = true; }
+}
 let autoPer = "";   // งวดที่ระบบเติมให้ล่าสุด: ถ้าช่องยังเป็นค่านี้ ถึงจะเติมทับใหม่ได้ (ไม่ทับสิ่งที่พิมพ์เอง)
 function fillPeriod() {
   if (nType === "news") return;
@@ -387,9 +411,10 @@ function fillPeriod() {
   else if (!g && autoPer && el.value === autoPer) { el.value = ""; autoPer = ""; hint.hidden = true; }
 }
 let perT = null;
-$("nText").addEventListener("input", () => { clearTimeout(perT); perT = setTimeout(fillPeriod, 350); });
+$("nText").addEventListener("input", () => { clearTimeout(perT); perT = setTimeout(() => { fillPeriod(); fillTickers(); }, 350); });
+$("nTickers").addEventListener("input", () => { if ($("nTickers").value !== autoTk) { autoTk = ""; $("nTkHint").hidden = true; } });
 $("nPeriod").addEventListener("input", () => { if ($("nPeriod").value !== autoPer) { autoPer = ""; $("nPerHint").hidden = true; } });
-function setNType(t) { nType = t; $("nTypeNews").setAttribute("aria-pressed", t === "news"); $("nTypePrev").setAttribute("aria-pressed", t === "preview"); $("nTypeRes").setAttribute("aria-pressed", t === "result"); $("nPerBox").hidden = t === "news"; fillPeriod(); }
+function setNType(t) { nType = t; $("nTypeNews").setAttribute("aria-pressed", t === "news"); $("nTypePrev").setAttribute("aria-pressed", t === "preview"); $("nTypeRes").setAttribute("aria-pressed", t === "result"); $("nPerBox").hidden = t === "news"; fillPeriod(); fillTickers(); }
 function lockTypes() {   // ตอนแก้ไข สลับระหว่าง "ข่าว" กับ "พรีวิว/งบ" ไม่ได้ (อยู่คนละที่เก็บ) แต่สลับพรีวิว↔งบหุ้นรายตัวได้
   $("nTypeNews").disabled = !!nEditing && nEditing.col === "earnings";
   $("nTypePrev").disabled = !!nEditing && nEditing.col === "news";
@@ -397,7 +422,7 @@ function lockTypes() {   // ตอนแก้ไข สลับระหว่
 }
 $("nTypeNews").onclick = () => setNType("news"); $("nTypePrev").onclick = () => setNType("preview"); $("nTypeRes").onclick = () => setNType("result");
 function resetNews() {
-  ["nText", "nTickers", "nPeriod", "nLink"].forEach(i => $(i).value = ""); nImgs.length = 0; newsPick.draw(); autoPer = ""; $("nPerHint").hidden = true;
+  ["nText", "nTickers", "nPeriod", "nLink"].forEach(i => $(i).value = ""); nImgs.length = 0; newsPick.draw(); autoPer = ""; autoTk = ""; $("nPerHint").hidden = true; $("nTkHint").hidden = true;
   nEditing = null; $("nEditBar").hidden = true; $("nPost").textContent = "โพสต์"; lockTypes(); setNType("news");
 }
 $("nCancel").onclick = () => { resetNews(); note("nMsg", ""); };
@@ -428,7 +453,7 @@ async function findDup(text, link) {
   } catch (err) { return null; }   // เช็กไม่ได้ (เช่น ออฟไลน์) ก็ให้โพสต์ต่อ ไม่ขัดการทำงาน
 }
 $("nPost").onclick = async () => {
-  const text = $("nText").value.trim(), tickers = parseTk($("nTickers").value), earn = nType !== "news";
+  const text = $("nText").value.trim(), earn = nType !== "news", tickers = parseTk($("nTickers").value.trim() || guessTickers($("nText").value, earn).join(" "));
   if (!text) return note("nMsg", "แปะข้อความก่อน");
   if (earn && !tickers.length) return note("nMsg", "พรีวิวงบ/งบหุ้นรายตัวต้องใส่ชื่อหุ้นอย่างน้อย 1 ตัว");
   const isEdit = !!nEditing, col = isEdit ? nEditing.col : (earn ? "earnings" : "news");
@@ -478,7 +503,7 @@ $("nList").addEventListener("click", async e => {
     newsPick.draw();
     nEditing = { col: r.col, id: r.id, createdAt: r.createdAt, imgCreatedAt: imgCreated, hadImages: !!r.hasImages };
     setNType(r.col === "news" ? "news" : (r.kind === "preview" ? "preview" : "result")); lockTypes();
-    $("nText").value = r.text || ""; $("nTickers").value = (r.tickers || []).join(", "); $("nPeriod").value = r.period || ""; $("nLink").value = r.link || ""; autoPer = ""; $("nPerHint").hidden = true; fillPeriod();   // โพสต์เก่าที่ยังไม่มีงวด: เปิดแก้ไขแล้วเติมให้จากข้อความ
+    $("nText").value = r.text || ""; $("nTickers").value = (r.tickers || []).join(", "); $("nPeriod").value = r.period || ""; $("nLink").value = r.link || ""; autoPer = ""; autoTk = ""; $("nPerHint").hidden = true; $("nTkHint").hidden = true; fillPeriod(); fillTickers();   // โพสต์เก่าที่ยังไม่มีงวด: เปิดแก้ไขแล้วเติมให้จากข้อความ
     $("nEditTitle").textContent = ((r.tickers || []).join(", ") + " " + (r.text || "")).trim().slice(0, 40); $("nEditBar").hidden = false; $("nPost").textContent = "บันทึกการแก้ไข";
     $("nText").scrollIntoView({ behavior: "smooth", block: "center" });
     return;
