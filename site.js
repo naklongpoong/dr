@@ -11,6 +11,7 @@ window.SITE = {
   ipo: true,        // แท็บ หุ้น IPO ใหม่ (หุ้นสหรัฐที่เข้าตลาดใน 1-5 ปี ลิงก์ไปทำการบ้านต่อในหน้า dashboard) false = ซ่อนทั้งเมนูและการ์ด
   ipoLive: false,   // false = สมาชิกเห็นหน้า Coming Soon (ดูตัวจริงที่ ipo.html?preview=1) true = เปิดรายชื่อจริง
   etf: true,        // แท็บ ETF (รายชื่อ ETF ใหญ่ของสหรัฐ ค้นหา/กรอง/เรียงได้) false = ซ่อนทั้งเมนูและการ์ด
+  halloween: true,  // ธีมฮาโลวีนน่ารัก ๆ (สี ผี ฟักทอง ค้างคาว หมวกแม่มดบนหมูในโลโก้) ปิดเองหลังสิ้นวันที่ 1 พ.ย. 2026 เวลาไทย false = ปิดก่อนกำหนด
   newHours: 48,     // โพสต์ที่ใหม่กว่านี้ (ชั่วโมง) จะมีป้าย NEW
   listHours: 24,    // หน้าข่าวโหลดเฉพาะโพสต์ย้อนหลังกี่ชั่วโมง (เก่ากว่านั้นกดปุ่ม "โหลดเพิ่ม")
   cacheMinutes: 3,  // จำข่าว/บทความในเครื่องผู้อ่านกี่นาทีก่อนอ่านใหม่ (0 = ไม่จำ) ช่วยประหยัดโควตาอ่าน
@@ -545,5 +546,65 @@ document.addEventListener("click", function (e) {
         if (show_wk_later && !shown) showWk(show_wk_later);
       });
     }).catch(function () {});
+  });
+})();
+
+// ===== ธีมฮาโลวีน (ถึงสิ้นวันที่ 1 พ.ย. 2026 เวลาไทย แล้วปิดเอง) =====
+// ทำงานจากไฟล์นี้ไฟล์เดียว ไม่แตะข้อมูลหรือสีขึ้น/ลงของราคา ตัวการ์ตูนทั้งหมดเป็น SVG วาดเองในไฟล์นี้
+// ลบทิ้งทั้งก้อนนี้ได้เลยหลังฮาโลวีน หรือตั้ง SITE.halloween = false เพื่อปิดก่อนกำหนด
+(function () {
+  if (window.SITE && SITE.halloween === false) return;
+  if (Date.now() >= Date.parse("2026-11-02T00:00:00+07:00")) return;
+
+  var ghost = '<svg viewBox="0 0 64 72" width="100%" height="100%"><path d="M8 66V32C8 15 19 6 32 6s24 9 24 26v34l-8-6-8 6-8-6-8 6-8-6z" fill="#fff" stroke="#6b3fa8" stroke-width="3" stroke-linejoin="round"/><ellipse cx="24" cy="32" rx="3.6" ry="5" fill="#2a1450"/><ellipse cx="40" cy="32" rx="3.6" ry="5" fill="#2a1450"/><circle cx="25.2" cy="30" r="1.3" fill="#fff"/><circle cx="41.2" cy="30" r="1.3" fill="#fff"/><ellipse cx="17" cy="41" rx="4.5" ry="3" fill="#ffb3c7"/><ellipse cx="47" cy="41" rx="4.5" ry="3" fill="#ffb3c7"/><path d="M28 42q4 5 8 0" fill="none" stroke="#2a1450" stroke-width="2.6" stroke-linecap="round"/></svg>';
+  var pumpkin = '<svg viewBox="0 0 72 64" width="100%" height="100%"><path d="M36 12c-2-6 1-9 6-10" fill="none" stroke="#3f9b4a" stroke-width="5" stroke-linecap="round"/><ellipse cx="22" cy="38" rx="17" ry="22" fill="#ff8a1f" stroke="#b34d00" stroke-width="2.5"/><ellipse cx="50" cy="38" rx="17" ry="22" fill="#ff8a1f" stroke="#b34d00" stroke-width="2.5"/><ellipse cx="36" cy="38" rx="13" ry="23" fill="#ffa23d" stroke="#b34d00" stroke-width="2.5"/><circle cx="28" cy="36" r="3.4" fill="#2a1450"/><circle cx="44" cy="36" r="3.4" fill="#2a1450"/><circle cx="29.2" cy="34.8" r="1.1" fill="#fff"/><circle cx="45.2" cy="34.8" r="1.1" fill="#fff"/><ellipse cx="21" cy="44" rx="4" ry="2.6" fill="#ff6f91" opacity=".75"/><ellipse cx="51" cy="44" rx="4" ry="2.6" fill="#ff6f91" opacity=".75"/><path d="M31 44q5 6 10 0" fill="none" stroke="#2a1450" stroke-width="2.6" stroke-linecap="round"/></svg>';
+  var bat = '<svg viewBox="0 0 64 40" width="100%" height="100%"><path d="M32 12c-3-6-8-9-14-8 2 3 2 5 1 7C14 9 8 9 2 13c4 2 5 5 5 8-1 4 1 7 5 8 0-3 2-5 5-5 3 0 5 2 6 5l2 4 2-4c1-3 3-5 6-5 3 0 5 2 5 5 4-1 6-4 5-8 0-3 1-6 5-8-6-4-12-4-17-2-1-2-1-4 1-7-6-1-11 2-14 8z" fill="#7a4bc4" stroke="#2a1450" stroke-width="2" stroke-linejoin="round"/><circle cx="27" cy="19" r="2" fill="#fff"/><circle cx="37" cy="19" r="2" fill="#fff"/><circle cx="27" cy="19.3" r="1" fill="#2a1450"/><circle cx="37" cy="19.3" r="1" fill="#2a1450"/><path d="M30 24q2 2 4 0" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  var hat = '<svg viewBox="0 0 64 60" width="100%" height="100%"><path d="M32 3c3 10 8 22 14 36H18C24 25 29 13 32 3z" fill="#5a2aa0" stroke="#2a1450" stroke-width="2.5" stroke-linejoin="round"/><path d="M21 31l22 0 3 8H18z" fill="#ff8a1f" stroke="#2a1450" stroke-width="2" stroke-linejoin="round"/><ellipse cx="32" cy="45" rx="29" ry="8" fill="#6c35bd" stroke="#2a1450" stroke-width="2.5"/><path d="M32 33.5l1.6 3.2 3.5.5-2.5 2.5.6 3.5-3.2-1.7-3.2 1.7.6-3.5-2.5-2.5 3.5-.5z" fill="#ffd34d" stroke="#2a1450" stroke-width=".8" stroke-linejoin="round"/></svg>';
+
+  var css =
+    'html:root{--navy:#2d1658;--gold:#ff8a1f;--gold-ink:#2a1450;--accent:#7a3fc4;--accent-soft:#f1e7fc;--bg:#f7f2fc}' +
+    '@media (prefers-color-scheme:dark){html:root:not([data-theme="light"]){--bg:#160d28;--surface:#21133c;--line:#3a2766;--accent:#d2b0ff;--accent-soft:#2e1d52}}' +
+    'html:root[data-theme="dark"]{--bg:#160d28;--surface:#21133c;--line:#3a2766;--accent:#d2b0ff;--accent-soft:#2e1d52}' +
+    'html .hero{background:linear-gradient(135deg,#3d1d78,#26104d)}' +
+    'html .nav-more.on{background:#ff8a1f;border-color:#ff8a1f;color:#2a1450}html .nav-more{color:#eadcff}#nlpPu .puh{background:#2d1658}#nlpPu .puk,#nlpPu .pua .pur{background:#ff8a1f;border-color:#ff8a1f;color:#2a1450}#nlpPu .pub{border-top-color:#ff8a1f}' +
+    'html .hero::before,html .hero::after{display:none}' +
+    'html .nav a{color:#eadcff}html .lede,html .hero p{color:#e3d2fa}' +
+    'body{background-image:radial-gradient(circle at 1px 1px,rgba(255,138,31,.16) 1.6px,transparent 2px),radial-gradient(circle at 21px 21px,rgba(122,63,196,.12) 1.6px,transparent 2px);background-size:42px 42px}' +
+    'html .hero>.hw-deco{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}' +
+    '.hw-deco>*{position:absolute;display:block}' +
+    '.hw-ghost{right:16px;top:12px;width:62px;height:70px}.hw-nav .hw-pumpkin,.hw-nav .hw-bat2{display:none}.hw-nav .hw-ghost{top:6px}.hw-nav .hw-bat1{top:14px}' +
+    '.hw-pumpkin{right:88px;bottom:6px;width:58px;height:52px}' +
+    '.hw-bat1{right:150px;top:10px;width:44px;height:28px}' +
+    '.hw-bat2{left:46%;top:6px;width:30px;height:19px;opacity:.9}' +
+    'html .hero>.hw-hat{position:absolute;z-index:3;pointer-events:none;display:block;width:44px;height:41px;left:0;top:0;transform-origin:50% 100%;transform:rotate(-10deg)}' +
+    '@media (max-width:640px){.hw-pumpkin,.hw-bat2{display:none}.hw-ghost{width:48px;height:54px;right:10px;top:8px}.hw-bat1{width:34px;height:22px;right:64px;top:12px}}' +
+    '@media (prefers-reduced-motion:no-preference){' +
+    '.hw-ghost{animation:hwFloat 3.6s ease-in-out infinite}.hw-pumpkin{animation:hwBounce 2.8s ease-in-out infinite}' +
+    '.hw-bat1{animation:hwFlap 1.6s ease-in-out infinite}.hw-bat2{animation:hwFlap 2.1s ease-in-out infinite .4s}' +
+    '@keyframes hwFloat{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}' +
+    '@keyframes hwBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}' +
+    '@keyframes hwFlap{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-5px) scaleY(.82)}}}';
+
+  var st = document.createElement("style"); st.id = "hw-style"; st.textContent = css; document.head.appendChild(st);
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var hero = document.querySelector(".hero"); if (!hero) return;
+    var deco = document.createElement("div"); deco.className = "hw-deco"; deco.setAttribute("aria-hidden", "true");
+    deco.innerHTML = '<span class="hw-ghost">' + ghost + '</span><span class="hw-pumpkin">' + pumpkin + '</span><span class="hw-bat1">' + bat + '</span><span class="hw-bat2">' + bat + '</span>';
+    hero.insertBefore(deco, hero.firstChild);
+    // หมวกแม่มดบนหัวหมูในโลโก้ วางตามตำแหน่งจริงของโลโก้ (หน้าแรกกับหน้าอื่นจัดโลโก้ไม่เหมือนกัน)
+    var logo = hero.querySelector("img.logo, .brand img"); if (!logo) return;
+    var h = document.createElement("span"); h.className = "hw-hat"; h.setAttribute("aria-hidden", "true"); h.innerHTML = hat; hero.appendChild(h);
+    function put() {
+      var nv = hero.querySelector(".nav");   // หน้าที่มีเมนูบนหัว: ให้ตัวการ์ตูนอยู่ใต้แถวเมนู ไม่บังปุ่ม
+      if (nv) { deco.classList.add("hw-nav"); deco.style.top = Math.max(0, nv.getBoundingClientRect().bottom - hero.getBoundingClientRect().top) + "px"; }
+      var r = logo.getBoundingClientRect(), b = hero.getBoundingClientRect(); if (!r.width) return;
+      var w = r.width * 0.46;
+      h.style.width = w + "px"; h.style.height = w * 0.94 + "px";
+      h.style.left = (r.left - b.left + r.width * 0.5 - w * 0.5 + r.width * 0.02) + "px";
+      h.style.top = (r.top - b.top + r.height * 0.15 - w * 0.94) + "px";
+    }
+    put(); setTimeout(put, 300); setTimeout(put, 1200); logo.addEventListener("load", put); window.addEventListener("resize", put); window.addEventListener("load", put);
+    if (window.ResizeObserver) new ResizeObserver(put).observe(hero);
   });
 })();
