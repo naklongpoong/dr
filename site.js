@@ -11,6 +11,8 @@ window.SITE = {
   ipo: true,        // แท็บ หุ้น IPO ใหม่ (หุ้นสหรัฐที่เข้าตลาดใน 1-5 ปี ลิงก์ไปทำการบ้านต่อในหน้า dashboard) false = ซ่อนทั้งเมนูและการ์ด
   ipoLive: false,   // false = สมาชิกเห็นหน้า Coming Soon (ดูตัวจริงที่ ipo.html?preview=1) true = เปิดรายชื่อจริง
   etf: true,        // แท็บ ETF (รายชื่อ ETF ใหญ่ของสหรัฐ ค้นหา/กรอง/เรียงได้) false = ซ่อนทั้งเมนูและการ์ด
+  econ: true,        // แท็บ ตัวเลขเศรษฐกิจ (CPI งบจ้างงาน GDP ฯลฯ คืออะไร กระทบตลาดอย่างไร) false = ซ่อนทั้งเมนู
+  econLive: false,  // false = สมาชิกเห็นหน้า Coming Soon (ดูตัวจริงที่ econ.html?preview=1) true = เปิดเนื้อหาจริง
   halloween: true,  // ธีมฮาโลวีนน่ารัก ๆ (สี ผี ฟักทอง ค้างคาว หมวกแม่มดบนหมูในโลโก้) ปิดเองหลังสิ้นวันที่ 1 พ.ย. 2026 เวลาไทย false = ปิดก่อนกำหนด
   newHours: 48,     // โพสต์ที่ใหม่กว่านี้ (ชั่วโมง) จะมีป้าย NEW
   listHours: 24,    // หน้าข่าวโหลดเฉพาะโพสต์ย้อนหลังกี่ชั่วโมง (เก่ากว่านั้นกดปุ่ม "โหลดเพิ่ม")
@@ -91,6 +93,7 @@ window.buildNav = function (current) {
   if (SITE.rr) extra.push(["rr", "rr.html", "คำนวณความคุ้มเสี่ยง"]);
   if (SITE.ipo) extra.push(["ipo", "ipo.html", "หุ้น IPO ใหม่"]);
   if (SITE.etf) extra.push(["etf", "etf.html", "ETF"]);
+  if (SITE.econ) extra.push(["econ", "econ.html", "ตัวเลขเศรษฐกิจ"]);
   function link(i, cls) {
     return '<a' + (cls ? ' class="' + cls + '"' : "") + ' href="' + i[1] + '"' + (i[0] === current ? ' aria-current="page"' : "") + ">" + i[2] + "</a>";
   }
@@ -577,7 +580,7 @@ document.addEventListener("click", function (e) {
     '.hw-bat1{right:150px;top:10px;width:44px;height:28px}' +
     '.hw-bat2{left:46%;top:6px;width:30px;height:19px;opacity:.9}' +
     'html .hero>.hw-hat{position:absolute;z-index:3;pointer-events:none;display:block;width:44px;height:41px;left:0;top:0;transform-origin:50% 100%;transform:rotate(-10deg)}' +
-    '@media (max-width:640px){.hw-pumpkin,.hw-bat2{display:none}.hw-ghost{width:48px;height:54px;right:10px;top:8px}.hw-bat1{width:34px;height:22px;right:64px;top:12px}}' +
+    '@media (max-width:640px){.hw-pumpkin,.hw-bat2,.hw-nav .hw-bat1{display:none}.hw-ghost{width:48px;height:54px;right:10px;top:8px}.hw-bat1{width:34px;height:22px;right:64px;top:12px}}' +
     '@media (prefers-reduced-motion:no-preference){' +
     '.hw-ghost{animation:hwFloat 3.6s ease-in-out infinite}.hw-pumpkin{animation:hwBounce 2.8s ease-in-out infinite}' +
     '.hw-bat1{animation:hwFlap 1.6s ease-in-out infinite}.hw-bat2{animation:hwFlap 2.1s ease-in-out infinite .4s}' +
