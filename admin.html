@@ -67,7 +67,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
 .pctl .del { color: var(--err); }
 .mv { font: inherit; font-size: 0.8rem; padding: 1px 4px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); width: auto; max-width: 118px; }
 .it { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 0.92rem; }
-.it span { overflow-wrap: anywhere; } .it small { color: var(--muted); }
+.it span { overflow-wrap: anywhere; } .it small { color: var(--muted); } small.hint { display: block; margin-top: 4px; font-size: .8rem; }
 .it > span:last-child { text-align: right; flex: none; }
 .drop { border: 2px dashed var(--line); border-radius: 12px; padding: 14px; text-align: center; color: var(--muted); font-size: 0.9rem; }
 .drop.over { border-color: var(--gold); background: var(--accent-soft); }
@@ -121,7 +121,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <textarea id="nText" maxlength="20000" style="min-height:220px"></textarea>
       <div class="grid2">
         <div><label for="nTickers">ชื่อหุ้น คั่นด้วยคอมมา (พรีวิวงบ/งบหุ้นรายตัวต้องมีอย่างน้อย 1 ตัว)</label><input id="nTickers" type="text" placeholder="NVDA, AMD" autocomplete="off"></div>
-        <div id="nPerBox" hidden><label for="nPeriod">งวดงบ เช่น Q3/2026</label><input id="nPeriod" type="text" maxlength="20" autocomplete="off"></div>
+        <div id="nPerBox" hidden><label for="nPeriod">งวดงบ เช่น Q3/2026 (ดึงจากข้อความให้เองถ้าเจอ)</label><input id="nPeriod" type="text" maxlength="20" autocomplete="off"><small id="nPerHint" class="hint" hidden></small></div>
         <div><label for="nLink">ลิงก์ต้นฉบับ (ไม่ใส่ก็ได้)</label><input id="nLink" type="url" placeholder="https://" autocomplete="off"></div>
       </div>
       <label>รูปประกอบ (ไม่ใส่ก็ได้ สูงสุด 10 รูป ย่อให้อัตโนมัติ)</label>
@@ -357,7 +357,39 @@ document.addEventListener("change", async e => {
 let nType = "news", nEditing = null;   // nEditing = {col, id, createdAt} เมื่อกำลังแก้ไขรายการเดิม
 const nCache = {};
 const nImgs = [];   // รูปของโพสต์ข่าว/งบที่กำลังพิมพ์ (ย่อแล้ว)
-function setNType(t) { nType = t; $("nTypeNews").setAttribute("aria-pressed", t === "news"); $("nTypePrev").setAttribute("aria-pressed", t === "preview"); $("nTypeRes").setAttribute("aria-pressed", t === "result"); $("nPerBox").hidden = t === "news"; }
+// ดึงงวดงบจากข้อความที่แปะ: เจอรูปแบบ Q3 2026, Q3/2026, 3Q26, Q3 FY26, "ไตรมาส 3/2026", "ไตรมาสที่ 3 ปี 2026" -> Q3/2026
+// ถ้าเป็นปีงบประมาณ (FY) จะเขียน Q3/FY2026 เพราะไตรมาสของปีงบไม่ตรงกับปฏิทินเสมอไป ไม่เจอปีชัดเจนก็ปล่อยว่างให้พิมพ์เอง ไม่เดา
+function guessPeriod(text) {
+  const t = String(text || ""), hits = [];
+  const add = (idx, q, fy, y) => {
+    q = +q; y = String(y); if (q < 1 || q > 4) return;
+    if (y.length === 2) y = "20" + y; else if (+y >= 2500) y = String(+y - 543);   // ปี พ.ศ. -> ค.ศ.
+    if (+y < 2000 || +y > 2099) return;
+    hits.push([idx, `Q${q}/${fy ? "FY" : ""}${y}`]);
+  };
+  let m;
+  const r1 = /(?:^|[^A-Za-z0-9])Q([1-4])\s*[\/\-\s'’]*\s*(FY)?\s*['’]?\s*(20\d\d|\d\d)(?!\d)/gi;      // Q3 2026, Q3/2026, Q3'26, Q3 FY26
+  while ((m = r1.exec(t))) add(m.index, m[1], m[2], m[3]);
+  const r2 = /(?:^|[^A-Za-z0-9])([1-4])Q\s*[\/\-\s'’]*\s*(FY)?\s*(20\d\d|\d\d)(?!\d)/gi;               // 3Q26, 3Q 2026
+  while ((m = r2.exec(t))) add(m.index, m[1], m[2], m[3]);
+  const r3 = /(?:^|[^A-Za-z0-9])(FY)?\s*(20\d\d)\s*[\/\-\s]*Q([1-4])(?![0-9])/gi;                        // 2026 Q3, FY2026 Q3
+  while ((m = r3.exec(t))) add(m.index, m[3], m[1], m[2]);
+  const r4 = /ไตรมาส(?:ที่)?\s*([1-4])\s*(?:[\/\-]|\s*(?:ของ)?\s*(?:ปีงบประมาณ|ปีงบ|ปี)?\s*)\s*(FY)?\s*(25\d\d|20\d\d)(?!\d)/g;   // ไตรมาส 3/2026, ไตรมาสที่ 3 ปี 2026
+  while ((m = r4.exec(t))) add(m.index, m[1], /ปีงบ/.test(m[0]) || m[2], m[3]);
+  hits.sort((a, b) => a[0] - b[0]);
+  return hits.length ? hits[0][1] : "";
+}
+let autoPer = "";   // งวดที่ระบบเติมให้ล่าสุด: ถ้าช่องยังเป็นค่านี้ ถึงจะเติมทับใหม่ได้ (ไม่ทับสิ่งที่พิมพ์เอง)
+function fillPeriod() {
+  if (nType === "news") return;
+  const el = $("nPeriod"), g = guessPeriod($("nText").value), hint = $("nPerHint");
+  if (g && (!el.value.trim() || el.value === autoPer)) { el.value = g; autoPer = g; hint.textContent = "เติมให้จากข้อความ แก้ได้"; hint.hidden = false; }
+  else if (!g && autoPer && el.value === autoPer) { el.value = ""; autoPer = ""; hint.hidden = true; }
+}
+let perT = null;
+$("nText").addEventListener("input", () => { clearTimeout(perT); perT = setTimeout(fillPeriod, 350); });
+$("nPeriod").addEventListener("input", () => { if ($("nPeriod").value !== autoPer) { autoPer = ""; $("nPerHint").hidden = true; } });
+function setNType(t) { nType = t; $("nTypeNews").setAttribute("aria-pressed", t === "news"); $("nTypePrev").setAttribute("aria-pressed", t === "preview"); $("nTypeRes").setAttribute("aria-pressed", t === "result"); $("nPerBox").hidden = t === "news"; fillPeriod(); }
 function lockTypes() {   // ตอนแก้ไข สลับระหว่าง "ข่าว" กับ "พรีวิว/งบ" ไม่ได้ (อยู่คนละที่เก็บ) แต่สลับพรีวิว↔งบหุ้นรายตัวได้
   $("nTypeNews").disabled = !!nEditing && nEditing.col === "earnings";
   $("nTypePrev").disabled = !!nEditing && nEditing.col === "news";
@@ -365,7 +397,7 @@ function lockTypes() {   // ตอนแก้ไข สลับระหว่
 }
 $("nTypeNews").onclick = () => setNType("news"); $("nTypePrev").onclick = () => setNType("preview"); $("nTypeRes").onclick = () => setNType("result");
 function resetNews() {
-  ["nText", "nTickers", "nPeriod", "nLink"].forEach(i => $(i).value = ""); nImgs.length = 0; newsPick.draw();
+  ["nText", "nTickers", "nPeriod", "nLink"].forEach(i => $(i).value = ""); nImgs.length = 0; newsPick.draw(); autoPer = ""; $("nPerHint").hidden = true;
   nEditing = null; $("nEditBar").hidden = true; $("nPost").textContent = "โพสต์"; lockTypes(); setNType("news");
 }
 $("nCancel").onclick = () => { resetNews(); note("nMsg", ""); };
@@ -401,7 +433,7 @@ $("nPost").onclick = async () => {
   if (earn && !tickers.length) return note("nMsg", "พรีวิวงบ/งบหุ้นรายตัวต้องใส่ชื่อหุ้นอย่างน้อย 1 ตัว");
   const isEdit = !!nEditing, col = isEdit ? nEditing.col : (earn ? "earnings" : "news");
   const docData = { text, link: safeUrl($("nLink").value.trim()), tickers, createdAt: isEdit ? nEditing.createdAt : N.F.serverTimestamp(), hasImages: nImgs.length > 0, imgCount: nImgs.length };
-  if (earn) { docData.period = $("nPeriod").value.trim().slice(0, 20); docData.kind = nType; }
+  if (earn) { docData.period = ($("nPeriod").value.trim() || guessPeriod(text)).slice(0, 20); docData.kind = nType; }
   if (isEdit) docData.updatedAt = N.F.serverTimestamp();
   note("nMsg", ""); $("nPost").disabled = true;
   if (!isEdit) {
