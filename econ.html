@@ -261,9 +261,6 @@ textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); 
 .e-chain { display: flex; align-items: stretch; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
 .e-chain span { flex: 1 1 120px; text-align: center; font-size: .86rem; font-weight: 600; padding: 8px 10px; border-radius: 10px; background: var(--accent-soft); color: var(--ink); border: 1px solid var(--line); }
 .e-chain i { align-self: center; font-style: normal; color: var(--muted); }
-.e-time { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: .9rem; }
-.e-time th, .e-time td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); }
-.e-time th { font-weight: 600; color: var(--muted); font-size: .82rem; }
 .e-tools { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; margin: 18px -20px 0; padding: 10px 20px; background: var(--bg); border-bottom: 1px solid var(--line); }
 .e-bar { display: flex; gap: 8px; align-items: center; margin-top: 8px; font-size: .85rem; color: var(--muted); }
 .e-list { display: grid; gap: 10px; margin-top: 14px; }
@@ -331,15 +328,8 @@ textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); 
         <div class="e-chain" aria-label="ลำดับผลของตัวเลขเศรษฐกิจ"><span>ตัวเลขเศรษฐกิจออก</span><i aria-hidden="true">→</i><span>ตลาดปรับคาดการณ์ดอกเบี้ย Fed</span><i aria-hidden="true">→</i><span>Treasury Yield และดอลลาร์ขยับ</span><i aria-hidden="true">→</i><span>ราคาหุ้น (และ DR) ปรับตาม</span></div>
       </div>
       <div class="e-box">
-        <h2>เวลาประกาศเป็นเวลาไทยกี่โมง</h2>
-        <p>ทางการสหรัฐบอกเวลาเป็นเวลานิวยอร์ก (ET) ซึ่งเปลี่ยนตามช่วงเวลาออมแสง (DST) ปีละสองครั้ง ส่วนไทยไม่เปลี่ยน เวลาไทยจึงต่างกันหนึ่งชั่วโมงตามฤดูกาล</p>
-        <table class="e-time"><thead><tr><th>เวลานิวยอร์ก (ET)</th><th>ช่วง DST (ราวมี.ค.–พ.ย.)</th><th>ช่วงนอก DST</th></tr></thead><tbody>
-          <tr><td>08:30</td><td>19:30 น.</td><td>20:30 น.</td></tr>
-          <tr><td>09:15</td><td>20:15 น.</td><td>21:15 น.</td></tr>
-          <tr><td>10:00</td><td>21:00 น.</td><td>22:00 น.</td></tr>
-          <tr><td>14:00</td><td>01:00 น. (วันถัดไป)</td><td>02:00 น. (วันถัดไป)</td></tr>
-        </tbody></table>
-        <p>ตัวเลขส่วนใหญ่ออกหลังตลาดหุ้นไทยปิด ราคา DR ที่อ้างอิงหุ้นสหรัฐจึงมักไปขยับในวันทำการถัดไป</p>
+        <h2>เวลาในการ์ดเป็นเวลานิวยอร์ก (ET)</h2>
+        <p>แต่ละตัวออกเวลาไม่เหมือนกัน ดูเวลาของตัวนั้นในการ์ด แล้วบวกเพิ่มเพื่อเป็นเวลาไทย: <b>+11 ชั่วโมง</b> ช่วงที่สหรัฐใช้เวลาออมแสง (DST ราวมี.ค.–พ.ย.) และ <b>+12 ชั่วโมง</b> ช่วงอื่น เช่น 08:30 ET = 19:30 หรือ 20:30 น. ไทย</p>
       </div>
     </div>
 
