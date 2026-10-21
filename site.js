@@ -85,33 +85,58 @@ window.buildNav = function (current) {
   if (SITE.news) items.push(["news", "news.html", "ข่าว"]);
   if (SITE.earnings) items.push(["earnings", "earnings.html", "งบ"]);
   items.push(["feed", "feed.html", "ฟีดของฉัน"]);
-  var extra = [];   // เมนูรอง เก็บไว้หลังปุ่ม "เพิ่มเติม" ให้แถบเมนูไม่ยาวเกินบนมือถือ
-  if (SITE.articles) extra.push(["legend", "articles.html?type=legend", "Legends"]);
-  if (SITE.basics) extra.push(["basics", "basics.html", "ความรู้พื้นฐาน"]);
-  if (SITE.invest) extra.push(["invest", "invest.html", "แนวทางการลงทุน"]);
-  if (SITE.calc) extra.push(["calc", "calc.html", "คำนวณดอกเบี้ยทบต้น"]);
-  if (SITE.rr) extra.push(["rr", "rr.html", "คำนวณความคุ้มเสี่ยง"]);
-  if (SITE.ipo) extra.push(["ipo", "ipo.html", "หุ้น IPO ใหม่"]);
-  if (SITE.etf) extra.push(["etf", "etf.html", "ETF"]);
-  if (SITE.econ) extra.push(["econ", "econ.html", "ตัวเลขเศรษฐกิจ"]);
-  function link(i, cls) {
-    return '<a' + (cls ? ' class="' + cls + '"' : "") + ' href="' + i[1] + '"' + (i[0] === current ? ' aria-current="page"' : "") + ">" + i[2] + "</a>";
+  var extra = [];   // เมนูรอง อยู่ในแผงของปุ่ม "เพิ่มเติม" [id, href, ชื่อ, กลุ่ม] ให้แถบเมนูสั้นและไม่รก
+  if (SITE.basics) extra.push(["basics", "basics.html", "ความรู้พื้นฐาน", "เรียนรู้"]);
+  if (SITE.econ) extra.push(["econ", "econ.html", "ตัวเลขเศรษฐกิจ", "เรียนรู้"]);
+  if (SITE.invest) extra.push(["invest", "invest.html", "แนวทางการลงทุน", "เรียนรู้"]);
+  if (SITE.articles) extra.push(["legend", "articles.html?type=legend", "Legends", "เรียนรู้"]);
+  if (SITE.calc) extra.push(["calc", "calc.html", "คำนวณดอกเบี้ยทบต้น", "เครื่องมือคำนวณ"]);
+  if (SITE.rr) extra.push(["rr", "rr.html", "คำนวณความคุ้มเสี่ยง", "เครื่องมือคำนวณ"]);
+  if (SITE.ipo) extra.push(["ipo", "ipo.html", "หุ้น IPO ใหม่", "รายชื่อ"]);
+  if (SITE.etf) extra.push(["etf", "etf.html", "ETF", "รายชื่อ"]);
+  function link(i) {
+    return '<a href="' + i[1] + '"' + (i[0] === current ? ' aria-current="page"' : "") + ">" + i[2] + "</a>";
   }
   var cur = extra.filter(function (i) { return i[0] === current; })[0];   // หน้านี้อยู่ในเมนูรอง: ปุ่มจะโชว์ชื่อหน้านี้และเป็นสีทอง
-  el.innerHTML = items.map(function (i) { return link(i); }).join("") +
-    (extra.length ? '<button type="button" class="nav-more' + (cur ? " on" : "") + '" aria-expanded="false" aria-label="เมนูอื่นๆ">' + (cur ? cur[2] : "เพิ่มเติม") + ' ▾</button>' + extra.map(function (i) { return link(i, "nav-x"); }).join("") : "") +
+  el.innerHTML = items.map(link).join("") +
+    (extra.length ? '<button type="button" class="nav-more' + (cur ? " on" : "") + '" aria-expanded="false" aria-haspopup="true" aria-controls="navMenu" aria-label="เมนูอื่นๆ">' + (cur ? cur[2] : "เพิ่มเติม") + ' ▾</button>' : "") +
     '<button type="button" class="nav-search" data-search aria-label="ค้นหาทั้งเว็บ" title="ค้นหาทั้งเว็บ (Ctrl+K)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="nlp-t">ค้นหา</span></button>';
+  var old = document.getElementById("navMenu"); if (old) old.remove();
+  if (extra.length) {   // แผงเมนูแยกกลุ่ม วางไว้ใต้ body (ไม่ให้ถูก hero ตัดขอบ)
+    var groups = [], by = {};
+    extra.forEach(function (i) { if (!by[i[3]]) { by[i[3]] = []; groups.push(i[3]); } by[i[3]].push(i); });
+    var menu = document.createElement("div"); menu.id = "navMenu"; menu.hidden = true; menu.setAttribute("role", "menu");
+    menu.innerHTML = groups.map(function (g) { return '<div class="nm-g">' + g + "</div>" + by[g].map(link).join(""); }).join("");
+    document.body.appendChild(menu);
+  }
   if (window.nlpPopupBtn) window.nlpPopupBtn();
 };
-(function () {   // ปุ่ม "เพิ่มเติม" เปิด/ปิดเมนูรอง (กดที่อื่นหรือกด Esc เพื่อปิด)
-  function close() { var n = document.getElementById("nav"); if (!n) return; n.classList.remove("open"); var m = n.querySelector(".nav-more"); if (m) m.setAttribute("aria-expanded", "false"); }
+(function () {   // ปุ่ม "เพิ่มเติม" เปิด/ปิดแผงเมนูรอง (กดที่อื่นหรือกด Esc เพื่อปิด)
+  function parts() { return { n: document.getElementById("nav"), m: document.getElementById("navMenu") }; }
+  function close() {
+    var p = parts(); if (p.m) p.m.hidden = true;
+    if (p.n) { p.n.classList.remove("open"); var b = p.n.querySelector(".nav-more"); if (b) b.setAttribute("aria-expanded", "false"); }
+  }
+  function place() {
+    var p = parts(), b = p.n && p.n.querySelector(".nav-more"); if (!b || !p.m || p.m.hidden) return;
+    var r = b.getBoundingClientRect(), vw = document.documentElement.clientWidth, w = p.m.offsetWidth;
+    p.m.style.top = (window.pageYOffset + r.bottom + 8) + "px";
+    p.m.style.left = Math.max(10, Math.min(window.pageXOffset + r.left, window.pageXOffset + vw - w - 10)) + "px";
+  }
   document.addEventListener("click", function (e) {
-    var n = document.getElementById("nav"); if (!n || !e.target.closest) return;
+    var p = parts(); if (!p.n || !p.m || !e.target.closest) return;
     var b = e.target.closest(".nav-more");
-    if (b) { var o = n.classList.toggle("open"); b.setAttribute("aria-expanded", o ? "true" : "false"); return; }
-    if (n.classList.contains("open") && !e.target.closest(".nav-x")) close();
+    if (b) {
+      var open = p.m.hidden; p.m.hidden = !open; p.n.classList.toggle("open", open); b.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) { place(); var a = p.m.querySelector("a"); if (a && e.detail === 0) a.focus(); }   // เปิดด้วยคีย์บอร์ด: โฟกัสรายการแรก
+      return;
+    }
+    if (!p.m.hidden && !e.target.closest("#navMenu")) close();
   });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") { var p = parts(), b = p.n && p.n.querySelector(".nav-more"), was = p.m && !p.m.hidden; close(); if (was && b) b.focus(); }
+  });
+  window.addEventListener("resize", place); window.addEventListener("scroll", place, { passive: true });
 })();
 
 // true ถ้าเวลาที่ให้มา (Firestore timestamp หรือ Date) อยู่ในช่วง newHours ชั่วโมงที่ผ่านมา
@@ -244,7 +269,7 @@ document.addEventListener("click", function (e) {
   var box = null, inp, out, data = null, loading = null, last = null, sel = -1, TK = /^[A-Z0-9.\-]{1,12}$/, meta = null, busy = false, PAGE_N = 50;
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   var css = document.createElement("style");
-  css.textContent = ".nav .nav-x{display:none}.nav.open .nav-x{display:inline-block}.nav-more{font:inherit;font-size:.9rem;color:#c9d5f2;background:transparent;padding:3px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.25);cursor:pointer}.nav-more:hover,.nav.open .nav-more{border-color:#f5b301;color:#fff}.nav-more.on{background:#f5b301;border-color:#f5b301;color:#14213d;font-weight:600}.nav-more:focus-visible{outline:2px solid #f5b301;outline-offset:2px}@media(max-width:480px){.nav-search .nlp-t{display:none}}.nav-search{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font:inherit;font-size:.9rem;color:#c9d5f2;background:transparent;padding:3px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.25);cursor:pointer}.nav-search:hover{border-color:#f5b301;color:#fff}.nav-search:focus-visible{outline:2px solid #f5b301;outline-offset:2px}" +
+  css.textContent = "#navMenu{position:absolute;z-index:90;width:min(280px,calc(100vw - 20px));box-sizing:border-box;background:var(--surface,#fff);color:var(--ink,#14213d);border:1px solid var(--line,#d5dbea);border-radius:14px;box-shadow:0 14px 40px rgba(5,10,25,.35);padding:8px}#navMenu[hidden]{display:none}#navMenu .nm-g{font-size:.74rem;font-weight:700;letter-spacing:.04em;color:var(--muted,#5b6982);padding:8px 10px 3px}#navMenu .nm-g:first-child{padding-top:2px}#navMenu a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink,#14213d);text-decoration:none;font-size:.95rem}#navMenu a:hover,#navMenu a:focus-visible{background:var(--accent-soft,#e3ebfa);outline:none}#navMenu a[aria-current=\"page\"]{background:#f5b301;color:#14213d;font-weight:600}" + ".nav-more{font:inherit;font-size:.9rem;color:#c9d5f2;background:transparent;padding:3px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.25);cursor:pointer}.nav-more:hover,.nav.open .nav-more{border-color:#f5b301;color:#fff}.nav-more.on{background:#f5b301;border-color:#f5b301;color:#14213d;font-weight:600}.nav-more:focus-visible{outline:2px solid #f5b301;outline-offset:2px}@media(max-width:480px){.nav-search .nlp-t{display:none}}.nav-search{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font:inherit;font-size:.9rem;color:#c9d5f2;background:transparent;padding:3px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.25);cursor:pointer}.nav-search:hover{border-color:#f5b301;color:#fff}.nav-search:focus-visible{outline:2px solid #f5b301;outline-offset:2px}" +
     "#nlpS{position:fixed;inset:0;z-index:95;background:rgba(5,10,25,.72);display:flex;justify-content:center;align-items:flex-start;padding:8vh 14px 14px}#nlpS[hidden]{display:none}" +
     "#nlpS .sb{width:100%;max-width:640px;max-height:84vh;display:flex;flex-direction:column;background:var(--surface,#fff);color:var(--ink,#14213d);border-radius:16px;border-bottom:4px solid #f5b301;box-shadow:0 20px 60px rgba(0,0,0,.45);overflow:hidden}" +
     "#nlpS input{width:100%;box-sizing:border-box;font:inherit;font-size:1.05rem;padding:16px 18px;border:0;border-bottom:1px solid var(--line,#d5dbea);background:transparent;color:inherit;outline:none}" +
@@ -569,7 +594,7 @@ document.addEventListener("click", function (e) {
     '@media (prefers-color-scheme:dark){html:root:not([data-theme="light"]){--bg:#160d28;--surface:#21133c;--line:#3a2766;--accent:#d2b0ff;--accent-soft:#2e1d52}}' +
     'html:root[data-theme="dark"]{--bg:#160d28;--surface:#21133c;--line:#3a2766;--accent:#d2b0ff;--accent-soft:#2e1d52}' +
     'html .hero{background:linear-gradient(135deg,#3d1d78,#26104d)}' +
-    'html .nav-more.on{background:#ff8a1f;border-color:#ff8a1f;color:#2a1450}html .nav-more{color:#eadcff}#nlpPu .puh{background:#2d1658}#nlpPu .puk,#nlpPu .pua .pur{background:#ff8a1f;border-color:#ff8a1f;color:#2a1450}#nlpPu .pub{border-top-color:#ff8a1f}' +
+    '#navMenu a[aria-current="page"]{background:#ff8a1f;color:#2a1450}html .nav-more.on{background:#ff8a1f;border-color:#ff8a1f;color:#2a1450}html .nav-more{color:#eadcff}#nlpPu .puh{background:#2d1658}#nlpPu .puk,#nlpPu .pua .pur{background:#ff8a1f;border-color:#ff8a1f;color:#2a1450}#nlpPu .pub{border-top-color:#ff8a1f}' +
     'html .hero::before,html .hero::after{display:none}' +
     'html .nav a{color:#eadcff}html .lede,html .hero p{color:#e3d2fa}' +
     'body{background-image:radial-gradient(circle at 1px 1px,rgba(255,138,31,.16) 1.6px,transparent 2px),radial-gradient(circle at 21px 21px,rgba(122,63,196,.12) 1.6px,transparent 2px);background-size:42px 42px}' +
