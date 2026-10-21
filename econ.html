@@ -261,6 +261,9 @@ textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); 
 .e-chain { display: flex; align-items: stretch; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
 .e-chain span { flex: 1 1 120px; text-align: center; font-size: .86rem; font-weight: 600; padding: 8px 10px; border-radius: 10px; background: var(--accent-soft); color: var(--ink); border: 1px solid var(--line); }
 .e-chain i { align-self: center; font-style: normal; color: var(--muted); }
+.e-time { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: .9rem; }
+.e-time th, .e-time td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); }
+.e-time th { font-weight: 600; color: var(--muted); font-size: .82rem; }
 .e-tools { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; margin: 18px -20px 0; padding: 10px 20px; background: var(--bg); border-bottom: 1px solid var(--line); }
 .e-bar { display: flex; gap: 8px; align-items: center; margin-top: 8px; font-size: .85rem; color: var(--muted); }
 .e-list { display: grid; gap: 10px; margin-top: 14px; }
@@ -328,8 +331,8 @@ textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); 
         <div class="e-chain" aria-label="ลำดับผลของตัวเลขเศรษฐกิจ"><span>ตัวเลขเศรษฐกิจออก</span><i aria-hidden="true">→</i><span>ตลาดปรับคาดการณ์ดอกเบี้ย Fed</span><i aria-hidden="true">→</i><span>Treasury Yield และดอลลาร์ขยับ</span><i aria-hidden="true">→</i><span>ราคาหุ้น (และ DR) ปรับตาม</span></div>
       </div>
       <div class="e-box">
-        <h2>เวลาในการ์ดเป็นเวลานิวยอร์ก (ET)</h2>
-        <p>แต่ละตัวออกเวลาไม่เหมือนกัน ดูเวลาของตัวนั้นในการ์ด แล้วบวกเพิ่มเพื่อเป็นเวลาไทย: <b>+11 ชั่วโมง</b> ช่วงที่สหรัฐใช้เวลาออมแสง (DST ราวมี.ค.–พ.ย.) และ <b>+12 ชั่วโมง</b> ช่วงอื่น เช่น 08:30 ET = 19:30 หรือ 20:30 น. ไทย</p>
+        <h2>เวลาประกาศ</h2>
+        <p>ทางการสหรัฐบอกเวลาเป็นเวลานิวยอร์ก (ET) ซึ่งเปลี่ยนตามช่วงเวลาออมแสง (DST) ปีละสองครั้ง ส่วนไทยไม่เปลี่ยน แต่ละการ์ดจึงบอกเวลาไทย 2 ค่า คือช่วง DST (ราวมี.ค.–พ.ย.) / ช่วงนอก DST เวลาและวันของแต่ละตัวต่างกัน และบางครั้งหน่วยงานเลื่อนวัน ควรเช็กวันจริงจากตารางทางการด้านล่างก่อนวางแผน</p>
       </div>
     </div>
 
@@ -529,10 +532,16 @@ if (live) {
     $("ecats").innerHTML = [["all", "ทั้งหมด"]].concat(Object.entries(CATS)).map(([k, v]) =>
       `<button class="tab" type="button" data-c="${k}" aria-pressed="${st.cat === k}">${esc(v)}</button>`).join("");
   }
+  function thai(at) {   // "08:30 ET" -> "19:30 / 20:30 น. ไทย" (บวก 11 ชม. ช่วง DST, 12 ชม. นอกช่วง DST)
+    const m = /(\d\d):(\d\d) ET/.exec(at); if (!m) return "";
+    const f = k => { const t = +m[1] + k, d = t >= 24; return String(t % 24).padStart(2, "0") + ":" + m[2] + (d ? "+1" : ""); };
+    const a = f(11), b = f(12);
+    return `${a.replace("+1", "")} / ${b.replace("+1", "")} น. ไทย` + (a.includes("+1") ? " (วันถัดไป)" : "");
+  }
   function card(x, open) {
     const rel = (x.term || []).map(id => `<a href="basics.html#${esc(id)}">ศัพท์: ${esc(id.toUpperCase().replace("-", " "))} ›</a>`).join("");
     return `<details class="e-card" id="${esc(x.id)}"${open ? " open" : ""}><summary><div class="e-sum"><h3>${esc(x.t)}${x.star ? '<span class="e-star">ตลาดจับตา</span>' : ""}<small>${esc(x.en)}</small></h3>
-      <div class="e-meta"><span>${esc(x.who)}</span><span>${esc(x.freq)}</span><span>${esc(x.at)}</span></div></div></summary>
+      <div class="e-meta"><span>${esc(x.who)}</span><span>${esc(x.freq)}</span><span>${esc(x.at)}</span>${thai(x.at) ? `<span>${esc(thai(x.at))}</span>` : ""}</div></div></summary>
       <div class="e-body">
         <h4>คืออะไร</h4><p>${x.what}</p>
         <h4>อ่านยังไง</h4><p>${x.read}</p>
