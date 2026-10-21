@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610210818"></script>
-<script src="terms.js?v=202610210818"></script>
-<script src="gate.js?v=202610210818"></script>
+<script src="site.js?v=202610210822"></script>
+<script src="terms.js?v=202610210822"></script>
+<script src="gate.js?v=202610210822"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -293,7 +293,8 @@ const fav = document.createElement("link"); fav.rel = "icon"; fav.href = documen
 
 
 const preview = /[?&]preview=1/.test(location.search), live = !!(window.SITE && SITE.basicsLive) || preview;
-const CATS = window.TERM_CATS, GT = window.termsShown(preview);   // คำศัพท์อยู่ใน terms.js (ฉบับร่างโผล่เฉพาะ ?preview=1 จนกว่าจะเปิด)
+const CATS = window.TERM_CATS, GT = window.termsShown(preview);
+const EC = { cpi: "CPI", ppi: "PPI", pce: "PCE", jobs: "รายงานการจ้างงาน", claims: "ผู้ขอรับสวัสดิการว่างงาน", gdp: "GDP", pmi: "ISM PMI", fomc: "มติและแถลงข่าว FOMC", dot: "Dot Plot" };   // ชื่อการ์ดใน econ.html ที่ลิงก์ไปจากศัพท์ (ฟิลด์ e ใน terms.js)   // คำศัพท์อยู่ใน terms.js (ฉบับร่างโผล่เฉพาะ ?preview=1 จนกว่าจะเปิด)
 if (live) {
   document.getElementById("soon").hidden = true; document.getElementById("gloss").hidden = false;
   document.querySelector(".lede").textContent = "ศัพท์การลงทุนที่เจอบ่อย อ่านเข้าใจง่าย";
@@ -306,7 +307,7 @@ if (live) {
   function list() {
     const q = norm(st.q).trim();
     const rows = GT.filter(x => (st.cat === "all" || x.c === st.cat) && (!q || norm([x.t, x.en, x.d, x.w].join(" ")).includes(q)));
-    $("glist").innerHTML = rows.map(x => `<article class="g-card" id="${x.id}"><span class="g-cat">${CATS[x.c]}</span><h3>${x.t}<small>${x.en}</small></h3><p>${x.d}</p><p class="why">${x.w}</p></article>`).join("");
+    $("glist").innerHTML = rows.map(x => `<article class="g-card" id="${x.id}"><span class="g-cat">${CATS[x.c]}</span><h3>${x.t}<small>${x.en}</small></h3><p>${x.d}</p>${x.e ? `<p class="why">ตัวเลขนี้ออกเมื่อไร ดูยังไง และกระทบตลาดยังไง อ่านต่อที่ <a href="econ.html#${x.e}">ตัวเลขเศรษฐกิจ › ${EC[x.e]}</a></p>` : `<p class="why">${x.w}</p>`}</article>`).join("");
     $("gempty").hidden = rows.length > 0;
   }
   $("gcats").addEventListener("click", e => { const b = e.target.closest("[data-c]"); if (!b) return; st.cat = b.dataset.c; cats(); list(); });
