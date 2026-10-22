@@ -25,9 +25,9 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610221537"></script>
-<script src="terms.js?v=202610221537"></script>
-<script src="gate.js?v=202610221537"></script>
+<script src="site.js?v=202610221700"></script>
+<script src="terms.js?v=202610221700"></script>
+<script src="gate.js?v=202610221700"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -266,6 +266,7 @@ var ICON = {
   invest: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>',
   calc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M6 16v-4M11 16V9M16 16V6"/><path d="M5 8l5-4 4 2 5-3"/></svg>',
   rr: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 19h16"/><path d="M12 5v14"/><path d="M9 8l3-3 3 3"/><path d="M9 16l3 3 3-3"/></svg>',
+  drprem: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13"/><path d="M14 4l4 4-4 4"/><path d="M20 16H7"/><path d="M10 12l-4 4 4 4"/></svg>',
   ipo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.5 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>',
   etf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M16 3.5A9 9 0 0 1 20.5 8H16z"/></svg>',
   earnings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4zM4 10h16M10 4v16"/></svg>',
@@ -280,6 +281,7 @@ var PAGES = [
   { key: "invest", href: "invest.html", on: true, hidden: !SITE.invest, title: "แนวทางการลงทุน", desc: "เกมตอบ 8 ข้อ ดูว่าสไตล์การลงทุนของคุณเป็นแบบไหน", go: "เล่นเกมเลย ›" },
   { key: "calc", href: "calc.html", on: true, hidden: !SITE.calc, title: "คำนวณดอกเบี้ยทบต้น", desc: "กรอกเงินต้น เงินออมต่อเดือน ผลตอบแทน ปันผล (Re-invest หรือไม่ Re-invest) แล้วดูว่าเงินโตแค่ไหน", go: "ลองคำนวณ ›" },
   { key: "rr", href: "rr.html", on: true, hidden: !SITE.rr, title: "คำนวณความคุ้มเสี่ยง (Risk:Reward)", desc: "ใส่ราคาที่ซื้อ ราคาตัดขาดทุน และราคาเป้าหมาย ดูว่าเสี่ยงเสียเท่าไรเทียบกับหวังได้เท่าไร และซื้อได้กี่หุ้นตามเงินที่ยอมเสีย", go: "ลองคำนวณ ›" },
+  { key: "drprem", href: "drprem.html", on: true, hidden: !SITE.drprem, title: "คำนวณพรีเมียม DR", desc: "ใส่ราคา DR อัตราส่วน ราคาหุ้นต้นทาง และอัตราแลกเปลี่ยน ดูว่า DR แพงหรือถูกกว่าหุ้นต้นทางกี่ %", go: "ลองคำนวณ ›" },
   { key: "ipo", href: "ipo.html", on: true, hidden: !SITE.ipo, badge: SITE.ipoLive ? "" : "Coming Soon", title: "หุ้น IPO ใหม่", desc: "หุ้นสหรัฐที่เข้าตลาดใน 1-5 ปีที่ผ่านมา กดไปทำการบ้านต่อได้", go: "ดูหุ้น IPO ใหม่ ›" },
   { key: "etf", href: "etf.html", on: true, hidden: !SITE.etf, title: "ETF", desc: "รายชื่อ ETF ใหญ่ของสหรัฐจากผู้ออก 25 ราย ค้นหา กรองประเภท เรียงตามขนาดกองทุน", go: "ดูรายชื่อ ETF ›" }
 ];
