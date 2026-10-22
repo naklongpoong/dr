@@ -8,7 +8,7 @@ window.SITE = {
   invest: true,    // แท็บ แนวทางการลงทุน (เกมตอบคำถามดูสไตล์นักลงทุน) false = ซ่อนทั้งเมนูและการ์ด
   calc: true,      // แท็บ คำนวณดอกเบี้ยทบต้น (เงินต้น/เงินออม/ผลตอบแทน/ปันผล Re-invest หรือไม่ Re-invest) false = ซ่อนทั้งเมนูและการ์ด
   rr: true,        // แท็บ คำนวณความคุ้มเสี่ยง Risk:Reward (เครื่องมือสายเทรด ใส่ราคาซื้อ/ตัดขาดทุน/เป้าหมาย) false = ซ่อนทั้งเมนูและการ์ด
-  drprem: true,    // แท็บ คำนวณพรีเมียม DR (ใส่ราคา DR/อัตราส่วน/ราคาหุ้นต้นทาง/อัตราแลกเปลี่ยน ดูว่า DR แพงหรือถูกกว่ากี่ %) false = ซ่อนทั้งเมนูและการ์ด
+  drprem: true,    // แท็บ คำนวณ Premium DR (ใส่ราคา DR/อัตราส่วน/ราคาหุ้นต้นทาง/อัตราแลกเปลี่ยน ดูว่า DR แพงหรือถูกกว่ากี่ %) false = ซ่อนทั้งเมนูและการ์ด
   ipo: true,        // แท็บ หุ้น IPO ใหม่ (หุ้นสหรัฐที่เข้าตลาดใน 1-5 ปี ลิงก์ไปทำการบ้านต่อในหน้า dashboard) false = ซ่อนทั้งเมนูและการ์ด
   ipoLive: false,   // false = สมาชิกเห็นหน้า Coming Soon (ดูตัวจริงที่ ipo.html?preview=1) true = เปิดรายชื่อจริง
   etf: true,        // แท็บ ETF (รายชื่อ ETF ใหญ่ของสหรัฐ ค้นหา/กรอง/เรียงได้) false = ซ่อนทั้งเมนูและการ์ด
@@ -93,7 +93,7 @@ window.buildNav = function (current) {
   if (SITE.articles) extra.push(["legend", "articles.html?type=legend", "Legends", "เรียนรู้"]);
   if (SITE.calc) extra.push(["calc", "calc.html", "คำนวณดอกเบี้ยทบต้น", "เครื่องมือคำนวณ"]);
   if (SITE.rr) extra.push(["rr", "rr.html", "คำนวณความคุ้มเสี่ยง", "เครื่องมือคำนวณ"]);
-  if (SITE.drprem) extra.push(["drprem", "drprem.html", "คำนวณพรีเมียม DR", "เครื่องมือคำนวณ"]);
+  if (SITE.drprem) extra.push(["drprem", "drprem.html", "คำนวณ Premium DR", "เครื่องมือคำนวณ"]);
   if (SITE.ipo) extra.push(["ipo", "ipo.html", "หุ้น IPO ใหม่", "รายชื่อ"]);
   if (SITE.etf) extra.push(["etf", "etf.html", "ETF", "รายชื่อ"]);
   function link(i) {

@@ -25,9 +25,9 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202610221700"></script>
-<script src="terms.js?v=202610221700"></script>
-<script src="gate.js?v=202610221700"></script>
+<script src="site.js?v=202610222137"></script>
+<script src="terms.js?v=202610222137"></script>
+<script src="gate.js?v=202610222137"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -281,7 +281,7 @@ var PAGES = [
   { key: "invest", href: "invest.html", on: true, hidden: !SITE.invest, title: "แนวทางการลงทุน", desc: "เกมตอบ 8 ข้อ ดูว่าสไตล์การลงทุนของคุณเป็นแบบไหน", go: "เล่นเกมเลย ›" },
   { key: "calc", href: "calc.html", on: true, hidden: !SITE.calc, title: "คำนวณดอกเบี้ยทบต้น", desc: "กรอกเงินต้น เงินออมต่อเดือน ผลตอบแทน ปันผล (Re-invest หรือไม่ Re-invest) แล้วดูว่าเงินโตแค่ไหน", go: "ลองคำนวณ ›" },
   { key: "rr", href: "rr.html", on: true, hidden: !SITE.rr, title: "คำนวณความคุ้มเสี่ยง (Risk:Reward)", desc: "ใส่ราคาที่ซื้อ ราคาตัดขาดทุน และราคาเป้าหมาย ดูว่าเสี่ยงเสียเท่าไรเทียบกับหวังได้เท่าไร และซื้อได้กี่หุ้นตามเงินที่ยอมเสีย", go: "ลองคำนวณ ›" },
-  { key: "drprem", href: "drprem.html", on: true, hidden: !SITE.drprem, title: "คำนวณพรีเมียม DR", desc: "ใส่ราคา DR อัตราส่วน ราคาหุ้นต้นทาง และอัตราแลกเปลี่ยน ดูว่า DR แพงหรือถูกกว่าหุ้นต้นทางกี่ %", go: "ลองคำนวณ ›" },
+  { key: "drprem", href: "drprem.html", on: true, hidden: !SITE.drprem, title: "คำนวณ Premium DR", desc: "ใส่ราคา DR อัตราส่วน ราคาหุ้นต้นทาง และอัตราแลกเปลี่ยน ดูว่า DR แพงหรือถูกกว่าหุ้นต้นทางกี่ %", go: "ลองคำนวณ ›" },
   { key: "ipo", href: "ipo.html", on: true, hidden: !SITE.ipo, badge: SITE.ipoLive ? "" : "Coming Soon", title: "หุ้น IPO ใหม่", desc: "หุ้นสหรัฐที่เข้าตลาดใน 1-5 ปีที่ผ่านมา กดไปทำการบ้านต่อได้", go: "ดูหุ้น IPO ใหม่ ›" },
   { key: "etf", href: "etf.html", on: true, hidden: !SITE.etf, title: "ETF", desc: "รายชื่อ ETF ใหญ่ของสหรัฐจากผู้ออก 25 ราย ค้นหา กรองประเภท เรียงตามขนาดกองทุน", go: "ดูรายชื่อ ETF ›" }
 ];
