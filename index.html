@@ -220,6 +220,7 @@ a.card:hover .go { text-decoration: underline; }
       <div class="u"><div class="cell"><b id="eS">--</b></div><span>วินาที</span></div>
     </div>
     <div class="when"><span>วันเลือกตั้ง <b>อ. 3 พ.ย. 2026</b></span><span>ชิง <b>สภาผู้แทนฯ 435 ที่นั่ง</b></span><span>และ <b>วุฒิสภา 35 ที่นั่ง</b></span></div>
+    <p class="src" id="eWhat">"กลางเทอม" คือจัดกลางวาระ 4 ปีของประธานาธิบดี ไม่ได้เลือกประธานาธิบดี สภาผู้แทนฯ เลือกใหม่ทั้งสภา ส่วนวุฒิสภา (100 ที่นั่ง) เลือกใหม่ 35 ที่นั่ง ตลาดจับตาเพราะสองสภานี้ผ่านกฎหมายงบประมาณ ภาษี และเพดานหนี้</p>
     <p class="src" id="eSrc">นับถึงเริ่มวันที่ 3 พ.ย. ตามเวลาฝั่งตะวันออกสหรัฐ (ตรงกับเที่ยงวันที่ 3 พ.ย. เวลาไทย) ผลทยอยออกช่วงเช้ามืดวันที่ 4 พ.ย. เวลาไทย</p>
   </div>
 
@@ -526,10 +527,11 @@ inflCard(window.PPI_LATEST, "p", "ppi");
       c.fillStyle = "rgba(255,255,255,.16)"; c.fillRect(140, 822, W - 280, 2);
       c.fillStyle = INK; c.font = "600 44px " + FONT; c.fillText("วันอังคารที่ 3 พ.ย. 2026", W / 2, 886);
       [["435", "ที่นั่งสภาผู้แทนฯ", "#8db4ff"], ["35", "ที่นั่งวุฒิสภา", "#ff8a7a"]].forEach(function (it, i) {
-        var x = 60 + i * 490; panel(c, x, 950, 470, 210, it[2]);
-        c.fillStyle = INK; c.textAlign = "center"; c.font = "700 92px " + FONT; c.fillText(it[0], x + 235, 1060);
-        c.fillStyle = MUTED; c.font = "400 36px " + FONT; c.fillText(it[1], x + 235, 1124);
+        var x = 60 + i * 490; panel(c, x, 950, 470, 192, it[2]);
+        c.fillStyle = INK; c.textAlign = "center"; c.font = "700 92px " + FONT; c.fillText(it[0], x + 235, 1052);
+        c.fillStyle = MUTED; c.font = "400 36px " + FONT; c.fillText(it[1], x + 235, 1112);
       });
+      c.fillStyle = MUTED; c.font = "400 28px " + FONT; wrap(c, "จัดกลางวาระ 4 ปีของประธานาธิบดี ไม่ได้เลือกประธานาธิบดี ตลาดจับตาเพราะสองสภานี้ผ่านกฎหมายงบประมาณ ภาษี และเพดานหนี้", 60, 1192, W - 120, 36, "center");
       footer(c); return cv;
     }
     var pre = tab === "ppi" ? "p" : "c", root = document.getElementById(tab);
