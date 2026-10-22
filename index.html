@@ -212,7 +212,7 @@ a.card:hover .go { text-decoration: underline; }
 
   <div class="fomc" id="elec" hidden role="tabpanel" aria-label="นับถอยหลังถึงวันเลือกตั้งกลางเทอมสหรัฐ">
     <span class="tag">เลือกตั้งสหรัฐ</span>
-    <h2>เลือกตั้งกลางเทอมสหรัฐอีก</h2>
+    <h2>นับถอยหลังเลือกตั้งกลางเทอมสหรัฐ</h2>
     <div class="tm">
       <div class="u"><div class="cell"><b id="eD">--</b></div><span>วัน</span></div><i aria-hidden="true">:</i>
       <div class="u"><div class="cell"><b id="eH">--</b></div><span>ชม.</span></div><i aria-hidden="true">:</i>
@@ -452,73 +452,107 @@ inflCard(window.PPI_LATEST, "p", "ppi");
     c.fillStyle = fg; c.textAlign = "center"; c.fillText(text, x, y + 34);
   }
   var FONT = '"Noto Sans Thai", "Sarabun", system-ui, -apple-system, "Segoe UI", sans-serif';
+  function rr(c, x, y, w, h, r) { c.beginPath(); c.roundRect(x, y, w, h, r); }
+  function heroGrad(c, y0, y1) { var g = c.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, "#ffffff"); g.addColorStop(1, "#ffd978"); return g; }
+  function bg(c) {   // พื้นไล่สี + แสงเรืองมุมทอง/น้ำเงิน + เส้นกราฟจางๆ ด้านล่าง
+    var g = c.createLinearGradient(0, 0, W * 0.45, H); g.addColorStop(0, "#1b3180"); g.addColorStop(0.5, "#0f1f4d"); g.addColorStop(1, "#070e26");
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    var r = c.createRadialGradient(950, 120, 0, 950, 120, 600); r.addColorStop(0, "rgba(120,145,255,.32)"); r.addColorStop(1, "rgba(120,145,255,0)"); c.fillStyle = r; c.fillRect(0, 0, W, H);
+    r = c.createRadialGradient(60, 1180, 0, 60, 1180, 680); r.addColorStop(0, "rgba(245,179,1,.14)"); r.addColorStop(1, "rgba(245,179,1,0)"); c.fillStyle = r; c.fillRect(0, 0, W, H);
+    var pts = [[-20, 1300], [110, 1262], [250, 1282], [390, 1214], [520, 1240], [660, 1160], [790, 1190], [920, 1110], [1100, 1070]];
+    c.beginPath(); pts.forEach(function (q, k) { k ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]); });
+    c.lineTo(W + 20, H); c.lineTo(-20, H); c.closePath();
+    var fg = c.createLinearGradient(0, 1060, 0, H); fg.addColorStop(0, "rgba(245,179,1,.07)"); fg.addColorStop(1, "rgba(245,179,1,0)"); c.fillStyle = fg; c.fill();
+    c.beginPath(); pts.forEach(function (q, k) { k ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]); });
+    c.strokeStyle = "rgba(245,179,1,.15)"; c.lineWidth = 5; c.lineJoin = "round"; c.stroke();
+  }
+  function header(c) {
+    c.save(); c.shadowColor = "rgba(0,0,0,.4)"; c.shadowBlur = 24; c.fillStyle = GOLD; c.beginPath(); c.arc(112, 112, 58, 0, Math.PI * 2); c.fill(); c.restore();
+    var logo = document.querySelector(".logo");
+    if (logo && logo.complete && logo.naturalWidth) { c.save(); c.beginPath(); c.arc(112, 112, 53, 0, Math.PI * 2); c.clip(); c.drawImage(logo, 59, 59, 106, 106); c.restore(); }
+    c.fillStyle = INK; c.textAlign = "left"; c.font = "700 48px " + FONT; c.fillText("นักลงพุง", 190, 126);
+    var d = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short", year: "numeric" }).format(new Date());
+    c.font = "400 30px " + FONT; var w = c.measureText(d).width + 48, x = W - 60 - w;
+    c.fillStyle = "rgba(255,255,255,.08)"; rr(c, x, 84, w, 56, 28); c.fill(); c.strokeStyle = "rgba(255,255,255,.2)"; c.lineWidth = 2; rr(c, x, 84, w, 56, 28); c.stroke();
+    c.fillStyle = MUTED; c.textAlign = "center"; c.fillText(d, x + w / 2, 123);
+  }
+  function titleBlock(c, tag, title, sub) {
+    c.font = "700 28px " + FONT; var w = c.measureText(tag).width + 56;
+    c.fillStyle = GOLD; rr(c, W / 2 - w / 2, 214, w, 52, 26); c.fill();
+    c.fillStyle = "#14213d"; c.textAlign = "center"; c.fillText(tag, W / 2, 251);
+    var fs = 68; c.font = "700 " + fs + "px " + FONT; while (c.measureText(title).width > W - 120 && fs > 40) { fs -= 4; c.font = "700 " + fs + "px " + FONT; }
+    c.fillStyle = INK; c.fillText(title, W / 2, 352);
+    if (sub) { c.fillStyle = MUTED; c.font = "400 34px " + FONT; c.fillText(sub, W / 2, 410); }
+  }
+  function panel(c, x, y, w, h, acc) {
+    c.save(); c.shadowColor = "rgba(0,0,0,.38)"; c.shadowBlur = 38; c.shadowOffsetY = 14; c.fillStyle = "#16275c"; rr(c, x, y, w, h, 36); c.fill(); c.restore();
+    var g = c.createLinearGradient(x, y, x, y + h); g.addColorStop(0, "rgba(255,255,255,.11)"); g.addColorStop(1, "rgba(255,255,255,.03)"); c.fillStyle = g; rr(c, x, y, w, h, 36); c.fill();
+    c.strokeStyle = "rgba(255,255,255,.17)"; c.lineWidth = 2; rr(c, x + 1, y + 1, w - 2, h - 2, 35); c.stroke();
+    if (acc) { c.fillStyle = acc; rr(c, x + 40, y - 1, w - 80, 8, 4); c.fill(); }
+  }
+  function footer(c) {
+    c.fillStyle = "rgba(255,255,255,.16)"; c.fillRect(60, H - 104, W - 120, 2);
+    c.fillStyle = MUTED; c.textAlign = "left"; c.font = "400 26px " + FONT; c.fillText("เนื้อหาเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน", 60, H - 54);
+    c.fillStyle = GOLD; c.textAlign = "right"; c.font = "700 30px " + FONT; c.fillText("นักลงพุง", W - 60, H - 54);
+    c.fillRect(0, H - 14, W, 14);
+  }
   function draw(tab) {
     var cv = document.createElement("canvas"); cv.width = W; cv.height = H; var c = cv.getContext("2d");
-    c.fillStyle = NAVY; c.fillRect(0, 0, W, H); c.fillStyle = GOLD; c.fillRect(0, H - 14, W, 14);
-    var logo = document.querySelector(".logo");
-    if (logo && logo.complete && logo.naturalWidth) { c.save(); c.beginPath(); c.arc(112, 112, 52, 0, Math.PI * 2); c.clip(); c.drawImage(logo, 60, 60, 104, 104); c.restore(); }
-    c.fillStyle = INK; c.textAlign = "left"; c.font = "700 46px " + FONT; c.fillText("นักลงพุง", 186, 126);
-    c.fillStyle = MUTED; c.textAlign = "right"; c.font = "400 30px " + FONT;
-    c.fillText(new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short", year: "numeric" }).format(new Date()), W - 60, 124);
-    var y = 290;
+    bg(c); header(c);
     if (tab === "fomc") {
-      c.fillStyle = GOLD; c.textAlign = "center"; c.font = "700 56px " + FONT; c.fillText("FOMC ครั้งถัดไป", W / 2, y);
-      c.fillStyle = INK; c.font = "700 120px " + FONT; c.fillText(txt("fMeet"), W / 2, y + 190);
-      c.fillStyle = MUTED; c.font = "400 38px " + FONT; c.fillText("ประกาศผลดอกเบี้ย", W / 2, y + 290);
-      c.fillStyle = INK; c.font = "600 46px " + FONT; c.fillText(txt("fAt"), W / 2, y + 350);
-      y += 440;
+      titleBlock(c, "ประชุมดอกเบี้ย", "FOMC ครั้งถัดไป");
+      panel(c, 60, 440, 960, 330, GOLD);
+      c.fillStyle = heroGrad(c, 480, 620); c.textAlign = "center"; c.font = "700 128px " + FONT; c.fillText(txt("fMeet"), W / 2, 600);
+      c.fillStyle = MUTED; c.font = "400 36px " + FONT; c.fillText("ประกาศผลดอกเบี้ย", W / 2, 680);
+      c.fillStyle = INK; c.font = "600 46px " + FONT; c.fillText(txt("fAt"), W / 2, 740);
       var od = document.getElementById("fOdds");
       if (od && !od.hidden) {
-        var items = [["oHold", "ไม่เปลี่ยน"], ["oHike", "ขึ้นดอกเบี้ย"], ["oEase", "ลดดอกเบี้ย"]], bw = 306;
+        var items = [["oHold", "ไม่เปลี่ยน", "#8db4ff"], ["oHike", "ขึ้นดอกเบี้ย", "#ff8a7a"], ["oEase", "ลดดอกเบี้ย", "#6fd39b"]], bw = 306;
         items.forEach(function (it, i) {
-          var x = 60 + i * (bw + 21); c.fillStyle = PANEL; c.beginPath(); c.roundRect(x, y, bw, 250, 28); c.fill();
-          c.fillStyle = INK; c.textAlign = "center"; c.font = "700 84px " + FONT; c.fillText(txt(it[0]), x + bw / 2, y + 125);
-          c.fillStyle = MUTED; c.font = "400 36px " + FONT; c.fillText(it[1], x + bw / 2, y + 196);
+          var x = 60 + i * (bw + 21); panel(c, x, 820, bw, 250, it[2]);
+          c.fillStyle = INK; c.textAlign = "center"; c.font = "700 84px " + FONT; c.fillText(txt(it[0]), x + bw / 2, 940);
+          c.fillStyle = MUTED; c.font = "400 36px " + FONT; c.fillText(it[1], x + bw / 2, 1010);
         });
-        c.fillStyle = MUTED; c.font = "400 30px " + FONT; c.fillText(txt("oSrc"), W / 2, y + 310);
+        c.fillStyle = MUTED; c.font = "400 30px " + FONT; c.fillText(txt("oSrc"), W / 2, 1132);
       }
-      c.fillStyle = MUTED; c.textAlign = "left"; c.font = "400 28px " + FONT; c.fillText("เนื้อหาเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน", 60, H - 60);
-      return cv;
+      footer(c); return cv;
     }
     if (tab === "elec") {
       var left = Math.max(0, Math.floor((Date.parse(ELECTION.at) - Date.now()) / 86400000));
-      c.fillStyle = GOLD; c.textAlign = "center"; c.font = "700 56px " + FONT; c.fillText("เลือกตั้งกลางเทอมสหรัฐอีก", W / 2, y);
-      c.fillStyle = INK; c.font = "700 260px " + FONT; c.fillText(String(left), W / 2, y + 290);
-      c.fillStyle = MUTED; c.font = "400 56px " + FONT; c.fillText("วัน", W / 2, y + 370);
-      c.fillStyle = INK; c.font = "600 48px " + FONT; c.fillText("วันอังคารที่ 3 พ.ย. 2026", W / 2, y + 480);
-      [["435", "ที่นั่งสภาผู้แทนฯ"], ["35", "ที่นั่งวุฒิสภา"]].forEach(function (it, i) {
-        var x = 60 + i * 490; c.fillStyle = PANEL; c.beginPath(); c.roundRect(x, y + 540, 470, 230, 28); c.fill();
-        c.fillStyle = INK; c.textAlign = "center"; c.font = "700 96px " + FONT; c.fillText(it[0], x + 235, y + 660);
-        c.fillStyle = MUTED; c.font = "400 36px " + FONT; c.fillText(it[1], x + 235, y + 726);
+      titleBlock(c, "นับถอยหลัง", "เลือกตั้งกลางเทอมสหรัฐ");
+      panel(c, 60, 440, 960, 470, GOLD);
+      c.fillStyle = heroGrad(c, 480, 700); c.textAlign = "center"; c.font = "700 290px " + FONT; c.fillText(String(left), W / 2, 700);
+      c.fillStyle = MUTED; c.font = "400 54px " + FONT; c.fillText("วัน", W / 2, 780);
+      c.fillStyle = "rgba(255,255,255,.16)"; c.fillRect(140, 822, W - 280, 2);
+      c.fillStyle = INK; c.font = "600 44px " + FONT; c.fillText("วันอังคารที่ 3 พ.ย. 2026", W / 2, 886);
+      [["435", "ที่นั่งสภาผู้แทนฯ", "#8db4ff"], ["35", "ที่นั่งวุฒิสภา", "#ff8a7a"]].forEach(function (it, i) {
+        var x = 60 + i * 490; panel(c, x, 950, 470, 210, it[2]);
+        c.fillStyle = INK; c.textAlign = "center"; c.font = "700 92px " + FONT; c.fillText(it[0], x + 235, 1060);
+        c.fillStyle = MUTED; c.font = "400 36px " + FONT; c.fillText(it[1], x + 235, 1124);
       });
-      c.fillStyle = MUTED; c.textAlign = "left"; c.font = "400 28px " + FONT; c.fillText("เนื้อหาเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน", 60, H - 60);
-      return cv;
+      footer(c); return cv;
     }
     var pre = tab === "ppi" ? "p" : "c", root = document.getElementById(tab);
-    c.fillStyle = GOLD; c.textAlign = "center"; c.font = "700 60px " + FONT; c.fillText(root.querySelector(".cpi-t").textContent, W / 2, y);
-    c.fillStyle = MUTED; c.font = "400 34px " + FONT; c.fillText(txt(tab + "Month"), W / 2, y + 60);
-    y += 130;
+    titleBlock(c, "ตัวเลขเงินเฟ้อ", root.querySelector(".cpi-t").textContent, txt(tab + "Month"));
     [pre + "H", pre + "C"].forEach(function (k, i) {
-      var box = document.getElementById(k).parentNode, x = 60 + i * 490, bw = 470;
-      c.fillStyle = PANEL; c.beginPath(); c.roundRect(x, y, bw, 560, 32); c.fill();
-      var lab = box.querySelector(".cpi-l").innerText.replace(/\u00a0/g, " ").split("\n").map(function (t) { return t.trim(); });
-      c.fillStyle = MUTED; c.textAlign = "center"; c.font = "400 32px " + FONT;
-      c.fillText(lab[0] || "", x + bw / 2, y + 62); if (lab[1]) { c.font = "400 26px " + FONT; c.fillText(lab[1], x + bw / 2, y + 100); }
-      c.fillStyle = INK; c.font = "700 150px " + FONT; c.fillText(txt(k), x + bw / 2, y + 250);
-      var mom = box.querySelector(".cpi-mom"), ml = mom.innerText.replace(/\u00a0/g, " ").split("\n").map(function (t) { return t.trim(); }).filter(Boolean);
+      var box = document.getElementById(k).parentNode, x = 60 + i * 490, bw = 470, y = 460;
+      panel(c, x, y, bw, 560, i ? "#8db4ff" : GOLD);
+      var lab = box.querySelector(".cpi-l").innerText.replace(/ /g, " ").split("\n").map(function (t) { return t.trim(); });
+      c.fillStyle = MUTED; c.textAlign = "center"; c.font = "600 34px " + FONT;
+      c.fillText(lab[0] || "", x + bw / 2, y + 66); if (lab[1]) { c.font = "400 26px " + FONT; c.fillText(lab[1], x + bw / 2, y + 104); }
+      c.fillStyle = heroGrad(c, y + 120, y + 250); c.font = "700 150px " + FONT; c.fillText(txt(k), x + bw / 2, y + 250);
+      var mom = box.querySelector(".cpi-mom"), ml = mom.innerText.replace(/ /g, " ").split("\n").map(function (t) { return t.trim(); }).filter(Boolean);
       c.fillStyle = INK; c.font = "700 44px " + FONT; c.fillText(ml[0] || "", x + bw / 2, y + 330);
       if (ml[1]) { c.fillStyle = MUTED; c.font = "400 30px " + FONT; c.fillText(ml[1], x + bw / 2, y + 376); }
-      var chip = box.querySelector(".cpi-chip");
-      if (chip && !chip.hidden && chip.textContent) pill(c, x + bw / 2, y + 408, chip.textContent, chip.classList.contains("hot") ? "#fde3df" : chip.classList.contains("cool") ? "#d7f5e3" : "#e4e9f5", chip.classList.contains("hot") ? "#b42318" : chip.classList.contains("cool") ? "#067647" : "#3b4a6b");
+      var chip = box.querySelector(".cpi-chip"), hot = chip && chip.classList.contains("hot"), cool = chip && chip.classList.contains("cool");
+      if (chip && !chip.hidden && chip.textContent) pill(c, x + bw / 2, y + 408, chip.textContent, hot ? "#fde3df" : cool ? "#d7f5e3" : "#e4e9f5", hot ? "#b42318" : cool ? "#067647" : "#3b4a6b");
       c.fillStyle = MUTED; c.font = "400 30px " + FONT; c.textAlign = "center";
-      wrap(c, txt(pre + (k[1] === "H" ? "Hs" : "Cs")), x + 20, y + 506, bw - 40, 38, "center");
+      wrap(c, txt(pre + (k[1] === "H" ? "Hs" : "Cs")), x + 20, y + 508, bw - 40, 38, "center");
     });
-    y += 600;
-    var note = txt(tab + "Note"); c.fillStyle = INK; c.font = "400 34px " + FONT;
-    if (note) y = wrap(c, note, 60, y + 30, W - 120, 48, "left");
-    c.fillStyle = MUTED; c.font = "400 28px " + FONT; wrap(c, txt(tab + "Src").replace(/\s*·\s*(Core|PPI)[^·]*คืออะไร ›.*/, ""), 60, Math.max(H - 150, y + 50), W - 120, 38, "left");
-    c.fillText("เนื้อหาเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน", 60, H - 60);
-    return cv;
+    var y = 1070, note = txt(tab + "Note"); c.fillStyle = INK; c.font = "400 34px " + FONT;
+    if (note) y = wrap(c, note, 60, y, W - 120, 48, "left") - 20;
+    c.fillStyle = MUTED; c.font = "400 28px " + FONT; wrap(c, txt(tab + "Src").replace(/\s*·\s*(Core|PPI)[^·]*คืออะไร ›.*/, ""), 60, Math.min(y + 56, H - 130), W - 120, 38, "left");
+    footer(c); return cv;
   }
   btn.onclick = async function () {
     var cur = document.querySelector("#macroTabs [aria-selected=true]"); if (!cur) return;
