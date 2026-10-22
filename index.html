@@ -140,6 +140,7 @@ h1 { font-size: clamp(2.2rem, 8vw, 3.4rem); font-weight: 700; line-height: 1.15;
 .macro-next { margin: 0; padding: 9px 14px 11px; text-align: center; font-size: .78rem; line-height: 1.6; color: var(--muted); border-top: 1px solid var(--line); }
 .macro-next[hidden] { display: none; }
 .macro-next b { color: var(--ink); font-weight: 600; }
+#macroSave { border-top: 0; padding-top: 0; } #saveImg { font: inherit; font-size: .78rem; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; } #saveImg:disabled { opacity: .5; cursor: default; }
 #macroCal { border-top: 0; padding-top: 0; } #macroCal a { color: var(--accent); font-weight: 600; text-decoration: underline; }
 /* ศัพท์วันนี้ */
 .wod { margin: 16px 0 0; padding: 14px 16px 14px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 14px; box-shadow: var(--shadow); }
@@ -230,6 +231,7 @@ a.card:hover .go { text-decoration: underline; }
   </div>
 
   <p class="macro-next" id="macroNext" hidden></p>
+  <p class="macro-next" id="macroSave" hidden><button type="button" id="saveImg">บันทึกการ์ดนี้เป็นรูป (สำหรับโพสต์)</button></p>
   <p class="macro-next" id="macroCal" hidden><a href="econ.html#calendar">ปฏิทินตัวเลขเศรษฐกิจ 30 วันข้างหน้า ›</a></p>
   </section>
 
@@ -390,7 +392,106 @@ inflCard(window.PPI_LATEST, "p", "ppi");
   ev.sort(function (a, b) { return a[0] - b[0]; });
   if (ev.length) { var n = document.getElementById("macroNext"); n.innerHTML = "รอบหน้า: " + ev.map(function (e) { return "<b>" + e[1] + "</b>"; }).join(" · "); n.hidden = false; }
   if (window.SITE && SITE.econLive) document.getElementById("macroCal").hidden = false;
+  document.getElementById("macroSave").hidden = false;
   wrap.hidden = false;
+})();
+
+// บันทึกการ์ดมหภาค (แท็บที่เปิดอยู่: FOMC / CPI / PPI) เป็นรูป 1080x1350 สำหรับโพสต์ Facebook วาดด้วย canvas เองจากข้อความในการ์ด ไม่ใช้ไลบรารี
+// บนมือถือที่รองรับจะเปิดหน้าแชร์ ถ้าไม่รองรับจะดาวน์โหลดไฟล์ PNG
+(function () {
+  var btn = document.getElementById("saveImg"); if (!btn) return;
+  var W = 1080, H = 1350, NAVY = "#0f1e46", PANEL = "#1a2b57", GOLD = "#f5b301", INK = "#ffffff", MUTED = "#b9c6e6";
+  function txt(id) { var e = document.getElementById(id); return e && !e.hidden ? e.innerText.replace(/\u00a0/g, " ").trim() : ""; }
+  function wrap(c, text, x, y, maxW, lh, align) {   // ตัดบรรทัดตามเว้นวรรค ถ้าคำเดียวยาวเกินก็ตัดทีละตัวอักษร (ภาษาไทยไม่มีเว้นวรรค) คืนค่า y ถัดไป
+    var words = String(text).split(/(\s+)/), line = "", lines = [];
+    function push(t) { lines.push(t); }
+    words.forEach(function (w) {
+      if (c.measureText(line + w).width <= maxW) { line += w; return; }
+      if (line.trim()) { push(line.trim()); line = ""; }
+      if (c.measureText(w).width <= maxW) { line = w.trimStart(); return; }
+      Array.from(w).forEach(function (ch) { if (c.measureText(line + ch).width > maxW) { push(line); line = ""; } line += ch; });
+    });
+    if (line.trim()) push(line.trim());
+    c.textAlign = align || "left";
+    lines.forEach(function (l, i) { c.fillText(l, align === "center" ? x + maxW / 2 : x, y + i * lh); });
+    return y + lines.length * lh;
+  }
+  function pill(c, x, y, text, bg, fg) {   // ป้ายกลางที่ x
+    c.font = "600 30px " + FONT; var w = c.measureText(text).width + 44;
+    c.fillStyle = bg; c.beginPath(); c.roundRect(x - w / 2, y, w, 48, 24); c.fill();
+    c.fillStyle = fg; c.textAlign = "center"; c.fillText(text, x, y + 34);
+  }
+  var FONT = '"Noto Sans Thai", "Sarabun", system-ui, -apple-system, "Segoe UI", sans-serif';
+  function draw(tab) {
+    var cv = document.createElement("canvas"); cv.width = W; cv.height = H; var c = cv.getContext("2d");
+    c.fillStyle = NAVY; c.fillRect(0, 0, W, H); c.fillStyle = GOLD; c.fillRect(0, H - 14, W, 14);
+    var logo = document.querySelector(".logo");
+    if (logo && logo.complete && logo.naturalWidth) { c.save(); c.beginPath(); c.arc(112, 112, 52, 0, Math.PI * 2); c.clip(); c.drawImage(logo, 60, 60, 104, 104); c.restore(); }
+    c.fillStyle = INK; c.textAlign = "left"; c.font = "700 46px " + FONT; c.fillText("นักลงพุง", 186, 126);
+    c.fillStyle = MUTED; c.textAlign = "right"; c.font = "400 30px " + FONT;
+    c.fillText(new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short", year: "numeric" }).format(new Date()), W - 60, 124);
+    var y = 290;
+    if (tab === "fomc") {
+      c.fillStyle = GOLD; c.textAlign = "center"; c.font = "700 56px " + FONT; c.fillText("FOMC ครั้งถัดไป", W / 2, y);
+      c.fillStyle = INK; c.font = "700 120px " + FONT; c.fillText(txt("fMeet"), W / 2, y + 190);
+      c.fillStyle = MUTED; c.font = "400 38px " + FONT; c.fillText("ประกาศผลดอกเบี้ย", W / 2, y + 290);
+      c.fillStyle = INK; c.font = "600 46px " + FONT; c.fillText(txt("fAt"), W / 2, y + 350);
+      y += 440;
+      var od = document.getElementById("fOdds");
+      if (od && !od.hidden) {
+        var items = [["oHold", "ไม่เปลี่ยน"], ["oHike", "ขึ้นดอกเบี้ย"], ["oEase", "ลดดอกเบี้ย"]], bw = 306;
+        items.forEach(function (it, i) {
+          var x = 60 + i * (bw + 21); c.fillStyle = PANEL; c.beginPath(); c.roundRect(x, y, bw, 250, 28); c.fill();
+          c.fillStyle = INK; c.textAlign = "center"; c.font = "700 84px " + FONT; c.fillText(txt(it[0]), x + bw / 2, y + 125);
+          c.fillStyle = MUTED; c.font = "400 36px " + FONT; c.fillText(it[1], x + bw / 2, y + 196);
+        });
+        c.fillStyle = MUTED; c.font = "400 30px " + FONT; c.fillText(txt("oSrc"), W / 2, y + 310);
+      }
+      c.fillStyle = MUTED; c.textAlign = "left"; c.font = "400 28px " + FONT; c.fillText("เนื้อหาเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน", 60, H - 60);
+      return cv;
+    }
+    var pre = tab === "ppi" ? "p" : "c", root = document.getElementById(tab);
+    c.fillStyle = GOLD; c.textAlign = "center"; c.font = "700 60px " + FONT; c.fillText(root.querySelector(".cpi-t").textContent, W / 2, y);
+    c.fillStyle = MUTED; c.font = "400 34px " + FONT; c.fillText(txt(tab + "Month"), W / 2, y + 60);
+    y += 130;
+    [pre + "H", pre + "C"].forEach(function (k, i) {
+      var box = document.getElementById(k).parentNode, x = 60 + i * 490, bw = 470;
+      c.fillStyle = PANEL; c.beginPath(); c.roundRect(x, y, bw, 560, 32); c.fill();
+      var lab = box.querySelector(".cpi-l").innerText.replace(/\u00a0/g, " ").split("\n").map(function (t) { return t.trim(); });
+      c.fillStyle = MUTED; c.textAlign = "center"; c.font = "400 32px " + FONT;
+      c.fillText(lab[0] || "", x + bw / 2, y + 62); if (lab[1]) { c.font = "400 26px " + FONT; c.fillText(lab[1], x + bw / 2, y + 100); }
+      c.fillStyle = INK; c.font = "700 150px " + FONT; c.fillText(txt(k), x + bw / 2, y + 250);
+      var mom = box.querySelector(".cpi-mom"), ml = mom.innerText.replace(/\u00a0/g, " ").split("\n").map(function (t) { return t.trim(); }).filter(Boolean);
+      c.fillStyle = INK; c.font = "700 44px " + FONT; c.fillText(ml[0] || "", x + bw / 2, y + 330);
+      if (ml[1]) { c.fillStyle = MUTED; c.font = "400 30px " + FONT; c.fillText(ml[1], x + bw / 2, y + 376); }
+      var chip = box.querySelector(".cpi-chip");
+      if (chip && !chip.hidden && chip.textContent) pill(c, x + bw / 2, y + 408, chip.textContent, chip.classList.contains("hot") ? "#fde3df" : chip.classList.contains("cool") ? "#d7f5e3" : "#e4e9f5", chip.classList.contains("hot") ? "#b42318" : chip.classList.contains("cool") ? "#067647" : "#3b4a6b");
+      c.fillStyle = MUTED; c.font = "400 30px " + FONT; c.textAlign = "center";
+      wrap(c, txt(pre + (k[1] === "H" ? "Hs" : "Cs")), x + 20, y + 506, bw - 40, 38, "center");
+    });
+    y += 600;
+    var note = txt(tab + "Note"); c.fillStyle = INK; c.font = "400 34px " + FONT;
+    if (note) y = wrap(c, note, 60, y + 30, W - 120, 48, "left");
+    c.fillStyle = MUTED; c.font = "400 28px " + FONT; wrap(c, txt(tab + "Src").replace(/\s*·\s*(Core|PPI)[^·]*คืออะไร ›.*/, ""), 60, Math.max(H - 150, y + 50), W - 120, 38, "left");
+    c.fillText("เนื้อหาเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน", 60, H - 60);
+    return cv;
+  }
+  btn.onclick = async function () {
+    var cur = document.querySelector("#macroTabs [aria-selected=true]"); if (!cur) return;
+    var tab = cur.dataset.t, old = btn.textContent; btn.disabled = true; btn.textContent = "กำลังสร้างรูป...";
+    try {
+      try { await document.fonts.ready; } catch (e) {}
+      var cv = draw(tab), blob = await new Promise(function (r) { cv.toBlob(r, "image/png"); });
+      if (!blob) throw new Error("toBlob");
+      var name = "naklongpoong-" + tab + "-" + new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date()) + ".png", file = new File([blob], name, { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] }) && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
+        try { await navigator.share({ files: [file] }); } catch (e) { if (e && e.name !== "AbortError") throw e; }
+      } else {
+        var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+      }
+    } catch (e) { btn.textContent = "สร้างรูปไม่สำเร็จ ลองใหม่อีกครั้ง"; setTimeout(function () { btn.textContent = old; btn.disabled = false; }, 2500); return; }
+    btn.textContent = old; btn.disabled = false;
+  };
 })();
 
 // ศัพท์วันนี้: เลือกจากคลังศัพท์ที่เปิดแล้ว วนตามวัน (เวลาไทย) ทุกคนเห็นคำเดียวกันในวันเดียวกัน
