@@ -293,6 +293,16 @@ textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); 
 .e-rel a { color: var(--accent); font-size: .88rem; margin-right: 12px; }
 .e-src { font-size: .82rem; color: var(--muted); }
 .e-src a { color: var(--accent); }
+.e-cal { scroll-margin-top: 14px; margin-top: 12px; }
+.cal-day { margin-top: 12px; }
+.cal-d { display: flex; gap: 8px; align-items: center; font-size: .9rem; font-weight: 700; color: var(--muted); padding-bottom: 3px; border-bottom: 1px solid var(--line); }
+.cal-now { font-size: .7rem; font-weight: 700; color: var(--gold-ink); background: var(--gold); border-radius: 999px; padding: 0 8px; }
+.cal-row { display: flex; gap: 12px; align-items: baseline; padding: 7px 0; border-bottom: 1px dashed var(--line); }
+.cal-t { flex: none; width: 3.6em; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cal-n { flex: 1; min-width: 0; font-size: .95rem; overflow-wrap: anywhere; }
+.cal-n a { color: var(--accent); }
+.cal-m { display: block; font-size: .75rem; color: var(--muted); }
+.cal-ap { color: var(--err); font-weight: 600; }
 @media (max-width: 560px) { .e-tools { margin: 14px -14px 0; padding: 8px 14px; } .e-two { grid-template-columns: 1fr; } .e-chain { flex-direction: column; } .e-chain span { flex: none; } .e-chain i { transform: rotate(90deg); } }
 </style>
 </head>
@@ -334,6 +344,12 @@ textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); 
         <h2>เวลาประกาศ</h2>
         <p>ทางการสหรัฐบอกเวลาเป็นเวลานิวยอร์ก (ET) ซึ่งเปลี่ยนตามช่วงเวลาออมแสง (DST) ปีละสองครั้ง แต่ไทยไม่เปลี่ยน แต่ละการ์ดเลยบอกเวลาไทยไว้ 2 ค่า คือช่วง DST (ราว มี.ค.–พ.ย.) / ช่วงนอก DST วันและเวลาของแต่ละตัวไม่เหมือนกัน และบางทีหน่วยงานก็เลื่อน ดูวันจริงจากตารางทางการด้านล่างก่อนวางแผน</p>
       </div>
+    </div>
+
+    <div class="e-box e-cal" id="calendar">
+      <h2>ปฏิทินตัวเลข 30 วันข้างหน้า</h2>
+      <p class="e-src" id="calnote"></p>
+      <div id="callist"></div>
     </div>
 
     <div class="e-tools">
@@ -525,6 +541,34 @@ const ECON = [
     caution: "เป็นแค่ความเห็นรายคน ไม่ใช่คำสัญญาของ Fed และเปลี่ยนได้ทุกรอบเมื่อมีข้อมูลใหม่", term: ["dot-plot"] }
 ];
 
+// ปฏิทินวันประกาศ ใส่วันที่เองจากตารางทางการ ไม่อัปเดตเอง ต้องมาไล่ตรวจใหม่ตามรอบ (ถ้าตรวจไม่ได้ ห้ามเดาวันใส่)
+// [วัน(ตามเวลา ET), เวลา ET, id การ์ดด้านล่าง (ไม่มีการ์ดใส่ null), ชื่อ, true = ยังไม่มีวันทางการ คำนวณตามกฎ]
+// ตรวจเมื่อ 22 ต.ค. 2026: BLS (หน้า schedule ต.ค.+พ.ย.) BEA Census ISM Fed G.17 และตาราง FOMC ของ Fed DST สหรัฐสิ้นสุด 1 พ.ย. (หลังจากนั้น ET = UTC-5)
+const CAL = { checked: "22 ต.ค. 2026", through: "2026-11-21", ev: [
+  ["2026-10-22", "08:30", "claims", "ผู้ขอรับสวัสดิการว่างงานรายสัปดาห์"],
+  ["2026-10-23", "10:00", "umich", "ความเชื่อมั่นผู้บริโภคมิชิแกน (ฉบับสุดท้าย)"],
+  ["2026-10-27", "08:30", null, "ยอดสั่งซื้อสินค้าคงทน"],
+  ["2026-10-27", "10:00", "conf", "ความเชื่อมั่นผู้บริโภค Conference Board"],
+  ["2026-10-28", "14:00", "fomc", "FOMC ประกาศมติดอกเบี้ย (แถลงข่าวตามมา)"],
+  ["2026-10-29", "08:30", "gdp", "GDP ไตรมาส 3 (ตัวเลขรอบแรก)"],
+  ["2026-10-29", "08:30", "pce", "PCE เดือน ก.ย."],
+  ["2026-10-29", "08:30", "claims", "ผู้ขอรับสวัสดิการว่างงานรายสัปดาห์"],
+  ["2026-10-30", "08:30", null, "ต้นทุนการจ้างงาน ECI ไตรมาส 3"],
+  ["2026-11-02", "10:00", "pmi", "ISM ภาคการผลิต"],
+  ["2026-11-03", "10:00", "jolts", "JOLTS ตำแหน่งงานว่าง (ก.ย.)"],
+  ["2026-11-04", "10:00", "pmi", "ISM ภาคบริการ"],
+  ["2026-11-05", "08:30", "claims", "ผู้ขอรับสวัสดิการว่างงานรายสัปดาห์"],
+  ["2026-11-06", "08:30", "jobs", "รายงานการจ้างงาน (ต.ค.)"],
+  ["2026-11-10", "08:30", "cpi", "CPI เงินเฟ้อผู้บริโภค (ต.ค.)"],
+  ["2026-11-12", "08:30", "claims", "ผู้ขอรับสวัสดิการว่างงานรายสัปดาห์"],
+  ["2026-11-13", "08:30", "ppi", "PPI เงินเฟ้อผู้ผลิต (ต.ค.)"],
+  ["2026-11-17", "08:30", "retail", "ยอดขายปลีก (ต.ค.)"],
+  ["2026-11-17", "09:15", "indpro", "การผลิตภาคอุตสาหกรรม (ต.ค.)"],
+  ["2026-11-18", "08:30", "housing", "การเริ่มสร้างบ้านและใบอนุญาตก่อสร้าง (ต.ค.)"],
+  ["2026-11-18", "14:00", "minutes", "บันทึกการประชุม FOMC รอบ 27–28 ต.ค.", true],
+  ["2026-11-19", "08:30", "claims", "ผู้ขอรับสวัสดิการว่างงานรายสัปดาห์"]
+] };
+
 const preview = /[?&]preview=1/.test(location.search), live = !!(window.SITE && SITE.econLive) || preview;
 if (live) {
   const $ = id => document.getElementById(id);
@@ -558,6 +602,24 @@ if (live) {
         ${rel ? `<p class="e-rel" style="margin-top:8px">${rel}</p>` : ""}
       </div></details>`;
   }
+  const MON = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+  function calendar() {   // วัน/เวลาไทยคำนวณจากเวลา ET (ก่อน 1 พ.ย. = UTC-4, หลังจากนั้น UTC-5) ตัดรายการที่ผ่านไปแล้วออกเอง
+    const etInst = (d, t) => { const [y, m, dd] = d.split("-").map(Number), [h, mi] = t.split(":").map(Number); return Date.UTC(y, m - 1, dd, h + (d < "2026-11-01" ? 4 : 5), mi); };
+    const bkk = o => new Intl.DateTimeFormat("th-TH", Object.assign({ timeZone: "Asia/Bangkok" }, o));
+    const keyF = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }), dayF = bkk({ weekday: "short", day: "numeric", month: "short" }), timeF = bkk({ hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+    const now = Date.now(), cover = etInst(CAL.through, "23:59"), end = Math.min(now + 30 * 864e5, cover);
+    const rows = CAL.ev.map(e => ({ e, at: etInst(e[0], e[1]) })).filter(r => r.at >= now && r.at <= end).sort((a, b) => a.at - b.at);
+    const days = [], by = {};
+    rows.forEach(r => { const k = keyF.format(r.at); (by[k] = by[k] || (days.push(k), [])).push(r); });
+    const today = keyF.format(now), star = id => (ECON.find(x => x.id === id) || {}).star;
+    $("callist").innerHTML = days.map(k => `<div class="cal-day"><div class="cal-d">${esc(dayF.format(by[k][0].at))}${k === today ? '<span class="cal-now">วันนี้</span>' : ""}</div>` + by[k].map(r => {
+      const [d, t, id, name, ap] = r.e, et = d !== k ? ` · ตามเวลา ET คือวันที่ ${+d.slice(8)} ${MON[+d.slice(5, 7) - 1]}` : "";
+      const nm = id ? `<a href="#${esc(id)}" data-go="${esc(id)}">${esc(name)}</a>` : esc(name);
+      return `<div class="cal-row"><span class="cal-t">${timeF.format(r.at)}</span><span class="cal-n">${nm}${star(id) ? '<span class="e-star">ตลาดจับตา</span>' : ""}<span class="cal-m">${esc(t)} ET${esc(et)}${ap ? ' · <span class="cal-ap">ยังไม่มีวันทางการ คำนวณตามกฎของ Fed (ออก 3 สัปดาห์หลังวันประกาศมติ)</span>' : ""}</span></span></div>`;
+    }).join("") + "</div>").join("") || '<p class="e-src">ไม่มีรายการในช่วงนี้ ปฏิทินที่ใส่ไว้หมดแล้ว ดูตารางทางการด้านล่าง</p>';
+    $("calnote").textContent = `เวลาที่แสดงเป็นเวลาไทย ตรวจกับตารางทางการเมื่อ ${CAL.checked} ใส่ไว้ถึงวันที่ ${+CAL.through.slice(8)} ${MON[+CAL.through.slice(5, 7) - 1]}` + (now + 30 * 864e5 > cover ? " ช่วงหลังจากนั้นยังไม่ได้ใส่" : "") + " หน่วยงานเลื่อนวันได้ เช็กตารางทางการด้านล่างก่อนวางแผน";
+    $("callist").addEventListener("click", ev => { const a = ev.target.closest("[data-go]"); if (!a) return; ev.preventDefault(); st.cat = "all"; st.q = ""; $("eq").value = ""; cats(); list(); location.hash = a.dataset.go; openHash(); });
+  }
   let allOpen = false;
   function list() {
     const q = plain(st.q).trim();
@@ -569,13 +631,14 @@ if (live) {
   }
   function openHash() {
     const id = decodeURIComponent((location.hash || "").slice(1)), el = id && document.getElementById(id);
+    if (id === "calendar" && el) { el.scrollIntoView({ block: "start" }); return; }
     if (el && el.tagName === "DETAILS" && el.classList.contains("e-card")) { el.open = true; el.classList.add("flash"); setTimeout(() => el.scrollIntoView({ block: "start" }), 50); }
   }
   $("ecats").addEventListener("click", e => { const b = e.target.closest("[data-c]"); if (!b) return; st.cat = b.dataset.c; cats(); list(); });
   $("eq").addEventListener("input", e => { st.q = e.target.value; list(); });
   $("etoggle").addEventListener("click", () => { allOpen = !allOpen; document.querySelectorAll(".e-card").forEach(d => d.open = allOpen); $("etoggle").textContent = allOpen ? "ปิดทั้งหมด" : "เปิดทั้งหมด"; });
   addEventListener("hashchange", openHash);
-  cats(); list();
+  calendar(); cats(); list();
 }
 </script>
 </body>

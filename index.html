@@ -140,6 +140,7 @@ h1 { font-size: clamp(2.2rem, 8vw, 3.4rem); font-weight: 700; line-height: 1.15;
 .macro-next { margin: 0; padding: 9px 14px 11px; text-align: center; font-size: .78rem; line-height: 1.6; color: var(--muted); border-top: 1px solid var(--line); }
 .macro-next[hidden] { display: none; }
 .macro-next b { color: var(--ink); font-weight: 600; }
+#macroCal { border-top: 0; padding-top: 0; } #macroCal a { color: var(--accent); font-weight: 600; text-decoration: underline; }
 /* ศัพท์วันนี้ */
 .wod { margin: 16px 0 0; padding: 14px 16px 14px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 14px; box-shadow: var(--shadow); }
 .wod[hidden] { display: none; }
@@ -229,6 +230,7 @@ a.card:hover .go { text-decoration: underline; }
   </div>
 
   <p class="macro-next" id="macroNext" hidden></p>
+  <p class="macro-next" id="macroCal" hidden><a href="econ.html#calendar">ปฏิทินตัวเลขเศรษฐกิจ 30 วันข้างหน้า ›</a></p>
   </section>
 
 
@@ -387,6 +389,7 @@ inflCard(window.PPI_LATEST, "p", "ppi");
   });
   ev.sort(function (a, b) { return a[0] - b[0]; });
   if (ev.length) { var n = document.getElementById("macroNext"); n.innerHTML = "รอบหน้า: " + ev.map(function (e) { return "<b>" + e[1] + "</b>"; }).join(" · "); n.hidden = false; }
+  if (window.SITE && SITE.econLive) document.getElementById("macroCal").hidden = false;
   wrap.hidden = false;
 })();
 
