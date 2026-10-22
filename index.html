@@ -192,7 +192,7 @@ a.card:hover .go { text-decoration: underline; }
   </header>
 
   <section class="macro" id="macro" hidden aria-label="ตัวเลขเศรษฐกิจสหรัฐที่ตลาดจับตา">
-  <div class="macro-tabs" id="macroTabs" role="tablist" aria-label="เลือกดู FOMC CPI หรือ PPI"></div>
+  <div class="macro-tabs" id="macroTabs" role="tablist" aria-label="เลือกดู FOMC เลือกตั้ง CPI หรือ PPI"></div>
 
   <div class="fomc" id="fomc" hidden role="tabpanel" aria-label="นับถอยหลังถึงการประกาศผลประชุม FOMC">
     <span class="tag">FOMC</span>
@@ -208,6 +208,19 @@ a.card:hover .go { text-decoration: underline; }
       <div class="row"><div class="hold"><b id="oHold"></b><span>ไม่เปลี่ยน</span></div><div class="hike"><b id="oHike"></b><span>ขึ้นดอกเบี้ย</span></div><div class="ease"><b id="oEase"></b><span>ลดดอกเบี้ย</span></div></div>
       <p class="src" id="oSrc"></p>
     </div>
+  </div>
+
+  <div class="fomc" id="elec" hidden role="tabpanel" aria-label="นับถอยหลังถึงวันเลือกตั้งกลางเทอมสหรัฐ">
+    <span class="tag">เลือกตั้งสหรัฐ</span>
+    <h2>เลือกตั้งกลางเทอมสหรัฐอีก</h2>
+    <div class="tm">
+      <div class="u"><div class="cell"><b id="eD">--</b></div><span>วัน</span></div><i aria-hidden="true">:</i>
+      <div class="u"><div class="cell"><b id="eH">--</b></div><span>ชม.</span></div><i aria-hidden="true">:</i>
+      <div class="u"><div class="cell"><b id="eM">--</b></div><span>นาที</span></div><i aria-hidden="true">:</i>
+      <div class="u"><div class="cell"><b id="eS">--</b></div><span>วินาที</span></div>
+    </div>
+    <div class="when"><span>วันเลือกตั้ง <b>อ. 3 พ.ย. 2026</b></span><span>ชิง <b>สภาผู้แทนฯ 435 ที่นั่ง</b></span><span>และ <b>วุฒิสภา 35 ที่นั่ง</b></span></div>
+    <p class="src" id="eSrc">นับถึงเริ่มวันที่ 3 พ.ย. ตามเวลาฝั่งตะวันออกสหรัฐ (ตรงกับเที่ยงวันที่ 3 พ.ย. เวลาไทย) ผลทยอยออกช่วงเช้ามืดวันที่ 4 พ.ย. เวลาไทย</p>
   </div>
 
   <div class="cpi" id="cpi" hidden role="tabpanel" aria-label="เงินเฟ้อสหรัฐ CPI ล่าสุด">
@@ -330,6 +343,22 @@ if (window.NLP && NLP.ready) NLP.ready.then(function (N) {
   var iv = setInterval(tick, 1000); tick(); box.dataset.ready = "1";
 })();
 
+// นับถอยหลังถึงวันเลือกตั้งกลางเทอมสหรัฐ (อังคารที่ 3 พ.ย. 2026 ตรวจกับข่าว ABC/Scripps: สภาผู้แทนฯ ทั้ง 435 ที่นั่ง วุฒิสภา 35 ที่นั่ง)
+// at = เริ่มวันที่ 3 พ.ย. เวลา 00:00 ตามเวลา ET (หลัง DST สิ้นสุด 1 พ.ย. = UTC-5 ตรงกับ 05:00Z) hideAfter = ซ่อนแท็บหลังผ่านวันเลือกตั้งไปแล้ว (ราว 05:00Z ของวันที่ 4)
+window.ELECTION = { at: "2026-11-03T05:00:00Z", hideAfter: "2026-11-04T05:00:00Z", label: "เลือกตั้งกลางเทอมสหรัฐ 3 พ.ย." };
+(function () {
+  var box = document.getElementById("elec"), E = window.ELECTION; if (!box || !E || Date.now() >= Date.parse(E.hideAfter)) return;
+  var t = Date.parse(E.at), ids = ["eD", "eH", "eM", "eS"].map(function (k) { return document.getElementById(k); });
+  function two(n) { return n < 10 ? "0" + n : String(n); }
+  function tick() {
+    var s = Math.max(0, Math.floor((t - Date.now()) / 1000));
+    ids[0].textContent = two(Math.floor(s / 86400)); ids[1].textContent = two(Math.floor(s % 86400 / 3600));
+    ids[2].textContent = two(Math.floor(s % 3600 / 60)); ids[3].textContent = two(s % 60);
+    if (Date.now() >= Date.parse(E.hideAfter)) { clearInterval(iv); location.reload(); }   // ผ่านวันเลือกตั้งแล้ว โหลดใหม่เพื่อซ่อนแท็บ
+  }
+  var iv = setInterval(tick, 1000); tick(); box.dataset.ready = "1";
+})();
+
 // การ์ดเงินเฟ้อ CPI / PPI ล่าสุด (ค่าอยู่ที่ window.CPI_LATEST / window.PPI_LATEST ใน site.js ซ่อนเองเมื่อถึงเวลาประกาศครั้งถัดไป)
 // ค่าคาด (exp / expMom) กับค่าก่อนหน้า (prev) ไม่ใส่ก็ได้ ถ้าไม่ใส่จะไม่โชว์ป้ายสูงกว่า/ต่ำกว่าคาด
 function pc(v) { return (+v).toFixed(1) + "%"; }
@@ -367,7 +396,7 @@ inflCard(window.PPI_LATEST, "p", "ppi");
 // รวมเป็นการ์ดมหภาคใบเดียว: แท็บ FOMC / CPI / PPI (โผล่เฉพาะแท็บที่มีข้อมูล) + บรรทัดวันประกาศรอบหน้า
 (function () {
   var wrap = document.getElementById("macro"), tabs = document.getElementById("macroTabs"); if (!wrap || !tabs) return;
-  var defs = [["fomc", "FOMC"], ["cpi", "CPI"], ["ppi", "PPI"]].filter(function (d) { var el = document.getElementById(d[0]); return el && el.dataset.ready === "1"; });
+  var defs = [["fomc", "FOMC"], ["elec", "เลือกตั้ง"], ["cpi", "CPI"], ["ppi", "PPI"]].filter(function (d) { var el = document.getElementById(d[0]); return el && el.dataset.ready === "1"; });
   if (!defs.length) return;
   var keep = ""; try { keep = localStorage.getItem("macroTab") || ""; } catch (e) {}
   var cur = defs.some(function (d) { return d[0] === keep; }) ? keep : defs[0][0];
@@ -386,6 +415,7 @@ inflCard(window.PPI_LATEST, "p", "ppi");
   // บรรทัดเดียว: วันประกาศสำคัญรอบหน้า เรียงตามเวลา
   var ev = [], now = Date.now();
   if (window.FOMC) for (var i = 0; i < FOMC.length; i++) if (Date.parse(FOMC[i].at) > now) { ev.push([Date.parse(FOMC[i].at), "FOMC " + FOMC[i].d]); break; }
+  if (window.ELECTION && Date.parse(ELECTION.at) > now) ev.push([Date.parse(ELECTION.at), "เลือกตั้งสหรัฐ 3 พ.ย."]);
   [["CPI", window.CPI_LATEST], ["PPI", window.PPI_LATEST]].forEach(function (x) {
     var c = x[1]; if (c && c.nextRelease && c.hideAfter && Date.parse(c.hideAfter) > now) ev.push([Date.parse(c.hideAfter), x[0] + " " + c.nextRelease]);
   });
@@ -447,6 +477,20 @@ inflCard(window.PPI_LATEST, "p", "ppi");
         });
         c.fillStyle = MUTED; c.font = "400 30px " + FONT; c.fillText(txt("oSrc"), W / 2, y + 310);
       }
+      c.fillStyle = MUTED; c.textAlign = "left"; c.font = "400 28px " + FONT; c.fillText("เนื้อหาเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน", 60, H - 60);
+      return cv;
+    }
+    if (tab === "elec") {
+      var left = Math.max(0, Math.floor((Date.parse(ELECTION.at) - Date.now()) / 86400000));
+      c.fillStyle = GOLD; c.textAlign = "center"; c.font = "700 56px " + FONT; c.fillText("เลือกตั้งกลางเทอมสหรัฐอีก", W / 2, y);
+      c.fillStyle = INK; c.font = "700 260px " + FONT; c.fillText(String(left), W / 2, y + 290);
+      c.fillStyle = MUTED; c.font = "400 56px " + FONT; c.fillText("วัน", W / 2, y + 370);
+      c.fillStyle = INK; c.font = "600 48px " + FONT; c.fillText("วันอังคารที่ 3 พ.ย. 2026", W / 2, y + 480);
+      [["435", "ที่นั่งสภาผู้แทนฯ"], ["35", "ที่นั่งวุฒิสภา"]].forEach(function (it, i) {
+        var x = 60 + i * 490; c.fillStyle = PANEL; c.beginPath(); c.roundRect(x, y + 540, 470, 230, 28); c.fill();
+        c.fillStyle = INK; c.textAlign = "center"; c.font = "700 96px " + FONT; c.fillText(it[0], x + 235, y + 660);
+        c.fillStyle = MUTED; c.font = "400 36px " + FONT; c.fillText(it[1], x + 235, y + 726);
+      });
       c.fillStyle = MUTED; c.textAlign = "left"; c.font = "400 28px " + FONT; c.fillText("เนื้อหาเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน", 60, H - 60);
       return cv;
     }
