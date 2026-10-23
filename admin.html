@@ -145,7 +145,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <label for="aSummary">สรุปสั้นๆ (ขึ้นในการ์ดหน้ารายการ)</label><textarea id="aSummary" maxlength="500" style="min-height:70px"></textarea>
       <label for="aBody">เนื้อหา (แปะจากเฟสได้ ขึ้นบรรทัดใหม่ได้)</label><textarea id="aBody" class="big" maxlength="20000"></textarea>
       <div class="grid2">
-        <div><label for="aTickers">ชื่อหุ้นที่เกี่ยวข้อง</label><input id="aTickers" type="text" placeholder="NVDA, AMD" autocomplete="off"></div>
+        <div><label for="aTickers">ชื่อหุ้นที่เกี่ยวข้อง</label><input id="aTickers" type="text" placeholder="NVDA, AMD" autocomplete="off"><small id="aTkHint" class="hint" hidden></small></div>
         <div><label for="aUrl">ลิงก์ต้นฉบับ (ไม่ใส่ก็ได้)</label><input id="aUrl" type="url" placeholder="https://" autocomplete="off"></div>
       </div>
       <label>รูปประกอบ (สูงสุด 10 รูป ย่อให้อัตโนมัติ)</label>
@@ -390,7 +390,7 @@ function guessTickers(text, fallback) {
   const rs = [new RegExp("\\$" + T + "(?![A-Za-z])", "g"), new RegExp("\\b(?:NYSE|NASDAQ|NYSEARCA|AMEX|NYSEAMERICAN|OTC)\\s*[:：]\\s*" + T + "(?![A-Za-z])", "g"), new RegExp("\\(" + T + "\\)", "g")];
   rs.forEach(r => { while ((m = r.exec(t))) push(m.index, m[1]); });
   found.sort((a, b) => a[0] - b[0]);
-  let out = found.map(x => x[1]).slice(0, 5);
+  let out = found.map(x => x[1]).slice(0, 10);   // 10 = เพดานเดียวกับ parseTk และ firestore.rules
   if (!out.length && fallback) {
     const r = /(?<![A-Za-z0-9$.\/\-])([A-Z]{2,5})(?![A-Za-z0-9])/g;
     while ((m = r.exec(t))) { if (!TK_STOP.has(m[1])) { out = [m[1]]; break; } }
@@ -577,8 +577,17 @@ document.addEventListener("paste", e => {
 $("aDate").value = new Date().toISOString().slice(0, 10);
 
 // ---------- บทความ ----------
+let autoATk = "";   // ชื่อหุ้นที่ระบบเติมให้ล่าสุดในฟอร์มบทความ (ทับใหม่ได้เฉพาะเมื่อช่องยังเป็นค่านี้ ไม่ทับที่พิมพ์เอง)
+function fillArticleTickers() {
+  const el = $("aTickers"), hint = $("aTkHint"), g = guessTickers([$("aTitle").value, $("aSummary").value, $("aBody").value].join("\n"), false).join(", ");
+  if (g && (!el.value.trim() || el.value === autoATk)) { el.value = g; autoATk = g; hint.textContent = "เติมให้จากข้อความ ตรวจก่อนโพสต์ แก้ได้"; hint.hidden = false; }
+  else if (!g && autoATk && el.value === autoATk) { el.value = ""; autoATk = ""; hint.hidden = true; }
+}
+let aTkT = 0;
+["aTitle", "aSummary", "aBody"].forEach(i => $(i).addEventListener("input", () => { clearTimeout(aTkT); aTkT = setTimeout(fillArticleTickers, 350); }));
+$("aTickers").addEventListener("input", () => { if ($("aTickers").value !== autoATk) { autoATk = ""; $("aTkHint").hidden = true; } });
 function resetArticleForm() {
-  ["aTitle", "aSummary", "aBody", "aTickers", "aUrl"].forEach(i => $(i).value = ""); imgs.length = 0; drawPrev();
+  ["aTitle", "aSummary", "aBody", "aTickers", "aUrl"].forEach(i => $(i).value = ""); imgs.length = 0; drawPrev(); autoATk = ""; $("aTkHint").hidden = true;
   editing = null; $("aEditBar").hidden = true; $("aPost").textContent = "โพสต์บทความ";
 }
 $("aCancel").onclick = () => { resetArticleForm(); note("aMsg", ""); };
@@ -619,7 +628,7 @@ $("aList").addEventListener("click", async e => {
   }
   editing = { id, createdAt: a.createdAt, imgCreatedAt: imgCreated };
   $("aType").value = a.type; $("aDate").value = a.date; $("aTitle").value = a.title; $("aSummary").value = a.summary || ""; $("aBody").value = a.body || "";
-  $("aTickers").value = (a.tickers || []).join(", "); $("aUrl").value = a.url || "";
+  $("aTickers").value = (a.tickers || []).join(", "); $("aUrl").value = a.url || ""; autoATk = ""; $("aTkHint").hidden = true;
   imgs.length = 0; old.forEach(s => imgs.push(s)); drawPrev();
   $("aEditTitle").textContent = a.title; $("aEditBar").hidden = false; $("aPost").textContent = "บันทึกการแก้ไข";
   $("aTitle").scrollIntoView({ behavior: "smooth", block: "center" });
