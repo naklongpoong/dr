@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="site.js?v=202610222137"></script>
-<script src="gate.js?v=202610222137"></script>
+<script src="site.js?v=202610231937"></script>
+<script src="gate.js?v=202610231937"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -543,6 +543,8 @@ const ECON = [
 
 // ปฏิทินวันประกาศ ใส่วันที่เองจากตารางทางการ ไม่อัปเดตเอง ต้องมาไล่ตรวจใหม่ตามรอบ (ถ้าตรวจไม่ได้ ห้ามเดาวันใส่)
 // [วัน(ตามเวลา ET), เวลา ET, id การ์ดด้านล่าง (ไม่มีการ์ดใส่ null), ชื่อ, true = ยังไม่มีวันทางการ คำนวณตามกฎ]
+// มิชิแกน: ตรวจ 23 ต.ค. 2026 กับเอกสาร "Release Dates for 2026" ของมหาวิทยาลัย (เบื้องต้น 6 พ.ย. สุดท้าย 20 พ.ย. ธ.ค. เบื้องต้น 4 ธ.ค. สุดท้าย 18 ธ.ค.) เอกสารไม่ระบุเวลา ใช้ 10:00 ET ตามหน้าแรกของเขาที่ระบุเวลานี้กับรอบ ต.ค.
+// Conference Board พ.ย.: หน้าทางการไม่ระบุวัน (กฎ "อังคารสุดท้ายของเดือน" = 24 พ.ย. ซึ่งเกินช่วงที่ใส่ไว้) ยังไม่ใส่ ต้องตรวจก่อนเติม
 // ตรวจเมื่อ 22 ต.ค. 2026: BLS (หน้า schedule ต.ค.+พ.ย.) BEA Census ISM Fed G.17 และตาราง FOMC ของ Fed DST สหรัฐสิ้นสุด 1 พ.ย. (หลังจากนั้น ET = UTC-5)
 const CAL = { checked: "22 ต.ค. 2026", through: "2026-11-21", ev: [
   ["2026-10-22", "08:30", "claims", "ผู้ขอรับสวัสดิการว่างงานรายสัปดาห์"],
@@ -559,6 +561,7 @@ const CAL = { checked: "22 ต.ค. 2026", through: "2026-11-21", ev: [
   ["2026-11-04", "10:00", "pmi", "ISM ภาคบริการ"],
   ["2026-11-05", "08:30", "claims", "ผู้ขอรับสวัสดิการว่างงานรายสัปดาห์"],
   ["2026-11-06", "08:30", "jobs", "รายงานการจ้างงาน (ต.ค.)"],
+  ["2026-11-06", "10:00", "umich", "ความเชื่อมั่นผู้บริโภคมิชิแกน (ฉบับเบื้องต้น)"],
   ["2026-11-10", "08:30", "cpi", "CPI เงินเฟ้อผู้บริโภค (ต.ค.)"],
   ["2026-11-12", "08:30", "claims", "ผู้ขอรับสวัสดิการว่างงานรายสัปดาห์"],
   ["2026-11-13", "08:30", "ppi", "PPI เงินเฟ้อผู้ผลิต (ต.ค.)"],
@@ -566,7 +569,8 @@ const CAL = { checked: "22 ต.ค. 2026", through: "2026-11-21", ev: [
   ["2026-11-17", "09:15", "indpro", "การผลิตภาคอุตสาหกรรม (ต.ค.)"],
   ["2026-11-18", "08:30", "housing", "การเริ่มสร้างบ้านและใบอนุญาตก่อสร้าง (ต.ค.)"],
   ["2026-11-18", "14:00", "minutes", "บันทึกการประชุม FOMC รอบ 27–28 ต.ค.", true],
-  ["2026-11-19", "08:30", "claims", "ผู้ขอรับสวัสดิการว่างงานรายสัปดาห์"]
+  ["2026-11-19", "08:30", "claims", "ผู้ขอรับสวัสดิการว่างงานรายสัปดาห์"],
+  ["2026-11-20", "10:00", "umich", "ความเชื่อมั่นผู้บริโภคมิชิแกน (ฉบับสุดท้าย)"]
 ] };
 
 const preview = /[?&]preview=1/.test(location.search), live = !!(window.SITE && SITE.econLive) || preview;
@@ -603,8 +607,10 @@ if (live) {
       </div></details>`;
   }
   const MON = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-  function calendar() {   // วัน/เวลาไทยคำนวณจากเวลา ET (ก่อน 1 พ.ย. = UTC-4, หลังจากนั้น UTC-5) ตัดรายการที่ผ่านไปแล้วออกเอง
-    const etInst = (d, t) => { const [y, m, dd] = d.split("-").map(Number), [h, mi] = t.split(":").map(Number); return Date.UTC(y, m - 1, dd, h + (d < "2026-11-01" ? 4 : 5), mi); };
+  function calendar() {   // วัน/เวลาไทยคำนวณจากเวลา ET (ช่วง DST สหรัฐ = UTC-4 นอกช่วง = UTC-5 คำนวณจากกฎ ไม่ได้ฮาร์ดโค้ด) ตัดรายการที่ผ่านไปแล้วออกเอง
+    const sunNth = (y, mo, n) => 1 + (7 - new Date(Date.UTC(y, mo, 1)).getUTCDay()) % 7 + (n - 1) * 7;   // วันที่ของอาทิตย์ที่ n ในเดือน mo (0 = ม.ค.)
+    const usDst = (y, m, dd) => { const t = Date.UTC(y, m - 1, dd); return t >= Date.UTC(y, 2, sunNth(y, 2, 2)) && t < Date.UTC(y, 10, sunNth(y, 10, 1)); };   // DST สหรัฐ: อาทิตย์ที่ 2 ของ มี.ค. ถึงก่อนอาทิตย์แรกของ พ.ย. (ทุกรายการออกหลังตี 2 จึงเทียบระดับวันได้)
+    const etInst = (d, t) => { const [y, m, dd] = d.split("-").map(Number), [h, mi] = t.split(":").map(Number); return Date.UTC(y, m - 1, dd, h + (usDst(y, m, dd) ? 4 : 5), mi); };
     const bkk = o => new Intl.DateTimeFormat("th-TH", Object.assign({ timeZone: "Asia/Bangkok" }, o));
     const keyF = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }), dayF = bkk({ weekday: "short", day: "numeric", month: "short" }), timeF = bkk({ hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
     const now = Date.now(), cover = etInst(CAL.through, "23:59"), end = Math.min(now + 30 * 864e5, cover);
