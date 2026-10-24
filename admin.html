@@ -285,8 +285,25 @@ function fail(id, e) { note(id, e && e.code === "permission-denied" ? "บัญ
 // ---------- ล็อกอิน ----------
 async function init() {
   N = await NLP.load();
+  // จดเหตุที่หลุดไว้ในเครื่อง (ล็อกอินอยู่แล้วจู่ๆ ไม่เจอบัญชี) โชว์ที่กล่องล็อกอิน ไว้ไล่สาเหตุ ไม่ได้เปลี่ยนวิธีล็อกอิน
+  const DROP = "nlp_admin_drop", tsF = t => new Date(t).toLocaleString("th-TH", { dateStyle: "short", timeStyle: "medium" }), mins = ms => Math.round(ms / 60000);
+  let lastErr = "", loginAt = 0, refreshAt = 0, was = false;
+  const keepErr = e => { const c = e && e.code; if (typeof c === "string" && c.indexOf("auth/") === 0) lastErr = c; };
+  window.addEventListener("unhandledrejection", ev => keepErr(ev.reason));
+  window.addEventListener("error", ev => keepErr(ev.error));
+  N.A.onIdTokenChanged(N.auth, u => { if (u && !u.isAnonymous) refreshAt = Date.now(); });
+  setInterval(async () => { const u = N.auth.currentUser; if (u && !u.isAnonymous) { try { await u.getIdToken(); } catch (e) { keepErr(e); } } }, 600000);   // เช็กโทเคนทุก 10 นาที ถ้าต่ออายุไม่ได้จะจดรหัสผิดพลาดไว้
+  const dropText = d => `หลุดตอน ${tsF(d.at)} (ล็อกอินมาได้ ${d.sinceLogin} นาที โทเคนต่ออายุล่าสุดก่อนหลุด ${d.sinceRefresh} นาที) ` + (d.err ? "รหัสผิดพลาด: " + d.err : "ไม่พบรหัสผิดพลาด");
   N.A.onAuthStateChanged(N.auth, u => {
     const ok = u && u.provider !== "anonymous" && !u.isAnonymous;
+    if (ok && !was) { was = true; loginAt = loginAt || Date.now(); refreshAt = refreshAt || Date.now(); note("loginMsg", ""); }
+    else if (!ok && was) {
+      was = false; const now = Date.now(), d = { at: now, sinceLogin: mins(now - loginAt), sinceRefresh: mins(now - refreshAt), err: lastErr };
+      try { localStorage.setItem(DROP, JSON.stringify(d)); } catch (e) {}
+      note("loginMsg", dropText(d)); loginAt = 0; refreshAt = 0;
+    } else if (!ok) {
+      try { const d = JSON.parse(localStorage.getItem(DROP) || "null"); if (d && d.at) note("loginMsg", "หลุดครั้งล่าสุด: " + dropText(d)); } catch (e) {}
+    }
     $("loginBox").hidden = !!ok; $("panel").hidden = !ok;
     try { if (ok) localStorage.setItem("nlp_admin", "1"); else localStorage.removeItem("nlp_admin"); } catch (e) {}   // เครื่องนี้ไม่นับยอดดู
     if (ok) { $("who").textContent = u.email || u.displayName || ""; if (!loaded.news) { loaded.news = true; loadNews(); } }
