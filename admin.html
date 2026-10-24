@@ -306,14 +306,15 @@ async function init() {
   window.addEventListener("error", ev => keepErr(ev.error));
   N.A.onIdTokenChanged(N.auth, u => { if (u && !u.isAnonymous) refreshAt = Date.now(); });
   setInterval(async () => { const u = N.auth.currentUser; if (u && !u.isAnonymous) { try { await u.getIdToken(); } catch (e) { keepErr(e); } } }, 600000);   // เช็กโทเคนทุก 10 นาที ถ้าต่ออายุไม่ได้จะจดรหัสผิดพลาดไว้
-  const dropText = d => `หลุดตอน ${tsF(d.at)} (ล็อกอินมาได้ ${d.sinceLogin} นาที โทเคนต่ออายุล่าสุดก่อนหลุด ${d.sinceRefresh} นาที) ` + (d.err ? "รหัสผิดพลาด: " + d.err : "ไม่พบรหัสผิดพลาด") + (d.state ? " · บัญชีที่เหลือ: " + d.state : "") + (d.tab ? " · แท็บ: " + d.tab : "");
+  const dropText = d => `หลุดตอน ${tsF(d.at)} (ล็อกอินมาได้ ${d.sinceLogin} นาที โทเคนต่ออายุล่าสุดก่อนหลุด ${d.sinceRefresh} นาที) ` + (d.err ? "รหัสผิดพลาด: " + d.err : "ไม่พบรหัสผิดพลาด") + (d.state ? " · บัญชีที่เหลือ: " + d.state : "") + (d.tab ? " · แท็บ: " + d.tab : "") + (d.ls ? " · ข้อมูลเว็บในเครื่อง: " + d.ls : "") + (d.idb ? " · ฐานล็อกอิน: " + d.idb : "");
   N.A.onAuthStateChanged(N.auth, u => {
     const ok = u && u.provider !== "anonymous" && !u.isAnonymous;
-    if (ok && !was) { was = true; loginAt = loginAt || Date.now(); refreshAt = refreshAt || Date.now(); note("loginMsg", ""); }
+    if (ok && !was) { was = true; loginAt = loginAt || Date.now(); refreshAt = refreshAt || Date.now(); note("loginMsg", ""); try { localStorage.setItem("nlp_canary", String(Date.now())); } catch (e) {} }
     else if (!ok && was) {
-      was = false; const now = Date.now(), d = { at: now, sinceLogin: mins(now - loginAt), sinceRefresh: mins(now - refreshAt), err: lastErr, state: u ? (u.isAnonymous ? "Anonymous (มีแท็บอื่นของเว็บนี้ล็อกอินแบบไม่ระบุตัวทับ)" : "บัญชีอื่น " + (u.email || "")) : "ไม่มีบัญชีเลย (ข้อมูลล็อกอินในเครื่องถูกลบหรือสั่งออกจากระบบ)", tab: document.visibilityState + (navigator.onLine ? "" : " · ออฟไลน์") };
+      was = false; const now = Date.now(), d = { at: now, sinceLogin: mins(now - loginAt), sinceRefresh: mins(now - refreshAt), err: lastErr, state: u ? (u.isAnonymous ? "Anonymous (มีแท็บอื่นของเว็บนี้ล็อกอินแบบไม่ระบุตัวทับ)" : "บัญชีอื่น " + (u.email || "")) : "ไม่มีบัญชีเลย (ข้อมูลล็อกอินในเครื่องถูกลบหรือสั่งออกจากระบบ)", tab: document.visibilityState + (navigator.onLine ? "" : " · ออฟไลน์"), ls: (() => { try { return localStorage.getItem("nlp_canary") ? "ยังอยู่" : "ถูกลบ (ของที่จดไว้ตอนล็อกอินหาย)"; } catch (e) { return "อ่านไม่ได้"; } })() };
       try { localStorage.setItem(DROP, JSON.stringify(d)); } catch (e) {}
       note("loginMsg", dropText(d)); loginAt = 0; refreshAt = 0;
+      try { indexedDB.databases().then(l => { d.idb = l.some(x => x.name === "firebaseLocalStorageDb") ? "ยังอยู่" : "ถูกลบทั้งก้อน"; try { localStorage.setItem(DROP, JSON.stringify(d)); } catch (e) {} if (!was) note("loginMsg", dropText(d)); }, () => {}); } catch (e) {}
     } else if (!ok) {
       try { const d = JSON.parse(localStorage.getItem(DROP) || "null"); if (d && d.at) note("loginMsg", "หลุดครั้งล่าสุด: " + dropText(d)); } catch (e) {}
     }
