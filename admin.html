@@ -284,10 +284,23 @@ function fail(id, e) { note(id, e && e.code === "permission-denied" ? "บัญ
 
 // ---------- ล็อกอิน ----------
 async function init() {
+  let lastErr = "";
+  // จดคำตอบของ Google ตอนต่ออายุล็อกอิน (ถ้าถูกปฏิเสธ จะรู้ว่าเพราะอะไร เช่น INVALID_REFRESH_TOKEN) ไม่แตะข้อมูลที่ส่งออก แค่อ่านสถานะคำตอบ
+  const origFetch = window.fetch;
+  if (origFetch) window.fetch = function (input, init) {
+    const p = origFetch.apply(this, arguments);
+    try {
+      const url = String(input && input.url || input);
+      if (/securetoken\.googleapis\.com|identitytoolkit\.googleapis\.com/.test(url)) {
+        p.then(r => { if (r.ok) { if (/securetoken/.test(url)) lastErr = ""; return; } r.clone().json().then(j => { lastErr = "HTTP " + r.status + " " + ((j && j.error && (j.error.message || j.error)) || ""); }, () => { lastErr = "HTTP " + r.status; }); }, e => { lastErr = "เน็ตขัดข้องตอนต่ออายุ: " + ((e && e.message) || e); });
+      }
+    } catch (e) {}
+    return p;
+  };
   N = await NLP.load();
   // จดเหตุที่หลุดไว้ในเครื่อง (ล็อกอินอยู่แล้วจู่ๆ ไม่เจอบัญชี) โชว์ที่กล่องล็อกอิน ไว้ไล่สาเหตุ ไม่ได้เปลี่ยนวิธีล็อกอิน
   const DROP = "nlp_admin_drop", tsF = t => new Date(t).toLocaleString("th-TH", { dateStyle: "short", timeStyle: "medium" }), mins = ms => Math.round(ms / 60000);
-  let lastErr = "", loginAt = 0, refreshAt = 0, was = false;
+  let loginAt = 0, refreshAt = 0, was = false;
   const keepErr = e => { const c = e && e.code; if (typeof c === "string" && c.indexOf("auth/") === 0) lastErr = c; };
   window.addEventListener("unhandledrejection", ev => keepErr(ev.reason));
   window.addEventListener("error", ev => keepErr(ev.error));
