@@ -174,12 +174,12 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <button class="btn alt" id="dLoad" type="button">โหลดข้อมูลปัจจุบัน</button><button class="btn alt" id="dCheck" type="button">ตรวจสอบ</button><button class="btn" id="dSave" type="button">บันทึก</button>
     </section>
 
-    <!-- หุ้นสแกน (ชุด 1 = content/picks, ชุด 2 = content/adminPicks) -->
+    <!-- หุ้นสแกน (ชุด 1 = content/picks, ชุด 2 = content/adminPicks, ชุด 3 = content/picks3) -->
     <section class="card" id="p-picks" hidden>
       <h2>หุ้นสแกน</h2>
-      <div class="seg" role="group" aria-label="เลือกชุด"><button type="button" id="pKindA" aria-pressed="true">หุ้นสแกน 1</button><button type="button" id="pKindB" aria-pressed="false">หุ้นสแกน 2</button></div>
+      <div class="seg" role="group" aria-label="เลือกชุด"><button type="button" id="pKindA" aria-pressed="true">หุ้นสแกน 1</button><button type="button" id="pKindB" aria-pressed="false">หุ้นสแกน 2</button><button type="button" id="pKindC" aria-pressed="false">หุ้นสแกน 3</button></div>
       <p class="help" id="pHelp">ขึ้นบนหน้าข่าวเป็นแถบชื่อหุ้น กดชื่อหุ้นจะขึ้นเมนูให้เลือก (DR / บทความ / ข่าว / งบ ตัวที่ไม่มี DR เมนู DR จะไม่ขึ้น) กด “ข่าว” เพื่อกรองข่าว กด ↗ เพื่อไปกราฟบน Finviz (Finviz มีเฉพาะหุ้นสหรัฐฯ ใช้สัญลักษณ์ตลาดสหรัฐฯ เช่น NVDA, BRK-B)</p>
-      <label for="pTitle">ชื่อส่วน (ตั้งเองได้ ขึ้นเป็นหัวข้อ/แท็บบนหน้าข่าวและป้ายในหน้าหุ้น ไม่ใส่จะใช้ "หุ้นสแกน 1" / "หุ้นสแกน 2")</label><input id="pTitle" type="text" maxlength="100" placeholder="หุ้นสแกน 1" autocomplete="off">
+      <label for="pTitle">ชื่อส่วน (ตั้งเองได้ ขึ้นเป็นหัวข้อ/แท็บบนหน้าข่าวและป้ายในหน้าหุ้น ไม่ใส่จะใช้ "หุ้นสแกน 1" / "หุ้นสแกน 2" / "หุ้นสแกน 3")</label><input id="pTitle" type="text" maxlength="100" placeholder="หุ้นสแกน 1" autocomplete="off">
       <label for="pNote" id="pNoteLbl">ที่มา / วิธีกรอง (เอามาจากไหน กรองยังไง ไม่ใส่ก็ได้)</label>
       <textarea id="pNote" maxlength="800" style="min-height:80px" placeholder="เช่น คัดจากสกรีนเนอร์ Finviz ตามเงื่อนไข ... / มาจากบทความ ..."></textarea>
       <label for="pTickers">ชื่อหุ้น วางทีเดียวได้ คั่นด้วยเว้นวรรค คอมมา หรือขึ้นบรรทัดใหม่ (สูงสุด 100 ตัว)</label>
@@ -864,21 +864,23 @@ async function loadWk() {
 }
 $("wLoad").onclick = loadWk;
 
-// ---------- หุ้นสแกน (ชุด 1 = content/picks, ชุด 2 = content/adminPicks) ----------
+// ---------- หุ้นสแกน (ชุด 1 = content/picks, ชุด 2 = content/adminPicks, ชุด 3 = content/picks3) ----------
 const PICKS_MAX = 100;
 let pDoc = "picks";
 const P_KIND = {
   picks: { title: "หุ้นสแกน 1", noteLbl: "ที่มา / วิธีกรอง (เอามาจากไหน กรองยังไง ไม่ใส่ก็ได้)", notePh: "เช่น คัดจากสกรีนเนอร์ Finviz ตามเงื่อนไข ... / มาจากบทความ ..." },
-  adminPicks: { title: "หุ้นสแกน 2", noteLbl: "หมายเหตุ (ไม่ใส่ก็ได้)", notePh: "เช่น เงื่อนไขที่ใช้สแกน ..." }
+  adminPicks: { title: "หุ้นสแกน 2", noteLbl: "หมายเหตุ (ไม่ใส่ก็ได้)", notePh: "เช่น เงื่อนไขที่ใช้สแกน ..." },
+  picks3: { title: "หุ้นสแกน 3", noteLbl: "หมายเหตุ (ไม่ใส่ก็ได้)", notePh: "เช่น เงื่อนไขที่ใช้สแกน ..." }
 };
 function setPKind(k) {
-  pDoc = k; $("pKindA").setAttribute("aria-pressed", k === "picks"); $("pKindB").setAttribute("aria-pressed", k === "adminPicks");
+  pDoc = k; $("pKindA").setAttribute("aria-pressed", k === "picks"); $("pKindB").setAttribute("aria-pressed", k === "adminPicks"); $("pKindC").setAttribute("aria-pressed", k === "picks3");
   $("pTitle").placeholder = P_KIND[k].title; $("pNoteLbl").textContent = P_KIND[k].noteLbl; $("pNote").placeholder = P_KIND[k].notePh;
   ["pTitle", "pNote", "pTickers"].forEach(i => $(i).value = ""); $("pSum").hidden = true; note("pMsg", "");
   loadPicks(); if ($("pHistBox").open) loadHist();
 }
 $("pKindA").onclick = () => { if (pDoc !== "picks") setPKind("picks"); };
 $("pKindB").onclick = () => { if (pDoc !== "adminPicks") setPKind("adminPicks"); };
+$("pKindC").onclick = () => { if (pDoc !== "picks3") setPKind("picks3"); };
 function parsePicks(text) {
   const out = [], bad = [], dup = [];
   String(text).split(/[\s,;]+/).forEach(w => {

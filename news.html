@@ -266,7 +266,7 @@ button.esym:focus-visible { outline: 2px solid var(--accent); outline-offset: 2p
     <div class="active" id="active" hidden></div>
   </div>
 
-  <!-- หุ้นสแกน 1 + 2 รวมเป็นส่วนเดียว สลับแท็บเอา (ถ้ามีกล่องเดียวก็ไม่ขึ้นแท็บ) -->
+  <!-- หุ้นสแกน 1 + 2 + 3 รวมเป็นส่วนเดียว สลับแท็บเอา (ถ้ามีกล่องเดียวก็ไม่ขึ้นแท็บ) -->
   <section class="sec" id="secP" hidden>
     <div class="sec-h"><h2 id="pTitle">หุ้นสแกน</h2><small id="pUpd"></small></div>
     <div class="tabs ptabs" id="pTabs" role="group" aria-label="เลือกชุดหุ้น" hidden></div>
@@ -315,7 +315,7 @@ const fmt = ts => { const d = ts && ts.toDate ? ts.toDate() : null; return d ? d
 const TK_OK = /^[A-Z0-9.\-]{1,12}$/;
 const IMG_OK = s => typeof s === "string" && /^data:image\/(jpeg|png|webp);base64,/.test(s);
 const TABS = PAGE === "earnings" ? ["preview", "result"] : [];
-const data = { news: [], earnings: [], picks: null, apicks: null };
+const data = { news: [], earnings: [], picks: null, apicks: null, p3: null };
 const state = { tab: "all", ticker: "" };
 const more = { news: { done: false, busy: false, err: false, cur: null, loaded: false }, earnings: { done: false, busy: false, err: false, cur: null, loaded: false } };
 const fell = { news: false, earnings: false };   // true = ไม่มีโพสต์ใน 24 ชม. เลยแสดงรายการล่าสุดแทน
@@ -383,12 +383,13 @@ async function firstLoad(N) {
     return { rows: docRows(s), fell: fb };
   };
   const isN = PAGE === "news";
-  const [x, pk, ap] = await Promise.all([
+  const [x, pk, ap, p3] = await Promise.all([
     col(PAGE),
     isN ? F.getDoc(F.doc(N.db, "content", "picks")) : null,
-    isN ? F.getDoc(F.doc(N.db, "content", "adminPicks")).catch(() => null) : null   // ถ้ายังไม่ได้เพิ่ม rules ให้กล่องแอดมินแนะนำ ข้ามไปเฉยๆ ไม่ให้หน้าล็อก
+    isN ? F.getDoc(F.doc(N.db, "content", "adminPicks")).catch(() => null) : null,   // ถ้ายังไม่ได้เพิ่ม rules ให้กล่องแอดมินแนะนำ ข้ามไปเฉยๆ ไม่ให้หน้าล็อก
+    isN ? F.getDoc(F.doc(N.db, "content", "picks3")).catch(() => null) : null   // หุ้นสแกน 3 ถ้ายังไม่ได้วางกฎใหม่ ข้ามไปเฉยๆ
   ]);
-  return { v: 3, [PAGE]: x, picks: pk && pk.exists() ? pk.data() : null, apicks: ap && ap.exists() ? ap.data() : null };
+  return { v: 4, [PAGE]: x, picks: pk && pk.exists() ? pk.data() : null, apicks: ap && ap.exists() ? ap.data() : null, p3: p3 && p3.exists() ? p3.data() : null };
 }
 function applySnap(s) {
   COLS.forEach(c => {
@@ -399,6 +400,7 @@ function applySnap(s) {
   });
   data.picks = s.picks ? readPicks(s.picks) : null;
   data.apicks = s.apicks ? readPicks(s.apicks) : null;
+  data.p3 = s.p3 ? readPicks(s.p3) : null;
 }
 async function loadMore(col) {
   const m = more[col]; if (m.busy || m.done) return;
@@ -529,7 +531,7 @@ function renderTickerBar(list) {
 }
 document.addEventListener("input", e => { if (e.target.id === "tbSearch") { tbQ = e.target.value; tbFill(); } });
 
-// ---- กล่องหุ้นสแกน 1 / 2: กดชื่อหุ้น -> ไปหน้า DR (ถ้าไม่มี DR กรองข่าวในหน้านี้แทน) ----
+// ---- กล่องหุ้นสแกน 1 / 2 / 3: กดชื่อหุ้น -> ไปหน้า DR (ถ้าไม่มี DR กรองข่าวในหน้านี้แทน) ----
 // ชิปหุ้นเหลือปุ่มเดียว กดแล้วขึ้นเมนู (dashboard / DR / กราฟ Finviz / บทความ / ข่าว / งบ) ★ = ตัวที่อยู่ในอีกชุดด้วย
 const pchip = (t, dr, star) => {
   const has = !dr || dr.has(t) || !!(window.TK_DR && TK_DR[t]);
@@ -539,8 +541,8 @@ window.SITE_MENU = { here: PAGE, onHere: t => { setTicker(t); const el = PAGE ==
 
 const P_COLLAPSE = 30;   // รายการยาวกว่านี้พับไว้ก่อน กด "ดูทั้งหมด" ค่อยขยาย
 let pTab = "p", pOpen = false;
-function renderPicks(pk, ap) {
-  const boxes = [["p", pk, "หุ้นสแกน 1"], ["a", ap, "หุ้นสแกน 2"]].filter(x => x[1] && x[1].list.length);
+function renderPicks(pk, ap, p3) {
+  const boxes = [["p", pk, "หุ้นสแกน 1"], ["a", ap, "หุ้นสแกน 2"], ["c", p3, "หุ้นสแกน 3"]].filter(x => x[1] && x[1].list.length);
   $("secP").hidden = !boxes.length; if (!boxes.length) return;
   if (!boxes.some(x => x[0] === pTab)) pTab = boxes[0][0];
   const two = boxes.length > 1, cur = boxes.find(x => x[0] === pTab), k = cur[0], b = cur[1], m = b.meta;
@@ -551,7 +553,7 @@ function renderPicks(pk, ap) {
   if (m.note) n.innerHTML = "<b>" + (k === "p" ? "ที่มา / วิธีกรอง:" : "หมายเหตุ:") + "</b> " + esc(m.note);
   const d = m.updatedAt && m.updatedAt.toDate ? m.updatedAt.toDate() : null;
   $("pUpd").innerHTML = d ? "อัปเดต " + esc(d.toLocaleDateString("th-TH", { dateStyle: "medium" })) + newPill(m.updatedAt) : "";
-  const other = new Set(two ? (k === "p" ? ap : pk).list : []);
+  const other = new Set(two ? boxes.filter(x => x[0] !== k).flatMap(x => x[1].list) : []);
   const cut = !pOpen && b.list.length > P_COLLAPSE;
   $("listP").innerHTML = (cut ? b.list.slice(0, P_COLLAPSE) : b.list).map(t => pchip(t, b.dr, other.has(t))).join("");
   $("pMore").hidden = b.list.length <= P_COLLAPSE;
@@ -575,9 +577,9 @@ function render() {
   $("active").hidden = !state.ticker;
   $("active").innerHTML = state.ticker ? `<span>กรองหุ้น <b>${esc(state.ticker)}</b></span><a href="stock.html?t=${encodeURIComponent(state.ticker)}" target="_blank" rel="noopener"><b>เปิด dashboard ↗</b></a><a href="dr.html?q=${encodeURIComponent(state.ticker)}">ดู DR ของ ${esc(state.ticker)} ›</a><a href="articles.html?ticker=${encodeURIComponent(state.ticker)}">อ่านบทความ ›</a>${PAGE === "news" ? `<a href="earnings.html?ticker=${encodeURIComponent(state.ticker)}">ดูงบของ ${esc(state.ticker)} ›</a>` : `<a href="news.html?ticker=${encodeURIComponent(state.ticker)}">ดูข่าวของ ${esc(state.ticker)} ›</a>`}<button class="linkbtn" type="button" data-tk="">ล้างตัวกรอง</button>` : "";
 
-  // หุ้นสแกน 1 + 2
-  const pk = data.picks, ap = data.apicks;
-  if (PAGE === "news") renderPicks(pk, ap); else $("secP").hidden = true;
+  // หุ้นสแกน 1 + 2 + 3
+  const pk = data.picks, ap = data.apicks, p3 = data.p3;
+  if (PAGE === "news") renderPicks(pk, ap, p3); else $("secP").hidden = true;
 
   if (PAGE === "earnings") { earnSection("preview", V, "พรีวิวงบ"); earnSection("result", R, "งบหุ้นรายตัว"); }
   const showN = PAGE === "news" && !!any;
@@ -598,7 +600,7 @@ function render() {
     hint("hintN", "news", "ข่าว");
     moreBtn("moreN", "news", true);
   }
-  const nothing = !any && !(pk && pk.list.length) && !(ap && ap.list.length);
+  const nothing = !any && !(pk && pk.list.length) && !(ap && ap.list.length) && !(p3 && p3.list.length);
   $("off").hidden = !nothing; if (nothing) $("off").textContent = PAGE === "news" ? "ยังไม่มีข่าว" : "ยังไม่มีพรีวิวงบหรืองบหุ้นรายตัว";
   checkClamp(); hydrateImgs(); observeViews();
   const sp = new URLSearchParams();
@@ -613,8 +615,8 @@ document.addEventListener("click", e => {
   if (e.target.closest("#lb")) { $("lb").hidden = true; return; }
   if (e.target.closest("#tbMore")) { tbOpen = !tbOpen; renderTickerBar(tbList); if (tbOpen) $("tbSearch").focus(); return; }
   const mb = e.target.closest("[data-more]"); if (mb) { loadMore(mb.dataset.more); return; }
-  const pt = e.target.closest("[data-ptab]"); if (pt) { pTab = pt.dataset.ptab; pOpen = false; renderPicks(data.picks, data.apicks); return; }
-  if (e.target.closest("#pMore")) { pOpen = !pOpen; renderPicks(data.picks, data.apicks); return; }
+  const pt = e.target.closest("[data-ptab]"); if (pt) { pTab = pt.dataset.ptab; pOpen = false; renderPicks(data.picks, data.apicks, data.p3); return; }
+  if (e.target.closest("#pMore")) { pOpen = !pOpen; renderPicks(data.picks, data.apicks, data.p3); return; }
   const tab = e.target.closest("[data-tab]"); if (tab) { state.tab = tab.dataset.tab; render(); return; }
   const tk = e.target.closest("[data-tk]");
   if (tk) {
@@ -638,7 +640,7 @@ async function boot() {
   readParams();
   try {
     let snap = window.cacheGet ? cacheGet(PAGE, CACHE_MIN) : null;
-    if (!snap || snap.v !== 3) { snap = await firstLoad(N); if (window.cachePut) cachePut(PAGE, snap); }
+    if (!snap || snap.v !== 4) { snap = await firstLoad(N); if (window.cachePut) cachePut(PAGE, snap); }
     applySnap(snap);
   } catch (err) {
     if (err && err.code === "permission-denied") return NLP.relock();

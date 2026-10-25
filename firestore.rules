@@ -97,17 +97,17 @@ service cloud.firestore {
     match /content/{docId} {
       allow get: if isMember();
       allow create, update: if isAdmin()
-        && ((docId == 'dr' && drValid()) || (docId in ['picks', 'adminPicks'] && picksValid()) || (docId == 'popup' && popupValid()) || (docId == 'popupWeekly' && popupWeeklyValid()) || (docId == 'fedwatch' && fedwatchValid()));
+        && ((docId == 'dr' && drValid()) || (docId in ['picks', 'adminPicks', 'picks3'] && picksValid()) || (docId == 'popup' && popupValid()) || (docId == 'popupWeekly' && popupWeeklyValid()) || (docId == 'fedwatch' && fedwatchValid()));
       allow delete: if isAdmin();
     }
 
     // ---------- ประวัติหุ้นน่าสนใจ / แอดมินแนะนำ รายสัปดาห์ (เฉพาะผู้ดูแล) ----------
-    // เอกสารละหนึ่งสัปดาห์ต่อกล่อง id = {picks|adminPicks}_{ปี}-W{สัปดาห์} เช่น picks_2026-W42 เซฟซ้ำในสัปดาห์เดียวกันจะเขียนทับ
+    // เอกสารละหนึ่งสัปดาห์ต่อกล่อง id = {picks|adminPicks|picks3}_{ปี}-W{สัปดาห์} เช่น picks_2026-W42 เซฟซ้ำในสัปดาห์เดียวกันจะเขียนทับ
     match /pickHistory/{id} {
       allow read: if isAdmin();
       allow create, update: if isAdmin()
         && request.resource.data.keys().hasOnly(['kind', 'week', 'tickers', 'savedAt'])
-        && request.resource.data.kind in ['picks', 'adminPicks']
+        && request.resource.data.kind in ['picks', 'adminPicks', 'picks3']
         && request.resource.data.week is string && request.resource.data.week.size() == 8
         && id == request.resource.data.kind + '_' + request.resource.data.week
         && request.resource.data.tickers is list && request.resource.data.tickers.size() <= 100
