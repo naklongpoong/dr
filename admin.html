@@ -54,6 +54,9 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
 .btn { font: inherit; font-weight: 600; cursor: pointer; padding: 8px 20px; margin-top: 12px; border: 0; border-radius: 10px; background: var(--gold); color: var(--gold-ink); }
 .btn.alt { background: transparent; color: var(--accent); border: 1px solid var(--line); margin-right: 8px; }
 .btn:disabled { opacity: .6; cursor: default; }
+.postbar { position: sticky; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 14px -18px -18px; padding: 8px 18px 12px; background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -6px 14px rgba(0,0,0,.12); }
+.postbar .btn { margin-top: 4px; }
+.postbar .msg { margin: 4px 0 0; order: 2; flex: 1 1 200px; }
 .btn:focus-visible, .linkbtn:focus-visible, .tab:focus-visible, .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .linkbtn { font: inherit; font-size: 0.88rem; background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-decoration: underline; }
 .msg { margin: 8px 0 0; font-size: 0.9rem; color: var(--err); } .msg.ok { color: var(--ok); }
@@ -127,6 +130,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <h2>แปะข่าว / รายงานงบ</h2>
       <div class="stat warn" id="nEditBar" hidden>กำลังแก้ไข: <b id="nEditTitle"></b> · <button class="linkbtn" id="nCancel" type="button">ยกเลิกการแก้ไข</button></div>
       <div class="seg" role="group" aria-label="ประเภท"><button type="button" id="nTypeNews" aria-pressed="true">ข่าว</button><button type="button" id="nTypePrev" aria-pressed="false">พรีวิวงบ</button><button type="button" id="nTypeRes" aria-pressed="false">งบหุ้นรายตัว</button></div>
+      <div class="postzone">
       <label for="nText">ข้อความ (แปะจากเฟสได้เลย)</label>
       <textarea id="nText" maxlength="20000" style="min-height:220px"></textarea>
       <div class="grid2">
@@ -137,8 +141,8 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <label>รูปประกอบ (ไม่ใส่ก็ได้ สูงสุด 10 รูป ย่อให้อัตโนมัติ)</label>
       <div class="drop" id="nDrop">แปะรูปด้วย Ctrl+V · ลากรูปมาวาง · หรือ <button class="linkbtn" type="button" id="nPick">เลือกไฟล์</button><input id="nFiles" type="file" accept="image/*" multiple hidden></div>
       <div class="prev" id="nPrev"></div>
-      <p class="msg" id="nMsg" role="alert" hidden></p>
-      <button class="btn" id="nPost" type="button">โพสต์</button>
+      <div class="postbar"><p class="msg" id="nMsg" role="alert" hidden></p><button class="btn" id="nPost" type="button">โพสต์</button></div>
+      </div>
       <h3>รายการล่าสุด</h3>
       <div class="items" id="nList"></div>
     </section>
