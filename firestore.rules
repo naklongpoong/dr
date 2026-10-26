@@ -129,7 +129,7 @@ service cloud.firestore {
       let d = request.resource.data;
       return d.text is string && d.text.size() > 0 && d.text.size() <= 20000
         && d.link is string && d.link.size() <= 1000
-        && d.tickers is list && d.tickers.size() <= 10
+        && d.tickers is list && d.tickers.size() <= 20
         && (!('hasImages' in d) || d.hasImages is bool)
         && (!('imgCount' in d) || (d.imgCount is int && d.imgCount <= 10));
     }
@@ -173,7 +173,7 @@ service cloud.firestore {
         && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 200
         && request.resource.data.summary is string && request.resource.data.summary.size() <= 500
         && request.resource.data.body is string && request.resource.data.body.size() <= 20000
-        && request.resource.data.tickers is list && request.resource.data.tickers.size() <= 10
+        && request.resource.data.tickers is list && request.resource.data.tickers.size() <= 20
         && request.resource.data.url is string && request.resource.data.url.size() <= 1000
         && request.resource.data.thumb is string && request.resource.data.thumb.size() <= 80000
         && request.resource.data.hasImages is bool;

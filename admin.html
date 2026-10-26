@@ -39,6 +39,16 @@ textarea, input[type="text"], input[type="url"], input[type="date"], select {
   font: inherit; width: 100%; padding: 9px 12px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; }
 textarea { min-height: 110px; resize: vertical; }
 textarea.big { min-height: 220px; font-size: 0.85rem; }
+/* ช่องชื่อหุ้น (ข่าว/บทความ): ช่องใหญ่ เห็นง่าย + ตัวนับ + ชิปพรีวิวสิ่งที่จะบันทึกจริง */
+textarea.tkin { min-height: 84px; font-size: 1.05rem; font-weight: 600; letter-spacing: .02em; border-width: 2px; }
+.tkmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 6px; }
+.tkcount { font-size: .85rem; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.tkcount.over { background: #fff4d6; color: #7a5200; }
+.tkchips { display: flex; flex-wrap: wrap; gap: 4px; }
+.tkchip { font-size: .85rem; font-weight: 600; padding: 1px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.tkchip.bad { background: #fff4d6; color: #7a5200; text-decoration: line-through; }
+.tkchip.cut { opacity: .5; text-decoration: line-through; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tkcount.over, :root:not([data-theme="light"]) .tkchip.bad { background: #3a3012; color: #ffd873; } }
 textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .btn { font: inherit; font-weight: 600; cursor: pointer; padding: 8px 20px; margin-top: 12px; border: 0; border-radius: 10px; background: var(--gold); color: var(--gold-ink); }
@@ -120,7 +130,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <label for="nText">ข้อความ (แปะจากเฟสได้เลย)</label>
       <textarea id="nText" maxlength="20000" style="min-height:220px"></textarea>
       <div class="grid2">
-        <div><label for="nTickers">ชื่อหุ้น คั่นด้วยคอมมา (พรีวิวงบ/งบหุ้นรายตัวต้องมีอย่างน้อย 1 ตัว ดึงจากข้อความให้เองถ้าเจอ)</label><input id="nTickers" type="text" placeholder="NVDA, AMD" autocomplete="off"><small id="nTkHint" class="hint" hidden></small></div>
+        <div style="grid-column:1/-1"><label for="nTickers">ชื่อหุ้น ใส่ได้สูงสุด 20 ตัว คั่นด้วยคอมมา เว้นวรรค หรือขึ้นบรรทัดใหม่ (พรีวิวงบ/งบหุ้นรายตัวต้องมีอย่างน้อย 1 ตัว ดึงจากข้อความให้เองถ้าเจอ)</label><textarea id="nTickers" class="tkin" rows="2" placeholder="NVDA, AMD, MSFT" autocomplete="off" spellcheck="false"></textarea><div class="tkmeta"><span class="tkcount" id="nTkCount"></span><span class="tkchips" id="nTkChips"></span></div><small id="nTkHint" class="hint" hidden></small></div>
         <div id="nPerBox" hidden><label for="nPeriod">งวดงบ เช่น Q3/2026 (ดึงจากข้อความให้เองถ้าเจอ)</label><input id="nPeriod" type="text" maxlength="20" autocomplete="off"><small id="nPerHint" class="hint" hidden></small></div>
         <div><label for="nLink">ลิงก์ต้นฉบับ (ไม่ใส่ก็ได้)</label><input id="nLink" type="url" placeholder="https://" autocomplete="off"></div>
       </div>
@@ -145,7 +155,7 @@ textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px
       <label for="aSummary">สรุปสั้นๆ (ขึ้นในการ์ดหน้ารายการ)</label><textarea id="aSummary" maxlength="500" style="min-height:70px"></textarea>
       <label for="aBody">เนื้อหา (แปะจากเฟสได้ ขึ้นบรรทัดใหม่ได้)</label><textarea id="aBody" class="big" maxlength="20000"></textarea>
       <div class="grid2">
-        <div><label for="aTickers">ชื่อหุ้นที่เกี่ยวข้อง</label><input id="aTickers" type="text" placeholder="NVDA, AMD" autocomplete="off"><small id="aTkHint" class="hint" hidden></small></div>
+        <div style="grid-column:1/-1"><label for="aTickers">ชื่อหุ้นที่เกี่ยวข้อง ใส่ได้สูงสุด 20 ตัว คั่นด้วยคอมมา เว้นวรรค หรือขึ้นบรรทัดใหม่</label><textarea id="aTickers" class="tkin" rows="2" placeholder="NVDA, AMD, MSFT" autocomplete="off" spellcheck="false"></textarea><div class="tkmeta"><span class="tkcount" id="aTkCount"></span><span class="tkchips" id="aTkChips"></span></div><small id="aTkHint" class="hint" hidden></small></div>
         <div><label for="aUrl">ลิงก์ต้นฉบับ (ไม่ใส่ก็ได้)</label><input id="aUrl" type="url" placeholder="https://" autocomplete="off"></div>
       </div>
       <label>รูปประกอบ (สูงสุด 10 รูป ย่อให้อัตโนมัติ)</label>
@@ -267,10 +277,25 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const safeUrl = u => /^https?:\/\//i.test(u || "") ? u : "";
 const TK_OK = /^[A-Z0-9.\-]{1,12}$/;
-const parseTk = (s, max = 10) => String(s || "").split(/[,\s]+/).map(t => t.trim().toUpperCase()).filter(t => TK_OK.test(t)).slice(0, max);
+const TK_MAX = 20;   // เพดานชื่อหุ้นต่อข่าว/บทความ ต้องตรงกับ firestore.rules (postFields / articleValid)
+const parseTk = (s, max = TK_MAX) => String(s || "").split(/[,\s]+/).map(t => t.trim().toUpperCase()).filter(t => TK_OK.test(t)).slice(0, max);
 // ช่องพิมพ์ชื่อหุ้น: แปลงเป็นตัวพิมพ์ใหญ่ทันทีที่พิมพ์/วาง (เก็บตำแหน่งเคอร์เซอร์ไว้ ไม่แตะตอนพิมพ์ด้วยคีย์บอร์ดภาษาไทยที่ยังไม่ยืนยัน)
 ["nTickers", "aTickers", "pTickers"].forEach(id => { const e = document.getElementById(id); if (!e) return;
   e.addEventListener("input", ev => { if (ev.isComposing) return; const u = e.value.toUpperCase(); if (u === e.value) return; const a = e.selectionStart, b = e.selectionEnd; e.value = u; try { e.setSelectionRange(a, b); } catch (x) {} }); });
+// ตัวนับ + ชิปใต้ช่องชื่อหุ้น (ข่าว nTickers / บทความ aTickers) อัปเดตตอนพิมพ์ และตอนโค้ดเติมค่าให้ (ดักการตั้ง .value)
+function tkBox(id, pre) {
+  const e = document.getElementById(id), cnt = document.getElementById(pre + "TkCount"), chips = document.getElementById(pre + "TkChips"); if (!e || !cnt || !chips) return;
+  const sync = () => {
+    const toks = e.value.split(/[,\s]+/).map(t => t.trim().toUpperCase()).filter(Boolean); let ok = 0, bad = 0;
+    chips.innerHTML = toks.map(t => { if (!TK_OK.test(t)) { bad++; return `<span class="tkchip bad" title="ใช้ไม่ได้ จะถูกข้าม">${esc(t)}</span>`; } ok++; return `<span class="tkchip${ok > TK_MAX ? " cut" : ""}"${ok > TK_MAX ? ' title="เกินเพดาน จะไม่ถูกบันทึก"' : ""}>${esc(t)}</span>`; }).join("");
+    cnt.classList.toggle("over", ok > TK_MAX || bad > 0);
+    cnt.textContent = ok + " / " + TK_MAX + " ตัว" + (ok > TK_MAX ? " · เกิน " + (ok - TK_MAX) + " ตัว (ตัวที่ขีดฆ่าจะไม่ถูกบันทึก)" : "") + (bad ? " · ใช้ไม่ได้ " + bad + " ตัว (จะถูกข้าม)" : "");
+  };
+  const d = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value");
+  Object.defineProperty(e, "value", { get() { return d.get.call(this); }, set(v) { d.set.call(this, v); sync(); }, configurable: true });
+  e.addEventListener("input", sync); sync();
+}
+tkBox("nTickers", "n"); tkBox("aTickers", "a");
 const fmtTime = ts => { const d = ts && ts.toDate ? ts.toDate() : null; return d ? d.toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" }) : ""; };
 const fmtCode = c => (c.match(/.{1,4}/g) || []).join("-");
 let N = null;
@@ -423,7 +448,7 @@ function guessTickers(text, fallback) {
   const rs = [new RegExp("\\$" + T + "(?![A-Za-z])", "g"), new RegExp("\\b(?:NYSE|NASDAQ|NYSEARCA|AMEX|NYSEAMERICAN|OTC)\\s*[:：]\\s*" + T + "(?![A-Za-z])", "g"), new RegExp("\\(" + T + "\\)", "g")];
   rs.forEach(r => { while ((m = r.exec(t))) push(m.index, m[1]); });
   found.sort((a, b) => a[0] - b[0]);
-  let out = found.map(x => x[1]).slice(0, 10);   // 10 = เพดานเดียวกับ parseTk และ firestore.rules
+  let out = found.map(x => x[1]).slice(0, TK_MAX);   // เพดานเดียวกับ parseTk และ firestore.rules
   if (!out.length && fallback) {
     const r = /(?<![A-Za-z0-9$.\/\-])([A-Z]{2,5})(?![A-Za-z0-9])/g;
     while ((m = r.exec(t))) { if (!TK_STOP.has(m[1])) { out = [m[1]]; break; } }
