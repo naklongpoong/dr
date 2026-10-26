@@ -6,6 +6,7 @@ window.SITE = {
   basics: true,     // แท็บ ความรู้พื้นฐาน false = ซ่อนทั้งเมนูและการ์ด
   basicsLive: true, // false = สมาชิกเห็นหน้า Coming Soon (ดูตัวจริงที่ basics.html?preview=1) true = เปิดคลังคำศัพท์จริง
   invest: true,    // แท็บ แนวทางการลงทุน (เกมตอบคำถามดูสไตล์นักลงทุน) false = ซ่อนทั้งเมนูและการ์ด
+  course: false,   // แท็บ สอนลงทุนหุ้นเมกา (บทอยู่ที่ course.html ตัวแปร CH ใส่บทแล้วตั้ง live: true) false = ซ่อนเมนูและสมาชิกยังอ่านไม่ได้ ดูร่างที่ course.html?preview=1 ตรวจแล้วค่อยตั้ง true
   calc: true,      // แท็บ คำนวณดอกเบี้ยทบต้น (เงินต้น/เงินออม/ผลตอบแทน/ปันผล Re-invest หรือไม่ Re-invest) false = ซ่อนทั้งเมนูและการ์ด
   rr: true,        // แท็บ คำนวณความคุ้มเสี่ยง Risk:Reward (เครื่องมือสายเทรด ใส่ราคาซื้อ/ตัดขาดทุน/เป้าหมาย) false = ซ่อนทั้งเมนูและการ์ด
   drprem: true,    // แท็บ คำนวณ Premium DR (ใส่ราคา DR/อัตราส่วน/ราคาหุ้นต้นทาง/อัตราแลกเปลี่ยน ดูว่า DR แพงหรือถูกกว่ากี่ %) false = ซ่อนทั้งเมนูและการ์ด
@@ -90,6 +91,7 @@ window.buildNav = function (current) {
   if (SITE.basics) extra.push(["basics", "basics.html", "ความรู้พื้นฐาน", "เรียนรู้"]);
   if (SITE.econ) extra.push(["econ", "econ.html", "ตัวเลขเศรษฐกิจ", "เรียนรู้"]);
   if (SITE.invest) extra.push(["invest", "invest.html", "แนวทางการลงทุน", "เรียนรู้"]);
+  if (SITE.course) extra.push(["course", "course.html", "สอนลงทุนหุ้นเมกา", "เรียนรู้"]);
   if (SITE.articles) extra.push(["legend", "articles.html?type=legend", "Legends", "เรียนรู้"]);
   if (SITE.calc) extra.push(["calc", "calc.html", "คำนวณดอกเบี้ยทบต้น", "เครื่องมือคำนวณ"]);
   if (SITE.rr) extra.push(["rr", "rr.html", "คำนวณความคุ้มเสี่ยง", "เครื่องมือคำนวณ"]);
