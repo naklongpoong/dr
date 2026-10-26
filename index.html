@@ -502,10 +502,7 @@ inflCard(window.PPI_LATEST, "p", "ppi");
     if (acc) { c.fillStyle = acc; rr(c, x + 40, y - 1, w - 80, 8, 4); c.fill(); }
   }
   function footer(c) {
-    c.fillStyle = "rgba(255,255,255,.16)"; c.fillRect(60, H - 104, W - 120, 2);
-    c.fillStyle = MUTED; c.textAlign = "left"; c.font = "400 26px " + FONT; c.fillText("เนื้อหาเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน", 60, H - 54);
-    c.fillStyle = GOLD; c.textAlign = "right"; c.font = "700 30px " + FONT; c.fillText("นักลงพุง", W - 60, H - 54);
-    c.fillRect(0, H - 14, W, 14);
+    c.fillStyle = GOLD; c.fillRect(0, H - 14, W, 14);
   }
   function draw(tab) {
     var cv = document.createElement("canvas"); cv.width = W; cv.height = H; var c = cv.getContext("2d");
