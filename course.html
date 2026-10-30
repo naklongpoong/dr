@@ -135,8 +135,20 @@ h1 { font-size: clamp(1.55rem, 4.6vw, 2.2rem); font-weight: 700; line-height: 1.
   :root, :root[data-theme="dark"] { --bg: #fff; --surface: #fff; --ink: #000; --muted: #333; --line: #bbb; --accent: #1f4fa8; --accent-soft: #fff; --shadow: none; }
   body { background: #fff !important; color: #000 !important; }
   body > *:not(main) { display: none !important; }
-  .hero, .g-foot, .chap .tools, .chap .pn { display: none !important; }
-  .wrap { max-width: none; padding: 0; margin: 0; }
+  @page { margin: 0; }
+  body { font-size: 12.5pt; line-height: 1.7; }
+  .hero { display: block !important; background: none !important; box-shadow: none; padding: 0; margin: 0 0 8px; }
+  .hero::after, .hero .nav, .hero .lede { display: none !important; }
+  .hero .brand { display: flex; align-items: center; gap: 12px; }
+  .hero .brand img { width: 64px; }
+  .hero h1 { color: #14213d !important; font-size: 1.3rem; margin: 0; }
+  .g-foot, .chap .tools, .chap .pn { display: none !important; }
+  .wrap { max-width: none; padding: 14mm 15mm; margin: 0; }
+  .chap .kick { font-size: 11pt; }
+  .chap h2.ct { font-size: 23pt; }
+  .chap .body h3 { font-size: 15pt; }
+  .chap .tbl { font-size: 10.5pt; }
+  .chap .src { font-size: 9.5pt; }
   .chap { margin-top: 0; }
   .chap .body { border: 0; box-shadow: none; padding: 0; margin-top: 8px; }
   .chap .tblw { overflow: visible; }
