@@ -128,6 +128,22 @@ h1 { font-size: clamp(1.55rem, 4.6vw, 2.2rem); font-weight: 700; line-height: 1.
   .brand img { width: 72px; }
   .chap .body { padding: 4px 15px 16px; }
 }
+.chap .tools { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.chap .pdfbtn { font: inherit; font-size: .88rem; color: var(--accent); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px; cursor: pointer; }
+.chap .pdfbtn:hover { border-color: var(--gold); }
+@media print {
+  :root, :root[data-theme="dark"] { --bg: #fff; --surface: #fff; --ink: #000; --muted: #333; --line: #bbb; --accent: #1f4fa8; --accent-soft: #fff; --shadow: none; }
+  body { background: #fff !important; color: #000 !important; }
+  body > *:not(main) { display: none !important; }
+  .hero, .g-foot, .chap .tools, .chap .pn { display: none !important; }
+  .wrap { max-width: none; padding: 0; margin: 0; }
+  .chap { margin-top: 0; }
+  .chap .body { border: 0; box-shadow: none; padding: 0; margin-top: 8px; }
+  .chap .tblw { overflow: visible; }
+  .chap .body h3, .chap .recap, .chap .tbl tr { break-inside: avoid; }
+  .chap .body h3 { break-after: avoid; }
+  .chap .body a { color: #000; text-decoration: none; }
+}
 </style>
 </head>
 <body>
@@ -220,7 +236,7 @@ async function chapter(n) {
     catch (e) { html = '<p>โหลดบทนี้ไม่สำเร็จ ลองรีเฟรชหน้าอีกครั้ง</p>'; }
     if (location.hash !== "#c" + n) return;
   }
-  $("chapView").innerHTML = `<button class="back" type="button" id="bk">‹ สารบัญ</button>
+  $("chapView").innerHTML = `<div class="tools"><button class="back" type="button" id="bk">‹ สารบัญ</button><button class="pdfbtn" type="button" id="pdf">บันทึกเป็น PDF</button></div>
     <p class="kick">หมวด ${c.part + 1} ${esc(PARTS[c.part][0])} · บทที่ ${n} จาก ${CH.length}</p><h2 class="ct">${esc(c.t)}</h2>
     <div class="body">${html}</div>
     <div class="pn">${prev ? `<a class="btn alt" href="#c${n - 1}" style="text-decoration:none">‹ บทก่อน</a>` : "<span></span>"}${next ? `<a class="btn" href="#c${n + 1}" style="text-decoration:none">บทถัดไป ›</a>` : "<span></span>"}</div>`;
@@ -231,7 +247,7 @@ function route() {
   if (n >= 1 && n <= CH.length && canOpen(CH[n - 1], n - 1)) { chapter(n); return; }
   $("chapView").hidden = true; $("tocView").hidden = false; document.title = "สอนลงทุนหุ้นเมกา | นักลงพุง";
 }
-document.addEventListener("click", e => { if (e.target.closest("#bk")) { location.hash = ""; history.replaceState(null, "", location.pathname + location.search); route(); window.scrollTo(0, 0); } });
+document.addEventListener("click", e => { if (e.target.closest("#pdf")) { window.print(); return; } if (e.target.closest("#bk")) { location.hash = ""; history.replaceState(null, "", location.pathname + location.search); route(); window.scrollTo(0, 0); } });
 window.addEventListener("hashchange", route);
 toc(); route();
 </script>
