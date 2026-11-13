@@ -270,7 +270,7 @@ button.esym:focus-visible { outline: 2px solid var(--accent); outline-offset: 2p
 .sm-row em { font-style: normal; font-size: 0.85rem; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
 .sm-row:hover b { text-decoration: underline; }
 .sm-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.sm-list li { display: grid; grid-template-columns: 46px 1fr; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.sm-list li { display: grid; grid-template-columns: 54px 1fr; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
 .sm-t { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 2px; }
 .sm-h { font: inherit; font-size: 0.95rem; line-height: 1.45; color: var(--ink); background: none; border: 0; padding: 0; text-align: left; cursor: pointer; overflow-wrap: anywhere; }
 .sm-h:hover { color: var(--accent); }
@@ -279,6 +279,11 @@ button.esym:focus-visible { outline: 2px solid var(--accent); outline-offset: 2p
 .sm-tk .sm-hot { background: var(--gold); color: var(--gold-ink); }
 .sm-note { margin: 16px 0 0; font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
 .sm-empty { padding: 28px 12px; text-align: center; color: var(--muted); }
+.sm-load { margin: 0 0 14px; padding: 8px 12px; border-radius: 10px; font-size: 0.85rem; color: var(--accent); background: var(--accent-soft); }
+.sm-all { margin-top: 12px; }
+.sm-all summary { cursor: pointer; font-size: 0.9rem; font-weight: 600; color: var(--accent); padding: 6px 0; }
+.sm-all .sm-list { margin-top: 8px; }
+.sm-t small { display: block; font-size: 0.7rem; }
 @media (max-width: 420px) { .sm-stat b { font-size: 1.35rem; } .sm-row { grid-template-columns: 56px 1fr 24px; } }
 </style>
 </head>
@@ -691,49 +696,78 @@ async function boot() {
 boot();
 </script>
 <script id="sum-add">
-// สรุปข่าว 24 ชม. แบบอัตโนมัติ (นับ/จัดกลุ่มจากข่าวที่โหลดอยู่ในหน้า ไม่ได้ใช้ AI เขียน)
+// สรุปข่าว 24 ชม. แบบอัตโนมัติ (นับ/จัดกลุ่มจากข่าวในหน้า ไม่ได้ใช้ AI เขียน) ถ้าหน้าโหลดมาเต็ม 50 ข่าว จะโหลดส่วนที่เหลือของ 24 ชม. ให้เองตอนกด
 (function () {
   const btn = $("sumBtn"), box = $("sum"), body = $("sumBody");
   if (!btn || !box || !body) return;
-  const HRS = 24, MAXROWS = 20;
-  let lastFocus = null;
+  const HRS = 24, PAGE_N = 50, MAX_PAGES = 5, TOP_N = 5, FRESH_MS = 180000;
+  let lastFocus = null, fullAt = 0, loadP = null, loadErr = false, capped = false;
   const hm = d => d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
   const dm = d => d.toLocaleDateString("th-TH", { day: "numeric", month: "short" });
   const dmhm = d => dm(d) + " " + hm(d);
+  const today = d => d.toDateString() === new Date().toDateString();
+  const inWin = () => { const from = Date.now() - HRS * 3600000; return data.news.filter(p => ms(p.createdAt) >= from); };
   function headline(t) {
     const l = String(t || "").split(/\n/).map(x => x.replace(/https?:\/\/\S+/g, "").replace(/\s+/g, " ").trim()).find(x => x.length > 1) || "(ไม่มีข้อความ)";
     return l.length > 110 ? l.slice(0, 110).trimEnd() + "…" : l;
   }
-  function build() {
-    const now = Date.now(), from = now - HRS * 3600000;
-    const L = data.news.filter(p => ms(p.createdAt) >= from).sort(byNew);
+  // หน้าโหลดมาเต็ม 50 ข่าวแรก = อาจมีข่าวใน 24 ชม. ที่ยังไม่ได้โหลด
+  const needsLoad = () => !more.news.done && more.news.cur != null && inWin().length >= FIRST_MAX && Date.now() - fullAt > FRESH_MS;
+  async function loadAll() {
+    const m = more.news; if (m.busy) return;
+    const N = NLP, F = N.F, since = F.Timestamp.fromMillis(Date.now() - HRS * 3600000);
+    let pages = 0; capped = false;
+    try {
+      while (pages < MAX_PAGES) {
+        const got = docRows(await F.getDocs(F.query(F.collection(N.db, "news"), F.where("createdAt", ">=", since), F.orderBy("createdAt", "desc"), F.startAfter(F.Timestamp.fromMillis(m.cur)), F.limit(PAGE_N))));
+        pages++; merge("news", got);
+        if (got.length) m.cur = Math.min(m.cur, ...got.map(x => ms(x.createdAt)));
+        if (got.length < PAGE_N) break;
+        if (pages >= MAX_PAGES) capped = true;
+      }
+      fullAt = Date.now(); loadErr = false;
+    } catch (e) {
+      if (e && e.code === "permission-denied") return NLP.relock();
+      loadErr = true;
+    }
+    render();
+  }
+  function build(loading) {
+    const now = Date.now(), from = now - HRS * 3600000, L = inWin().sort(byNew);
     $("sumRange").textContent = dmhm(new Date(from)) + " – " + dmhm(new Date(now));
     if (!L.length) { body.innerHTML = '<p class="sm-empty">ไม่มีข่าวใน 24 ชั่วโมงล่าสุด</p>'; return; }
     const cnt = new Map();
     L.forEach(p => { const seen = new Set(); (p.tickers || []).forEach(t => { const k = tkAlias(t)[0]; if (!seen.has(k)) { seen.add(k); cnt.set(k, (cnt.get(k) || 0) + 1); } }); });
     const top = [...cnt].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 8), mx = top.length ? top[0][1] : 1;
-    const showViews = !(window.SITE && SITE.countViews === false);
-    const totalViews = L.reduce((n, p) => n + (p.views || 0), 0);
-    let hot = null;
-    if (showViews && L.length >= 3) { const best = L.reduce((a, b) => ((b.views || 0) > (a.views || 0) ? b : a), L[0]); if ((best.views || 0) > 0) hot = best.id; }
+    const showViews = !(window.SITE && SITE.countViews === false), totalViews = L.reduce((n, p) => n + (p.views || 0), 0), hasViews = showViews && totalViews > 0;
+    const ranked = hasViews ? L.slice().sort((a, b) => (b.views || 0) - (a.views || 0) || byNew(a, b)) : L;
+    const hot = hasViews && L.length >= 3 ? ranked[0].id : null;
+    const row = p => {
+      const d = new Date(ms(p.createdAt)), tk = (p.tickers || []).slice(0, 6).map(t => "<span>" + esc(t) + "</span>").join("");
+      return '<li><span class="sm-t">' + hm(d) + (today(d) ? "" : "<small>" + dm(d) + "</small>") + '</span><div><button class="sm-h" type="button" data-smgo="' + esc(p.id) + '">' + esc(headline(p.text)) + "</button>"
+        + ((tk || p.id === hot) ? '<div class="sm-tk">' + (p.id === hot ? '<span class="sm-hot">อ่านมากสุด</span>' : "") + tk + "</div>" : "") + "</div></li>";
+    };
     const stats = [[L.length, "ข่าว"], [cnt.size, "หุ้นที่ถูกพูดถึง"]];
-    if (showViews && totalViews > 0) stats.push([totalViews, "ยอดอ่านรวม"]);
-    let h = '<div class="sm-stats" style="grid-template-columns:repeat(' + stats.length + ',1fr)">' + stats.map(x => '<div class="sm-stat"><b>' + x[0].toLocaleString("th-TH") + "</b><span>" + x[1] + "</span></div>").join("") + "</div>";
+    if (hasViews) stats.push([totalViews, "ยอดอ่านรวม"]);
+    let h = loading ? '<p class="sm-load">กำลังโหลดข่าวให้ครบ 24 ชั่วโมง ตัวเลขจะอัปเดตเอง...</p>' : "";
+    h += '<div class="sm-stats" style="grid-template-columns:repeat(' + stats.length + ',1fr)">' + stats.map(x => '<div class="sm-stat"><b>' + x[0].toLocaleString("th-TH") + "</b><span>" + x[1] + "</span></div>").join("") + "</div>";
     if (top.length) {
       h += "<h3>หุ้นที่ถูกพูดถึงมากสุด</h3><div class=\"sm-bars\">" + top.map(([k, n]) =>
         '<button class="sm-row" type="button" data-smtk="' + esc(k) + '" title="กดเพื่อกรองข่าวของ ' + esc(k) + '"><b>' + esc(k) + '</b><i style="--w:' + Math.round(n / mx * 100) + '%"></i><em>' + n + "</em></button>").join("") + "</div>";
     }
-    h += "<h3>ไฮไลต์ตามเวลา</h3><ul class=\"sm-list\">" + L.slice(0, MAXROWS).map(p => {
-      const d = new Date(ms(p.createdAt)), tk = (p.tickers || []).slice(0, 6).map(t => "<span>" + esc(t) + "</span>").join("");
-      return '<li><span class="sm-t">' + hm(d) + '</span><div><button class="sm-h" type="button" data-smgo="' + esc(p.id) + '">' + esc(headline(p.text)) + "</button>"
-        + ((tk || p.id === hot) ? '<div class="sm-tk">' + (p.id === hot ? '<span class="sm-hot">อ่านมากสุด</span>' : "") + tk + "</div>" : "") + "</div></li>";
-    }).join("") + "</ul>";
-    if (L.length > MAXROWS) h += '<p class="sm-note">และอีก ' + (L.length - MAXROWS) + " ข่าว ดูได้ในรายการข่าวด้านล่าง</p>";
-    h += '<p class="sm-note">สรุปอัตโนมัติจากข่าวที่เพจโพสต์ นับและเรียงให้ ไม่ได้ใช้ AI เขียนสรุป'
-      + (L.length >= FIRST_MAX && !more.news.loaded ? " · หน้านี้โหลดมาแค่ " + FIRST_MAX + " ข่าวแรก ถ้ามีมากกว่านั้นให้กด \"โหลดเพิ่ม\" ในรายการก่อนแล้วเปิดสรุปใหม่" : "") + "</p>";
-    body.innerHTML = h;
+    h += "<h3>" + (hasViews ? "ข่าวที่คนอ่านมากสุด" : "ข่าวล่าสุด") + '</h3><ul class="sm-list">' + ranked.slice(0, TOP_N).map(row).join("") + "</ul>";
+    if (L.length > TOP_N) h += '<details class="sm-all"><summary>ดูทุกข่าวตามเวลา (' + L.length + ')</summary><ul class="sm-list">' + L.map(row).join("") + "</ul></details>";
+    let note = "สรุปอัตโนมัติจากข่าวที่เพจโพสต์ นับและเรียงให้ ไม่ได้ใช้ AI เขียนสรุป";
+    if (loadErr) note += " · โหลดข่าวไม่ครบ สรุปจากเท่าที่โหลดได้ ลองเปิดใหม่อีกครั้ง";
+    else if (capped) note += " · นับจาก " + L.length + " ข่าวล่าสุด (ตัดที่ " + (PAGE_N * (MAX_PAGES + 1)) + " ข่าว)";
+    body.innerHTML = h + '<p class="sm-note">' + note + "</p>";
   }
-  function open() { lastFocus = document.activeElement; build(); box.hidden = false; document.body.style.overflow = "hidden"; box.querySelector(".sumbox").scrollTop = 0; box.querySelector("[data-sumclose]").focus(); }
+  function open() {
+    lastFocus = document.activeElement;
+    const need = needsLoad(); build(need); box.hidden = false; document.body.style.overflow = "hidden";
+    box.querySelector(".sumbox").scrollTop = 0; box.querySelector("[data-sumclose]").focus();
+    if (need) { loadP = loadP || loadAll().finally(() => { loadP = null; }); loadP.then(() => { if (!box.hidden) build(false); }); }
+  }
   function close() { box.hidden = true; document.body.style.overflow = ""; if (lastFocus && lastFocus.focus) lastFocus.focus(); }
   btn.addEventListener("click", open);
   box.addEventListener("click", e => {
