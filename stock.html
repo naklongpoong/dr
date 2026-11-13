@@ -375,6 +375,18 @@ h2 { font-size: 1.2rem; font-weight: 700; margin: 0; padding-left: 10px; border-
       <p class="keys">ปุ่มลัด D รายวัน, W รายสัปดาห์, M รายเดือน, C สลับแท่งเทียนกับเส้น, F ขยายเต็มจอ</p>
     </section>
 
+    <section class="sec" id="tvchart" aria-labelledby="tvTitle">
+      <details id="tvBox" style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 16px">
+        <summary style="cursor:pointer;font-weight:600" id="tvTitle">กราฟ TradingView (กดเพื่อเปิด เครื่องมือวาดเส้น/อินดิเคเตอร์ครบ)</summary>
+        <div id="tvWrap" style="margin-top:12px">
+          <div class="tradingview-widget-container" id="tvCont" style="height:600px;width:100%">
+            <div class="tradingview-widget-container__widget" id="tvWidget" style="height:calc(100% - 24px);width:100%"></div>
+            <div class="tradingview-widget-copyright" style="font-size:.78rem;color:var(--muted)"><a id="tvLink" href="https://www.tradingview.com/" rel="noopener noreferrer" target="_blank">ดูบน TradingView</a> ข้อมูลและกราฟโดย TradingView</div>
+          </div>
+        </div>
+      </details>
+    </section>
+
     <div class="cols">
       <section class="sec" id="timeline" aria-labelledby="tlTitle">
         <div class="tl-head">
@@ -959,6 +971,26 @@ async function boot() {
 }
 function renderTapeIdle() { renderTape(); }
 boot();
+</script>
+<script id="tv-add">
+// กราฟ TradingView แบบเสริม (โหลดเมื่อกดเปิดเท่านั้น) ไม่แตะกราฟ Finviz เดิม
+(function () {
+  const box = document.getElementById("tvBox");
+  if (!box) return;
+  box.addEventListener("toggle", function () {
+    if (!box.open || box.dataset.done || !T) return;
+    box.dataset.done = "1";
+    const sym = T.replace(/-/g, ".");
+    document.getElementById("tvLink").href = "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(sym);
+    const m = (getComputedStyle(document.body).backgroundColor.match(/\d+/g) || [255, 255, 255]).map(Number);
+    const dark = (m[0] + m[1] + m[2]) < 300;
+    const sc = document.createElement("script");
+    sc.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+    sc.async = true;
+    sc.text = JSON.stringify({ autosize: true, symbol: sym, interval: "D", timezone: "Asia/Bangkok", theme: dark ? "dark" : "light", style: "1", locale: "th_TH", allow_symbol_change: false, hide_side_toolbar: false, withdateranges: true, support_host: "https://www.tradingview.com" });
+    document.getElementById("tvWidget").appendChild(sc);
+  });
+})();
 </script>
 </body>
 </html>
