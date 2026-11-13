@@ -739,23 +739,19 @@ boot();
     const cnt = new Map();
     L.forEach(p => { const seen = new Set(); (p.tickers || []).forEach(t => { const k = tkAlias(t)[0]; if (!seen.has(k)) { seen.add(k); cnt.set(k, (cnt.get(k) || 0) + 1); } }); });
     const top = [...cnt].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 8), mx = top.length ? top[0][1] : 1;
-    const showViews = !(window.SITE && SITE.countViews === false), totalViews = L.reduce((n, p) => n + (p.views || 0), 0), hasViews = showViews && totalViews > 0;
-    const ranked = hasViews ? L.slice().sort((a, b) => (b.views || 0) - (a.views || 0) || byNew(a, b)) : L;
-    const hot = hasViews && L.length >= 3 ? ranked[0].id : null;
     const row = p => {
       const d = new Date(ms(p.createdAt)), tk = (p.tickers || []).slice(0, 6).map(t => "<span>" + esc(t) + "</span>").join("");
       return '<li><span class="sm-t">' + hm(d) + (today(d) ? "" : "<small>" + dm(d) + "</small>") + '</span><div><button class="sm-h" type="button" data-smgo="' + esc(p.id) + '">' + esc(headline(p.text)) + "</button>"
-        + ((tk || p.id === hot) ? '<div class="sm-tk">' + (p.id === hot ? '<span class="sm-hot">อ่านมากสุด</span>' : "") + tk + "</div>" : "") + "</div></li>";
+        + (tk ? '<div class="sm-tk">' + tk + "</div>" : "") + "</div></li>";
     };
     const stats = [[L.length, "ข่าว"], [cnt.size, "หุ้นที่ถูกพูดถึง"]];
-    if (hasViews) stats.push([totalViews, "ยอดอ่านรวม"]);
     let h = loading ? '<p class="sm-load">กำลังโหลดข่าวให้ครบ 24 ชั่วโมง ตัวเลขจะอัปเดตเอง...</p>' : "";
     h += '<div class="sm-stats" style="grid-template-columns:repeat(' + stats.length + ',1fr)">' + stats.map(x => '<div class="sm-stat"><b>' + x[0].toLocaleString("th-TH") + "</b><span>" + x[1] + "</span></div>").join("") + "</div>";
     if (top.length) {
       h += "<h3>หุ้นที่ถูกพูดถึงมากสุด</h3><div class=\"sm-bars\">" + top.map(([k, n]) =>
         '<button class="sm-row" type="button" data-smtk="' + esc(k) + '" title="กดเพื่อกรองข่าวของ ' + esc(k) + '"><b>' + esc(k) + '</b><i style="--w:' + Math.round(n / mx * 100) + '%"></i><em>' + n + "</em></button>").join("") + "</div>";
     }
-    h += "<h3>" + (hasViews ? "ข่าวที่คนอ่านมากสุด" : "ข่าวล่าสุด") + '</h3><ul class="sm-list">' + ranked.slice(0, TOP_N).map(row).join("") + "</ul>";
+    h += "<h3>ข่าวล่าสุด</h3><ul class=\"sm-list\">" + L.slice(0, TOP_N).map(row).join("") + "</ul>";
     if (L.length > TOP_N) h += '<details class="sm-all"><summary>ดูทุกข่าวตามเวลา (' + L.length + ')</summary><ul class="sm-list">' + L.map(row).join("") + "</ul></details>";
     let note = "สรุปอัตโนมัติจากข่าวที่เพจโพสต์ นับและเรียงให้ ไม่ได้ใช้ AI เขียนสรุป";
     if (loadErr) note += " · โหลดข่าวไม่ครบ สรุปจากเท่าที่โหลดได้ ลองเปิดใหม่อีกครั้ง";
