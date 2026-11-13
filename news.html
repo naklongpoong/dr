@@ -243,6 +243,43 @@ button.esym:focus-visible { outline: 2px solid var(--accent); outline-offset: 2p
   .egrid { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { .dot, .npost.fresh, .npost.fresh::before { animation: none; } }
+
+/* ปุ่มและหน้าต่างสรุปข่าว 24 ชม. (เพิ่มใหม่ ไม่แตะสไตล์เดิม) */
+.sumbtn { font: inherit; font-size: 0.88rem; font-weight: 700; cursor: pointer; border: 0; border-radius: 999px; padding: 7px 16px; background: var(--gold); color: var(--gold-ink); box-shadow: var(--shadow); white-space: nowrap; }
+.sumbtn:hover { filter: brightness(1.06); }
+.sumbtn:focus-visible, .sm-x:focus-visible, .sm-h:focus-visible, .sm-row:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#sum { position: fixed; inset: 0; z-index: 60; background: rgba(5,10,25,.72); display: flex; align-items: flex-end; justify-content: center; }
+.sumbox { width: 100%; max-width: 640px; max-height: 92vh; overflow: auto; background: var(--bg); color: var(--ink); border-radius: 20px 20px 0 0; box-shadow: 0 20px 60px rgba(0,0,0,.4); overscroll-behavior: contain; }
+@media (min-width: 700px) { #sum { align-items: center; padding: 20px; } .sumbox { border-radius: 20px; max-height: 88vh; } }
+.sm-head { position: sticky; top: 0; z-index: 1; display: flex; gap: 12px; align-items: flex-start; padding: 18px 20px 14px; color: #fff; background: linear-gradient(135deg, #0f1e46, #1a2b57); border-bottom: 3px solid var(--gold); }
+.sm-head h2 { margin: 0; font-size: 1.2rem; font-weight: 700; line-height: 1.3; }
+.sm-head p { margin: 3px 0 0; font-size: 0.82rem; color: #c9d5f2; }
+.sm-x { margin-left: auto; flex: none; width: 34px; height: 34px; border-radius: 50%; border: 0; cursor: pointer; font-size: 1.3rem; line-height: 1; color: #fff; background: rgba(255,255,255,.14); }
+.sm-x:hover { background: rgba(255,255,255,.25); }
+.sm-body { padding: 16px 20px 20px; }
+.sm-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 0 18px; }
+.sm-stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 8px; text-align: center; box-shadow: var(--shadow); }
+.sm-stat b { display: block; font-size: 1.6rem; line-height: 1.15; font-variant-numeric: tabular-nums; color: var(--accent); }
+.sm-stat span { font-size: 0.78rem; color: var(--muted); }
+.sm-body h3 { margin: 18px 0 10px; font-size: 1rem; font-weight: 700; padding-left: 10px; border-left: 4px solid var(--gold); }
+.sm-bars { display: flex; flex-direction: column; gap: 7px; }
+.sm-row { display: grid; grid-template-columns: 64px 1fr 28px; align-items: center; gap: 10px; width: 100%; font: inherit; color: inherit; background: none; border: 0; padding: 2px 0; cursor: pointer; text-align: left; }
+.sm-row b { font-size: 0.92rem; }
+.sm-row i { display: block; height: 10px; border-radius: 999px; background: var(--accent-soft); overflow: hidden; }
+.sm-row i::after { content: ""; display: block; height: 100%; width: var(--w); border-radius: 999px; background: var(--accent); }
+.sm-row em { font-style: normal; font-size: 0.85rem; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.sm-row:hover b { text-decoration: underline; }
+.sm-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.sm-list li { display: grid; grid-template-columns: 46px 1fr; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.sm-t { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 2px; }
+.sm-h { font: inherit; font-size: 0.95rem; line-height: 1.45; color: var(--ink); background: none; border: 0; padding: 0; text-align: left; cursor: pointer; overflow-wrap: anywhere; }
+.sm-h:hover { color: var(--accent); }
+.sm-tk { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.sm-tk span { font-size: 0.74rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.sm-tk .sm-hot { background: var(--gold); color: var(--gold-ink); }
+.sm-note { margin: 16px 0 0; font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+.sm-empty { padding: 28px 12px; text-align: center; color: var(--muted); }
+@media (max-width: 420px) { .sm-stat b { font-size: 1.35rem; } .sm-row { grid-template-columns: 56px 1fr 24px; } }
 </style>
 </head>
 <body data-page="news">
@@ -293,7 +330,7 @@ button.esym:focus-visible { outline: 2px solid var(--accent); outline-offset: 2p
   </section>
 
   <section class="sec" id="secN" hidden>
-    <div class="sec-h"><h2>ข่าว<small id="cntN"></small></h2></div>
+    <div class="sec-h"><h2>ข่าว<small id="cntN"></small></h2><button class="sumbtn" id="sumBtn" type="button" aria-haspopup="dialog">สรุปข่าว 24 ชม.</button></div>
     <p class="hint" id="hintN" hidden></p>
     <div class="timeline" id="listN"></div>
     <div class="empty" id="emptyN" hidden></div>
@@ -303,6 +340,7 @@ button.esym:focus-visible { outline: 2px solid var(--accent); outline-offset: 2p
 
 <div class="pop" id="pop" role="menu" hidden></div>
 <div id="lb" hidden role="dialog" aria-label="ดูรูปขยาย"><img id="lbImg" alt=""></div>
+<div id="sum" hidden><div class="sumbox" role="dialog" aria-modal="true" aria-labelledby="sumT"><div class="sm-head"><div><h2 id="sumT">สรุปข่าว 24 ชั่วโมงล่าสุด</h2><p id="sumRange"></p></div><button class="sm-x" type="button" data-sumclose aria-label="ปิด">&times;</button></div><div class="sm-body" id="sumBody"></div></div></div>
 <script>
 const PAGE = document.body.dataset.page === "earnings" ? "earnings" : "news", COLS = [PAGE];   // หน้า news = ข่าว+หุ้นแนะนำ, หน้า earnings = พรีวิวงบ+งบรายตัว
 const HOURS = (window.SITE && SITE.listHours) || 24, MORE_N = 15, FIRST_MAX = 50, FALLBACK_N = 10, PREVIEW_N = 6;
@@ -651,6 +689,62 @@ async function boot() {
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(checkClamp);
 }
 boot();
+</script>
+<script id="sum-add">
+// สรุปข่าว 24 ชม. แบบอัตโนมัติ (นับ/จัดกลุ่มจากข่าวที่โหลดอยู่ในหน้า ไม่ได้ใช้ AI เขียน)
+(function () {
+  const btn = $("sumBtn"), box = $("sum"), body = $("sumBody");
+  if (!btn || !box || !body) return;
+  const HRS = 24, MAXROWS = 20;
+  let lastFocus = null;
+  const hm = d => d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+  const dm = d => d.toLocaleDateString("th-TH", { day: "numeric", month: "short" });
+  const dmhm = d => dm(d) + " " + hm(d);
+  function headline(t) {
+    const l = String(t || "").split(/\n/).map(x => x.replace(/https?:\/\/\S+/g, "").replace(/\s+/g, " ").trim()).find(x => x.length > 1) || "(ไม่มีข้อความ)";
+    return l.length > 110 ? l.slice(0, 110).trimEnd() + "…" : l;
+  }
+  function build() {
+    const now = Date.now(), from = now - HRS * 3600000;
+    const L = data.news.filter(p => ms(p.createdAt) >= from).sort(byNew);
+    $("sumRange").textContent = dmhm(new Date(from)) + " – " + dmhm(new Date(now));
+    if (!L.length) { body.innerHTML = '<p class="sm-empty">ไม่มีข่าวใน 24 ชั่วโมงล่าสุด</p>'; return; }
+    const cnt = new Map();
+    L.forEach(p => { const seen = new Set(); (p.tickers || []).forEach(t => { const k = tkAlias(t)[0]; if (!seen.has(k)) { seen.add(k); cnt.set(k, (cnt.get(k) || 0) + 1); } }); });
+    const top = [...cnt].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 8), mx = top.length ? top[0][1] : 1;
+    const showViews = !(window.SITE && SITE.countViews === false);
+    const totalViews = L.reduce((n, p) => n + (p.views || 0), 0);
+    let hot = null;
+    if (showViews && L.length >= 3) { const best = L.reduce((a, b) => ((b.views || 0) > (a.views || 0) ? b : a), L[0]); if ((best.views || 0) > 0) hot = best.id; }
+    const stats = [[L.length, "ข่าว"], [cnt.size, "หุ้นที่ถูกพูดถึง"]];
+    if (showViews && totalViews > 0) stats.push([totalViews, "ยอดอ่านรวม"]);
+    let h = '<div class="sm-stats" style="grid-template-columns:repeat(' + stats.length + ',1fr)">' + stats.map(x => '<div class="sm-stat"><b>' + x[0].toLocaleString("th-TH") + "</b><span>" + x[1] + "</span></div>").join("") + "</div>";
+    if (top.length) {
+      h += "<h3>หุ้นที่ถูกพูดถึงมากสุด</h3><div class=\"sm-bars\">" + top.map(([k, n]) =>
+        '<button class="sm-row" type="button" data-smtk="' + esc(k) + '" title="กดเพื่อกรองข่าวของ ' + esc(k) + '"><b>' + esc(k) + '</b><i style="--w:' + Math.round(n / mx * 100) + '%"></i><em>' + n + "</em></button>").join("") + "</div>";
+    }
+    h += "<h3>ไฮไลต์ตามเวลา</h3><ul class=\"sm-list\">" + L.slice(0, MAXROWS).map(p => {
+      const d = new Date(ms(p.createdAt)), tk = (p.tickers || []).slice(0, 6).map(t => "<span>" + esc(t) + "</span>").join("");
+      return '<li><span class="sm-t">' + hm(d) + '</span><div><button class="sm-h" type="button" data-smgo="' + esc(p.id) + '">' + esc(headline(p.text)) + "</button>"
+        + ((tk || p.id === hot) ? '<div class="sm-tk">' + (p.id === hot ? '<span class="sm-hot">อ่านมากสุด</span>' : "") + tk + "</div>" : "") + "</div></li>";
+    }).join("") + "</ul>";
+    if (L.length > MAXROWS) h += '<p class="sm-note">และอีก ' + (L.length - MAXROWS) + " ข่าว ดูได้ในรายการข่าวด้านล่าง</p>";
+    h += '<p class="sm-note">สรุปอัตโนมัติจากข่าวที่เพจโพสต์ นับและเรียงให้ ไม่ได้ใช้ AI เขียนสรุป'
+      + (L.length >= FIRST_MAX && !more.news.loaded ? " · หน้านี้โหลดมาแค่ " + FIRST_MAX + " ข่าวแรก ถ้ามีมากกว่านั้นให้กด \"โหลดเพิ่ม\" ในรายการก่อนแล้วเปิดสรุปใหม่" : "") + "</p>";
+    body.innerHTML = h;
+  }
+  function open() { lastFocus = document.activeElement; build(); box.hidden = false; document.body.style.overflow = "hidden"; box.querySelector(".sumbox").scrollTop = 0; box.querySelector("[data-sumclose]").focus(); }
+  function close() { box.hidden = true; document.body.style.overflow = ""; if (lastFocus && lastFocus.focus) lastFocus.focus(); }
+  btn.addEventListener("click", open);
+  box.addEventListener("click", e => {
+    if (e.target === box || e.target.closest("[data-sumclose]")) { close(); return; }
+    const tk = e.target.closest("[data-smtk]");
+    if (tk) { close(); setTicker(tk.dataset.smtk); $("secN").scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+    const go = e.target.closest("[data-smgo]");
+    if (go) { close(); const el = document.querySelector('.npost[data-id="' + CSS.escape(go.dataset.smgo) + '"]'); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); }
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !box.hidden) close(); });
+})();
 </script>
 </body>
 </html>
