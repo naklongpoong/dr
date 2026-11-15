@@ -586,7 +586,7 @@ document.addEventListener("click", function (e) {
 (function () {
   var W = 1080, PAD = 60, GOLD = "#f5b301", INK = "#ffffff", MUTED = "#b9c6e6", PANEL = "#16275c";
   var FONT = '"IBM Plex Sans Thai", "Noto Sans Thai", "Sarabun", system-ui, -apple-system, "Segoe UI", sans-serif';
-  var CARD_SEL = ".ecard, .npost, #reader", BODY_MAX_H = 4300, MAX_H = 7200, IMG_MAX_H = 900;
+  var CARD_SEL = ".ecard, .npost, #reader", BODY_MAX_H = 2700, MAX_H = 7200, IMG_MAX_H = 900;
   var seg = null; try { if (window.Intl && Intl.Segmenter) seg = new Intl.Segmenter("th", { granularity: "word" }); } catch (e) {}
 
   function rr(c, x, y, w, h, r) {
@@ -621,7 +621,7 @@ document.addEventListener("click", function (e) {
   // ---- อ่านข้อมูลจากการ์ดในหน้า ----
   function firstText(el) { if (!el) return ""; var n = el.firstChild; while (n && n.nodeType !== 3) n = n.nextSibling; return (n ? n.textContent : el.textContent).trim(); }
   function cardData(card) {
-    var q = function (s) { return card.querySelector(s); }, d = { key: "post", kind: "ข่าว", title: "", sub: "", date: "", text: "", tickers: [] };
+    var q = function (s) { return card.querySelector(s); }, d = { key: "post", kind: "ข่าว", title: "", sub: "", date: "", text: "", alt: "", tickers: [] };
     if (card.matches(".ecard")) {
       var prev = (q(".ehead .kind") || {}).textContent; d.kind = (prev || "").trim() === "พรีวิว" ? "พรีวิวงบ" : "งบหุ้นรายตัว"; d.key = d.kind === "พรีวิวงบ" ? "preview" : "earnings";
       var sym = (q(".esym") || {}).textContent; d.title = sym && sym.trim() !== "งบ" ? sym.trim() : ""; d.sub = ((q(".eper") || {}).textContent || "").trim();
@@ -629,10 +629,14 @@ document.addEventListener("click", function (e) {
     } else if (card.matches("#reader")) {
       d.kind = ((q(".ameta .badge") || {}).textContent || "บทความ").trim(); d.key = d.kind === "บทวิเคราะห์" ? "analysis" : "article";
       d.title = ((q("h2") || {}).textContent || "").trim(); d.date = firstText(q(".ameta > span:not(.badge)"));
-      d.text = ((q(".rbody") || {}).textContent || "") || ((q(".sum") || {}).textContent || "");
+      d.text = ((q(".rbody") || {}).textContent || ""); d.alt = ((q(".sum") || {}).textContent || "").trim();
+      if (!d.text.trim()) { d.text = d.alt; d.alt = ""; }
+      var fl = d.text.replace(/^\s+/, "").split("\n")[0].trim();   // เนื้อบทความบางชิ้นขึ้นต้นด้วยหัวข้อซ้ำ ตัดออก
+      if (fl && d.title && (fl === d.title || d.title.indexOf(fl) === 0)) d.text = d.text.replace(/^\s+/, "").slice(fl.length);
     } else {
       d.key = "news"; d.date = firstText(q(".ntime")); d.text = ((q(".ntext") || {}).textContent || "");
     }
+    d.alt = d.alt.replace(/https?:\/\/\S+/g, "").replace(/[ \t]{2,}/g, " ").trim();
     d.text = d.text.replace(/https?:\/\/\S+/g, "").replace(/[ \t]{2,}/g, " ").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
     var seen = {}; card.querySelectorAll("[data-tkmenu]").forEach(function (b) { var t = (b.getAttribute("data-tkmenu") || "").trim(); if (t && !seen[t]) { seen[t] = 1; d.tickers.push(t); } });
     d.tickers = d.tickers.slice(0, 10);
@@ -655,12 +659,20 @@ document.addEventListener("click", function (e) {
     if (d.title) { m.font = "700 60px " + FONT; titleLines = wrapText(m, d.title, W - PAD * 2); y += titleLines.length * 76; }
     if (d.sub) { subLine = d.sub; y += 50; }
     y += 14;
-    var fs = 42, lh, lines, trunc = false, sizes = [42, 38, 34, 30], i, hOf = function (ls, l) { return ls.reduce(function (n, t) { return n + (t === "" ? Math.round(l * 0.5) : l); }, 0); };
-    for (i = 0; i < sizes.length; i++) {
-      fs = sizes[i]; lh = Math.round(fs * 1.55); m.font = "400 " + fs + "px " + FONT; lines = wrapText(m, d.text, innerW);
-      if (hOf(lines, lh) <= BODY_MAX_H) break;
+    var fs, lh, lines, trunc = false, sizes = [46, 42, 40], hOf = function (ls, l) { return ls.reduce(function (n, t) { return n + (t === "" ? Math.round(l * 0.5) : l); }, 0); };
+    function fit(text) {   // ลองขนาดใหญ่ไปเล็ก (ไม่เล็กกว่า 40px ให้อ่านออกบนมือถือ) คืน true ถ้าไม่ต้องตัด
+      for (var i = 0; i < sizes.length; i++) { fs = sizes[i]; lh = Math.round(fs * 1.55); m.font = "400 " + fs + "px " + FONT; lines = wrapText(m, text, innerW); if (hOf(lines, lh) <= BODY_MAX_H) return true; }
+      return false;
     }
-    if (hOf(lines, lh) > BODY_MAX_H) { trunc = true; while (lines.length > 1 && hOf(lines, lh) > BODY_MAX_H) lines.pop(); var last = lines[lines.length - 1]; while (last.length > 1 && m.measureText(last + "…").width > innerW) last = last.slice(0, -1); lines[lines.length - 1] = last + "…"; }
+    if (!fit(d.text)) {
+      if (!(d.alt && fit(d.alt))) {   // บทความยาวมีสรุปก็ใช้สรุป ไม่มีก็ตัดเนื้อ
+        fit(d.alt || d.text); trunc = true;
+        while (lines.length > 1 && hOf(lines, lh) > BODY_MAX_H) lines.pop();
+        var cut = lines.lastIndexOf("");   // ถอยไปจบที่ย่อหน้า ถ้าไม่เสียเนื้อเกินครึ่ง
+        if (cut > lines.length * 0.5) lines = lines.slice(0, cut);
+        else { var last = lines[lines.length - 1]; while (last.length > 1 && m.measureText(last + "…").width > innerW) last = last.slice(0, -1); lines[lines.length - 1] = last + "…"; }
+      }
+    }
     var panelY = y, panelH = 44 + hOf(lines, lh) + 44 + (trunc ? 54 : 0);
     y = panelY + panelH + 30;
     var plan = [];
@@ -704,7 +716,7 @@ document.addEventListener("click", function (e) {
     c.fillStyle = GOLD; rr(c, PAD + 40, panelY - 1, W - PAD * 2 - 80, 8, 4); c.fill();
     c.fillStyle = INK; c.font = "400 " + fs + "px " + FONT; c.textAlign = "left";
     var ly = panelY + 44; lines.forEach(function (l) { if (l === "") { ly += Math.round(lh * 0.5); return; } c.fillText(l, PAD + 44, ly + Math.round(fs * 1.08)); ly += lh; });
-    if (trunc) { c.fillStyle = GOLD; c.font = "600 28px " + FONT; c.fillText("ข้อความยาว แสดงบางส่วน อ่านต่อที่นักลงพุง", PAD + 44, panelY + panelH - 38); }
+    if (trunc) { c.fillStyle = GOLD; c.font = "600 28px " + FONT; c.fillText("อ่านต่อที่นักลงพุง ›", PAD + 44, panelY + panelH - 38); }
     plan.forEach(function (p) { c.save(); rr(c, p.x, p.y, p.w, p.h, 24); c.clip(); c.drawImage(p.im, p.x, p.y, p.w, p.h); c.restore(); });
     tkRows.forEach(function (p) {
       c.fillStyle = "rgba(255,255,255,.1)"; rr(c, p.x, p.y, p.w, 52, 26); c.fill(); c.strokeStyle = "rgba(245,179,1,.55)"; c.lineWidth = 2; rr(c, p.x, p.y, p.w, 52, 26); c.stroke();
