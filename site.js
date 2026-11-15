@@ -725,15 +725,94 @@ document.addEventListener("click", function (e) {
     c.fillStyle = GOLD; c.fillRect(0, H - 14, W, 14);
     return cv;
   }
-  function makeBlob(card) {
+  // ---- แบบแบ่งหน้า: เนื้อยาวแตกเป็นหลายรูป 1080x1350 (สัดส่วนที่ Facebook แสดงเต็ม) ตัวหนังสือ 42px ไม่ต้องย่อ ----
+  var PH = 1350, PAGE_LH = 66, MAX_PAGES = 8, MAX_TEXT_PAGES = 6;
+  function paintBg(c, H) {
+    var g = c.createLinearGradient(0, 0, W * 0.45, H); g.addColorStop(0, "#1b3180"); g.addColorStop(0.5, "#0f1f4d"); g.addColorStop(1, "#070e26"); c.fillStyle = g; c.fillRect(0, 0, W, H);
+    var r = c.createRadialGradient(950, 120, 0, 950, 120, 600); r.addColorStop(0, "rgba(120,145,255,.32)"); r.addColorStop(1, "rgba(120,145,255,0)"); c.fillStyle = r; c.fillRect(0, 0, W, H);
+    r = c.createRadialGradient(60, H - 120, 0, 60, H - 120, 680); r.addColorStop(0, "rgba(245,179,1,.12)"); r.addColorStop(1, "rgba(245,179,1,0)"); c.fillStyle = r; c.fillRect(0, 0, W, H);
+  }
+  function paintHead(c, pill) {
+    c.save(); c.shadowColor = "rgba(0,0,0,.4)"; c.shadowBlur = 24; c.fillStyle = GOLD; c.beginPath(); c.arc(112, 112, 58, 0, Math.PI * 2); c.fill(); c.restore();
+    var logo = document.querySelector(".brand img, .logo");
+    if (logo && logo.complete && logo.naturalWidth) { c.save(); c.beginPath(); c.arc(112, 112, 53, 0, Math.PI * 2); c.clip(); c.drawImage(logo, 59, 59, 106, 106); c.restore(); }
+    c.fillStyle = INK; c.textAlign = "left"; c.font = "700 48px " + FONT; c.fillText("นักลงพุง", 190, 126);
+    c.font = "400 28px " + FONT; var w0 = c.measureText(pill).width + 48, x = W - PAD - w0;
+    c.fillStyle = "rgba(255,255,255,.08)"; rr(c, x, 84, w0, 56, 28); c.fill(); c.strokeStyle = "rgba(255,255,255,.2)"; c.lineWidth = 2; rr(c, x, 84, w0, 56, 28); c.stroke();
+    c.fillStyle = MUTED; c.textAlign = "center"; c.fillText(pill, x + w0 / 2, 121);
+  }
+  function paintPanel(c, y, h) {
+    c.save(); c.shadowColor = "rgba(0,0,0,.38)"; c.shadowBlur = 38; c.shadowOffsetY = 14; c.fillStyle = PANEL; rr(c, PAD, y, W - PAD * 2, h, 36); c.fill(); c.restore();
+    var pg = c.createLinearGradient(0, y, 0, y + h); pg.addColorStop(0, "rgba(255,255,255,.11)"); pg.addColorStop(1, "rgba(255,255,255,.03)"); c.fillStyle = pg; rr(c, PAD, y, W - PAD * 2, h, 36); c.fill();
+    c.strokeStyle = "rgba(255,255,255,.17)"; c.lineWidth = 2; rr(c, PAD + 1, y + 1, W - PAD * 2 - 2, h - 2, 35); c.stroke();
+    c.fillStyle = GOLD; rr(c, PAD + 40, y - 1, W - PAD * 2 - 80, 8, 4); c.fill();
+  }
+  function textLines(d) { var m = document.createElement("canvas").getContext("2d"); m.font = "400 42px " + FONT; return wrapText(m, d.text, W - PAD * 2 - 88); }
+  function linesH(ls) { return ls.reduce(function (n, t) { return n + (t === "" ? PAGE_LH / 2 : PAGE_LH); }, 0); }
+  function drawPages(d, imgs) {
+    var m = document.createElement("canvas").getContext("2d"), lines = textLines(d), titleLines = [];
+    if (d.title) { m.font = "700 60px " + FONT; titleLines = wrapText(m, d.title, W - PAD * 2); }
+    var p1Top = 214 + 52 + 40 + titleLines.length * 76 + (d.sub ? 50 : 0) + 14, bottom = PH - 150, topN = 190, pages = [], i = 0, trunc = false;
+    while (i < lines.length || !pages.length) {
+      var top = pages.length ? topN : p1Top, cap = bottom - top - 88, used = 0, pl = [];
+      while (i < lines.length) { var h = lines[i] === "" ? PAGE_LH / 2 : PAGE_LH; if (used + h > cap) break; pl.push(lines[i]); used += h; i++; }
+      while (pl.length && pl[pl.length - 1] === "") { pl.pop(); used -= PAGE_LH / 2; }
+      while (i < lines.length && lines[i] === "") i++;
+      pages.push({ lines: pl, top: top, cap: cap });
+      if (pages.length >= MAX_TEXT_PAGES && i < lines.length) { trunc = true; break; }
+    }
+    if (trunc) { var lp = pages[pages.length - 1]; while (lp.lines.length > 1 && linesH(lp.lines) + 54 > lp.cap) lp.lines.pop(); }
+    var imgPages = imgs.slice(0, Math.max(0, MAX_PAGES - pages.length)), total = pages.length + imgPages.length, out = [];
+    var dt = d.date || new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short", year: "numeric" }).format(new Date());
+    function frame(k) {
+      var cv = document.createElement("canvas"); cv.width = W; cv.height = PH; var c = cv.getContext("2d");
+      paintBg(c, PH); paintHead(c, dt + "  ·  " + k + "/" + total); return { cv: cv, c: c };
+    }
+    function foot(c, k) {
+      if (k === total) {   // หน้าสุดท้าย: ชื่อหุ้นที่เกี่ยวข้อง
+        var x = PAD; c.font = "600 30px " + FONT;
+        d.tickers.forEach(function (t) {
+          var w = Math.round(c.measureText(t).width + 40); if (x + w > W - PAD) return;
+          c.fillStyle = "rgba(255,255,255,.1)"; rr(c, x, PH - 110, w, 52, 26); c.fill(); c.strokeStyle = "rgba(245,179,1,.55)"; c.lineWidth = 2; rr(c, x, PH - 110, w, 52, 26); c.stroke();
+          c.fillStyle = INK; c.textAlign = "center"; c.fillText(t, x + w / 2, PH - 74); x += w + 14;
+        });
+      } else { c.fillStyle = MUTED; c.font = "400 30px " + FONT; c.textAlign = "right"; c.fillText("อ่านต่อหน้าถัดไป ›", W - PAD, PH - 70); }
+      c.fillStyle = GOLD; c.fillRect(0, PH - 14, W, 14);
+    }
+    pages.forEach(function (pg, idx) {
+      var k = idx + 1, f = frame(k), c = f.c, last = idx === pages.length - 1, ph = last ? Math.max(140, linesH(pg.lines) + 88 + (trunc && idx === pages.length - 1 ? 54 : 0)) : bottom - pg.top;
+      if (k === 1) {
+        c.font = "700 28px " + FONT; var kw = c.measureText(d.kind).width + 56; c.fillStyle = GOLD; rr(c, PAD, 214, kw, 52, 26); c.fill();
+        c.fillStyle = "#14213d"; c.textAlign = "center"; c.fillText(d.kind, PAD + kw / 2, 251);
+        var ty = 214 + 52 + 40; c.textAlign = "left";
+        if (titleLines.length) { c.fillStyle = INK; c.font = "700 60px " + FONT; titleLines.forEach(function (l, j) { c.fillText(l, PAD, ty + 52 + j * 76); }); ty += titleLines.length * 76; }
+        if (d.sub) { c.fillStyle = MUTED; c.font = "400 32px " + FONT; c.fillText(d.sub, PAD, ty + 34); }
+      }
+      paintPanel(c, pg.top, ph);
+      c.fillStyle = INK; c.font = "400 42px " + FONT; c.textAlign = "left";
+      var ly = pg.top + 44; pg.lines.forEach(function (l) { if (l === "") { ly += PAGE_LH / 2; return; } c.fillText(l, PAD + 44, ly + 46); ly += PAGE_LH; });
+      if (trunc && idx === pages.length - 1) { c.fillStyle = GOLD; c.font = "600 30px " + FONT; c.fillText("อ่านต่อที่นักลงพุง ›", PAD + 44, pg.top + ph - 34); }
+      foot(c, k); out.push(f.cv);
+    });
+    imgPages.forEach(function (im, idx) {
+      var k = pages.length + idx + 1, f = frame(k), c = f.c, bw = W - PAD * 2, bh = bottom - topN;
+      var s = Math.min(bw / im.naturalWidth, bh / im.naturalHeight, 1.6), dw = Math.round(im.naturalWidth * s), dh = Math.round(im.naturalHeight * s), x = Math.round((W - dw) / 2), y = topN + Math.round((bh - dh) / 2);
+      c.save(); rr(c, x, y, dw, dh, 24); c.clip(); c.drawImage(im, x, y, dw, dh); c.restore();
+      foot(c, k); out.push(f.cv);
+    });
+    return out;
+  }
+  function toBlob(cv) { return new Promise(function (res, rej) { cv.toBlob(function (b) { b ? res(b) : rej(new Error("toBlob")); }, "image/png"); }); }
+  function makeBlobs(card) {   // คืน {blobs:[...], d} ข้อความสั้น = รูปเดียว ข้อความยาว = หลายหน้า
     var d = cardData(card);
     var fonts = (document.fonts && document.fonts.load) ? Promise.all([document.fonts.load('400 40px "IBM Plex Sans Thai"'), document.fonts.load('700 40px "IBM Plex Sans Thai"'), document.fonts.load('600 30px "IBM Plex Sans Thai"')]).catch(function () {}) : Promise.resolve();
     return Promise.all([fonts, imageSrcs(card)]).then(function (r) { return Promise.all(r[1].map(loadImg)); }).then(function (imgs) {
-      var cv = draw(d, imgs.filter(Boolean));
-      return new Promise(function (res, rej) { cv.toBlob(function (b) { b ? res(b) : rej(new Error("toBlob")); }, "image/png"); });
-    }).then(function (b) { return { blob: b, d: d }; });
+      imgs = imgs.filter(Boolean);
+      var cvs = linesH(textLines(d)) > 1000 ? drawPages(d, imgs) : [draw(d, imgs)];
+      return Promise.all(cvs.map(toBlob));
+    }).then(function (bl) { return { blobs: bl, d: d }; });
   }
-  function fname(d) { return "naklongpoong-" + d.key + (d.title && /^[A-Za-z0-9.\-]+$/.test(d.title) ? "-" + d.title : "") + "-" + new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date()) + ".png"; }
+  function fname(d, i, n) { return "naklongpoong-" + d.key + (d.title && /^[A-Za-z0-9.\-]+$/.test(d.title) ? "-" + d.title : "") + "-" + new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date()) + (n > 1 ? "-p" + (i + 1) : "") + ".png"; }
   function download(blob, name) { var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000); }
   function flash(b, text, keep) {
     var old = b.getAttribute("data-label") || b.textContent; b.setAttribute("data-label", old); b.textContent = text; clearTimeout(b._t);
@@ -745,20 +824,32 @@ document.addEventListener("click", function (e) {
     var card = b.closest(CARD_SEL); if (!card) return;
     var copy = b.hasAttribute("data-imgcopy"); b._busy = true; flash(b, "กำลังสร้างรูป...", true);
     var done = function (msg) { b._busy = false; flash(b, msg); };
-    var canClip = copy && window.ClipboardItem && navigator.clipboard && navigator.clipboard.write;
-    var p = makeBlob(card);
-    if (canClip) {   // ต้องเรียก clipboard.write ทันทีในจังหวะกด (Safari) โดยส่ง Promise ของรูปเข้าไป
-      navigator.clipboard.write([new ClipboardItem({ "image/png": p.then(function (r) { return r.blob; }) })]).then(function () { done("คัดลอกรูปแล้ว กดวางได้เลย"); }, function () {
-        p.then(function (r) { download(r.blob, fname(r.d)); done("คัดลอกไม่ได้ โหลดไฟล์ให้แทน"); }, function () { done("สร้างรูปไม่สำเร็จ"); });
-      });
+    if (!card._pg || Date.now() - card._pg.t > 300000) { card._pg = { t: Date.now(), p: makeBlobs(card) }; b._page = 0; }   // จำรูปที่สร้างแล้ว 5 นาที
+    var p = card._pg.p;
+    if (copy) {
+      var idx = b._page || 0, canClip = window.ClipboardItem && navigator.clipboard && navigator.clipboard.write;
+      var item = p.then(function (r) { return r.blobs[Math.min(idx, r.blobs.length - 1)]; });
+      var ok = function (r) {
+        var n = r.blobs.length; b._page = (idx + 1) % n;
+        done(n > 1 ? "คัดลอกหน้า " + (idx + 1) + "/" + n + " แล้ว กดอีกครั้งเพื่อหน้า " + (b._page + 1) : "คัดลอกรูปแล้ว กดวางได้เลย");
+      };
+      if (canClip) {   // ต้องเรียก clipboard.write ทันทีในจังหวะกด (Safari) โดยส่ง Promise ของรูปเข้าไป
+        navigator.clipboard.write([new ClipboardItem({ "image/png": item })]).then(function () { p.then(ok); }, function () {
+          p.then(function (r) { r.blobs.forEach(function (bl, i) { setTimeout(function () { download(bl, fname(r.d, i, r.blobs.length)); }, i * 500); }); done("คัดลอกไม่ได้ โหลดไฟล์ให้แทน"); }, function () { done("สร้างรูปไม่สำเร็จ"); });
+        });
+      } else {
+        p.then(function (r) { r.blobs.forEach(function (bl, i) { setTimeout(function () { download(bl, fname(r.d, i, r.blobs.length)); }, i * 500); }); done("เบราว์เซอร์นี้คัดลอกรูปไม่ได้ โหลดไฟล์ให้แทน"); }, function () { done("สร้างรูปไม่สำเร็จ"); });
+      }
       return;
     }
     p.then(function (r) {
-      var file = null; try { file = new File([r.blob], fname(r.d), { type: "image/png" }); } catch (x) {}
-      if (!copy && file && navigator.canShare && navigator.canShare({ files: [file] }) && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
-        return navigator.share({ files: [file] }).catch(function (x) { if (x && x.name !== "AbortError") throw x; }).then(function () { done("บันทึกรูป"); });
+      var n = r.blobs.length, files = [];
+      try { files = r.blobs.map(function (bl, i) { return new File([bl], fname(r.d, i, n), { type: "image/png" }); }); } catch (x) {}
+      if (files.length && navigator.canShare && navigator.canShare({ files: files }) && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
+        return navigator.share({ files: files }).catch(function (x) { if (x && x.name !== "AbortError") throw x; }).then(function () { done("บันทึกรูป"); });
       }
-      download(r.blob, fname(r.d)); done(copy ? "เบราว์เซอร์นี้คัดลอกรูปไม่ได้ โหลดไฟล์ให้แทน" : "โหลดรูปแล้ว");
+      r.blobs.forEach(function (bl, i) { setTimeout(function () { download(bl, fname(r.d, i, n)); }, i * 500); });
+      done(n > 1 ? "โหลดรูปแล้ว " + n + " หน้า" : "โหลดรูปแล้ว");
     }).catch(function () { done("สร้างรูปไม่สำเร็จ"); });
   });
 
