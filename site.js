@@ -13,6 +13,7 @@ window.SITE = {
   ipo: true,        // แท็บ หุ้น IPO ใหม่ (หุ้นสหรัฐที่เข้าตลาดใน 1-5 ปี ลิงก์ไปทำการบ้านต่อในหน้า dashboard) false = ซ่อนทั้งเมนูและการ์ด
   ipoLive: false,   // false = สมาชิกเห็นหน้า Coming Soon (ดูตัวจริงที่ ipo.html?preview=1) true = เปิดรายชื่อจริง
   etf: true,        // แท็บ ETF (รายชื่อ ETF ใหญ่ของสหรัฐ ค้นหา/กรอง/เรียงได้) false = ซ่อนทั้งเมนูและการ์ด
+  map: true,        // แท็บ My Map การลงทุน (แผนที่ห่วงโซ่หุ้น AI + หุ้น Cyclical 8 กลุ่ม) false = ซ่อนจากเมนู
   econ: true,        // แท็บ ตัวเลขเศรษฐกิจ (CPI งบจ้างงาน GDP ฯลฯ คืออะไร กระทบตลาดอย่างไร) false = ซ่อนทั้งเมนู
   econLive: true,   // false = สมาชิกเห็นหน้า Coming Soon (ดูตัวจริงที่ econ.html?preview=1) true = เปิดเนื้อหาจริง
   newHours: 48,     // โพสต์ที่ใหม่กว่านี้ (ชั่วโมง) จะมีป้าย NEW
@@ -88,6 +89,7 @@ window.buildNav = function (current) {
   items.push(["feed", "feed.html", "ฟีดของฉัน"]);
   var extra = [];   // เมนูรอง อยู่ในแผงของปุ่ม "เพิ่มเติม" [id, href, ชื่อ, กลุ่ม] ให้แถบเมนูสั้นและไม่รก
   if (SITE.basics) extra.push(["basics", "basics.html", "ความรู้พื้นฐาน", "เรียนรู้"]);
+  if (SITE.map) extra.push(["map", "map.html", "My Map การลงทุน", "เรียนรู้"]);
   if (SITE.econ) extra.push(["econ", "econ.html", "ตัวเลขเศรษฐกิจ", "เรียนรู้"]);
   if (SITE.invest) extra.push(["invest", "invest.html", "แนวทางการลงทุน", "เรียนรู้"]);
   if (SITE.course) extra.push(["course", "course.html", "นักลงพุงลุยวอลล์สตรีท", "เรียนรู้"]);
