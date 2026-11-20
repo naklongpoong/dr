@@ -270,13 +270,15 @@ var ICON = {
   ipo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.5 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>',
   etf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M16 3.5A9 9 0 0 1 20.5 8H16z"/></svg>',
   earnings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4zM4 10h16M10 4v16"/></svg>',
-  news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-8 4 16 3-8h6"/></svg>'
+  news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-8 4 16 3-8h6"/></svg>',
+  map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="4.5" cy="5.5" r="2"/><circle cx="19.5" cy="5.5" r="2"/><circle cx="4.5" cy="18.5" r="2"/><circle cx="19.5" cy="18.5" r="2"/><path d="M6 7l4.2 3.6M18 7l-4.2 3.6M6 17l4.2-3.6M18 17l-4.2-3.6"/></svg>'
 };
 var PAGES = [
   { key: "dr", href: "dr.html", on: true, title: "รวม DR ในตลาดหุ้นไทย", desc: "ค้นหาและกรอง DR ทุกตัว ตามหุ้น ประเทศ กลุ่มอุตสาหกรรม และผู้ออก กดดูราคาบนเว็บ SET ได้ทันที", go: "เข้าดูรายการ DR ›" },
   { key: "articles", href: "articles.html", on: SITE.articles, title: "บทความ & บทวิเคราะห์", desc: "บทความและบทวิเคราะห์หุ้นต่างประเทศจากนักลงพุง กรองตามประเภทและชื่อหุ้นได้", go: "เข้าอ่านบทความ ›" },
   { key: "news", href: "news.html", on: SITE.news, hidden: !SITE.news, title: "ข่าว", desc: "ข่าวและหุ้นสแกน กรองตามชื่อหุ้นได้", go: "เข้าดูข่าว ›" },
   { key: "earnings", href: "earnings.html", on: SITE.earnings, hidden: !SITE.earnings, title: "พรีวิวงบ & งบ", desc: "พรีวิวงบและงบหุ้นรายตัว กรองตามชื่อหุ้นได้", go: "เข้าดูงบ ›" },
+  { key: "map", href: "map.html", on: SITE.map, hidden: !SITE.map, title: "Mind Map การลงทุน", desc: "แผนที่หุ้น 6 มุมมอง ห่วงโซ่ AI, Cyclical, SaaS, การเงิน, กลาโหม+โดรน และ Space economy ดูว่าแต่ละกลุ่มหากำไรยังไง", go: "เปิด Mind Map ›" },
   { key: "basics", href: "basics.html", on: true, hidden: !SITE.basics, badge: SITE.basicsLive ? "" : "Coming Soon", title: "ความรู้พื้นฐาน", desc: "ความรู้เริ่มต้นสำหรับมือใหม่ อ่านเข้าใจง่าย", go: "ดูหน้าความรู้พื้นฐาน ›" },
   { key: "invest", href: "invest.html", on: true, hidden: !SITE.invest, title: "แนวทางการลงทุน", desc: "เกมตอบ 8 ข้อ ดูว่าสไตล์การลงทุนของคุณเป็นแบบไหน", go: "เล่นเกมเลย ›" },
   { key: "calc", href: "calc.html", on: true, hidden: !SITE.calc, title: "คำนวณดอกเบี้ยทบต้น", desc: "กรอกเงินต้น เงินออมต่อเดือน ผลตอบแทน ปันผล (Re-invest หรือไม่ Re-invest) แล้วดูว่าเงินโตแค่ไหน", go: "ลองคำนวณ ›" },
