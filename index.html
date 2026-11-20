@@ -180,6 +180,19 @@ a.card:hover .go { text-decoration: underline; }
   .hero::before, .hero::after { width: 220px; height: 82px; }
 }
 @media (prefers-reduced-motion: reduce) { .logo, h1, .lede, .card { animation: none; } a.card:hover { transform: none; } }
+
+/* ธีมลอยกระทง: โชว์เฉพาะ 21–25 พ.ย. 2026 (คลาส kt ถูกใส่โดยสคริปต์ท้ายหน้า ลบทิ้งเองหลังหมดช่วง) */
+.kt-wrap { position: relative; width: 168px; margin: 0 auto 8px; }
+.kt-wrap .logo { margin: 0; }
+.kt-krathong { position: absolute; left: -4%; top: 40%; width: 34%; z-index: 2; filter: drop-shadow(0 0 10px rgba(255,190,70,.75)); animation: ktbob 3s ease-in-out infinite; }
+.kt-flame { transform-origin: 50% 100%; animation: ktflame 1.2s ease-in-out infinite alternate; }
+@keyframes ktbob { 50% { transform: translateY(-4px) rotate(-3deg); } }
+@keyframes ktflame { from { transform: scale(1) rotate(-4deg); } to { transform: scale(1.18,1.1) rotate(4deg); } }
+.kt-lantern { position: absolute; bottom: -40px; width: 14px; height: 18px; border-radius: 4px 4px 6px 6px; background: radial-gradient(circle at 50% 70%, #ffe08a, #f5a301 70%); box-shadow: 0 0 14px 5px rgba(255,170,40,.55); opacity: 0; pointer-events: none; z-index: 0; animation: ktup linear infinite; }
+@keyframes ktup { 0% { transform: translateY(0) translateX(0); opacity: 0; } 12% { opacity: .9; } 85% { opacity: .7; } 100% { transform: translateY(-330px) translateX(18px); opacity: 0; } }
+.kt-tag { display: inline-block; margin: 0 0 10px; padding: 5px 14px; border-radius: 999px; font-size: .9rem; font-weight: 600; color: #3a2a00; background: linear-gradient(90deg,#ffe08a,#f5b301); box-shadow: 0 0 16px rgba(245,179,1,.45); animation: rise .7s ease both; }
+@media (prefers-reduced-motion: reduce) { .kt-krathong, .kt-flame, .kt-lantern { animation: none; } .kt-lantern { display: none; } }
+@media (max-width: 640px) { .kt-wrap { width: 128px; } }
 </style>
 </head>
 <body>
@@ -594,6 +607,16 @@ inflCard(window.PPI_LATEST, "p", "ppi");
   var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
   box.innerHTML = "<small>ศัพท์วันนี้</small><h3>" + esc(t.t) + "<span>" + esc(t.en) + "</span></h3><p>" + t.d.replace(/<[^>]+>/g, "") + '</p><div class="wod-links"><a href="basics.html#' + esc(t.id) + '">อ่านต่อ ›</a><a href="basics.html?quiz=1">ลองทำควิซ ›</a></div>';
   box.hidden = false;
+})();
+
+// ธีมลอยกระทง (ลอยกระทง อ. 24 พ.ย. 2026) โชว์ 21–25 พ.ย. แล้วหายเอง
+(function () {
+  var now = Date.now(); if (now < Date.parse("2026-11-20T17:00:00Z") || now >= Date.parse("2026-11-25T17:00:00Z")) return;
+  var logo = document.querySelector(".hero .logo"), hero = document.querySelector(".hero"); if (!logo || !hero) return;
+  var wrap = document.createElement("div"); wrap.className = "kt-wrap"; logo.parentNode.insertBefore(wrap, logo); wrap.appendChild(logo);
+  wrap.insertAdjacentHTML("beforeend", '<svg class="kt-krathong" viewBox="0 0 100 90" aria-hidden="true"><g fill="#2f8f4e"><ellipse cx="50" cy="70" rx="46" ry="14"/></g><g fill="#ff8fb8" stroke="#c2417a" stroke-width="1.5"><path d="M50 62 C38 58 30 46 34 36 C44 40 50 50 50 62Z"/><path d="M50 62 C62 58 70 46 66 36 C56 40 50 50 50 62Z"/><path d="M50 64 C28 64 14 56 12 48 C28 46 44 52 50 64Z"/><path d="M50 64 C72 64 86 56 88 48 C72 46 56 52 50 64Z"/></g><rect x="47" y="30" width="6" height="26" rx="2" fill="#fff6d6" stroke="#d9b45a"/><g class="kt-flame"><path d="M50 8 C58 18 56 26 50 29 C44 26 42 18 50 8Z" fill="#ffb300"/><path d="M50 16 C54 21 53 25 50 27 C47 25 46 21 50 16Z" fill="#fff3b0"/></g></svg>');
+  var tag = document.createElement("div"); tag.className = "kt-tag"; tag.textContent = "สุขสันต์วันลอยกระทง 24 พ.ย."; wrap.parentNode.insertBefore(tag, wrap);
+  for (var i = 0; i < 9; i++) { var l = document.createElement("i"); l.className = "kt-lantern"; l.style.left = (6 + i * 11) + "%"; l.style.animationDuration = (9 + (i * 7 % 6)) + "s"; l.style.animationDelay = (-i * 1.7) + "s"; hero.appendChild(l); }
 })();
 
 // ใช้โลโก้เป็น favicon
