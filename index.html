@@ -193,6 +193,15 @@ a.card:hover .go { text-decoration: underline; }
 .kt-tag { display: inline-block; margin: 0 0 10px; padding: 5px 14px; border-radius: 999px; font-size: .9rem; font-weight: 600; color: #3a2a00; background: linear-gradient(90deg,#ffe08a,#f5b301); box-shadow: 0 0 16px rgba(245,179,1,.45); animation: rise .7s ease both; }
 @media (prefers-reduced-motion: reduce) { .kt-krathong, .kt-flame, .kt-lantern { animation: none; } .kt-lantern { display: none; } }
 @media (max-width: 640px) { .kt-wrap { width: 128px; } }
+
+/* ธีม Thanksgiving: ใบไม้ร่วงแทนโคม · ธีม Black Friday: ป้ายสีดำทอง จุดแดงวิบวับ */
+.th-tg .kt-lantern { width: 14px; height: 14px; border-radius: 0 100% 0 100%; background: linear-gradient(135deg,#e8832a,#b8441a); box-shadow: none; bottom: auto; top: -20px; animation-name: ktfall; }
+.th-tg .kt-flame, .th-tg .kt-krathong { filter: drop-shadow(0 0 8px rgba(240,138,28,.6)); }
+.th-bf .kt-lantern { width: 8px; height: 8px; border-radius: 50%; background: #e11d2e; box-shadow: 0 0 12px 4px rgba(225,29,46,.6); animation-name: ktblink; bottom: auto; top: 12%; }
+.th-bf .kt-tag { color: #fff; background: linear-gradient(90deg,#111,#2a2a2a); border: 1.5px solid var(--gold); box-shadow: 0 0 16px rgba(245,179,1,.5); }
+.th-tg .kt-tag { color: #fff; background: linear-gradient(90deg,#b8441a,#e8832a); box-shadow: 0 0 16px rgba(232,131,42,.5); }
+@keyframes ktfall { 0% { transform: translateY(0) rotate(0); opacity: 0; } 10% { opacity: .95; } 100% { transform: translateY(340px) translateX(30px) rotate(300deg); opacity: 0; } }
+@keyframes ktblink { 0%,100% { opacity: .15; transform: scale(.7); } 50% { opacity: 1; transform: scale(1.2); } }
 </style>
 </head>
 <body>
@@ -609,13 +618,20 @@ inflCard(window.PPI_LATEST, "p", "ppi");
   box.hidden = false;
 })();
 
-// ธีมลอยกระทง (ลอยกระทง อ. 24 พ.ย. 2026) โชว์ 21–25 พ.ย. แล้วหายเอง
+// ธีมตามเทศกาล (เลือกตามวันที่ ไทย): ลอยกระทง 21–25 พ.ย. · Thanksgiving 26 พ.ย. · Black Friday 27–28 พ.ย. 2026 แล้วหายเอง
 (function () {
-  var now = Date.now(); if (now < Date.parse("2026-11-20T17:00:00Z") || now >= Date.parse("2026-11-25T17:00:00Z")) return;
-  var logo = document.querySelector(".hero .logo"), hero = document.querySelector(".hero"); if (!logo || !hero) return;
+  var now = Date.now(), T = [
+    { from: "2026-11-20T17:00:00Z", to: "2026-11-25T17:00:00Z", cls: "kt", tag: "สุขสันต์วันลอยกระทง 24 พ.ย.", svg: '<svg class="kt-krathong" viewBox="0 0 100 90" aria-hidden="true"><g fill="#2f8f4e"><ellipse cx="50" cy="70" rx="46" ry="14"/></g><g fill="#ff8fb8" stroke="#c2417a" stroke-width="1.5"><path d="M50 62 C38 58 30 46 34 36 C44 40 50 50 50 62Z"/><path d="M50 62 C62 58 70 46 66 36 C56 40 50 50 50 62Z"/><path d="M50 64 C28 64 14 56 12 48 C28 46 44 52 50 64Z"/><path d="M50 64 C72 64 86 56 88 48 C72 46 56 52 50 64Z"/></g><rect x="47" y="30" width="6" height="26" rx="2" fill="#fff6d6" stroke="#d9b45a"/><g class="kt-flame"><path d="M50 8 C58 18 56 26 50 29 C44 26 42 18 50 8Z" fill="#ffb300"/><path d="M50 16 C54 21 53 25 50 27 C47 25 46 21 50 16Z" fill="#fff3b0"/></g></svg>' },
+    { from: "2026-11-25T17:00:00Z", to: "2026-11-26T17:00:00Z", cls: "tg", tag: "Happy Thanksgiving · ตลาดหุ้นสหรัฐปิดวันนี้", svg: '<svg class="kt-krathong" viewBox="0 0 100 90" aria-hidden="true"><ellipse cx="50" cy="56" rx="40" ry="30" fill="#f08a1c" stroke="#b85c00" stroke-width="2"/><path d="M50 26 C34 34 34 78 50 86 C66 78 66 34 50 26Z" fill="#e0740c" opacity=".7"/><path d="M50 26 C20 36 20 76 50 86" fill="none" stroke="#b85c00" stroke-width="1.5"/><path d="M50 26 C80 36 80 76 50 86" fill="none" stroke="#b85c00" stroke-width="1.5"/><rect x="46" y="12" width="8" height="16" rx="3" fill="#5a8a2f"/><path d="M54 18 C64 12 70 16 68 24" fill="none" stroke="#5a8a2f" stroke-width="2.5" stroke-linecap="round"/></svg>' },
+    { from: "2026-11-26T17:00:00Z", to: "2026-11-28T17:00:00Z", cls: "bf", tag: "Black Friday · ตลาดสหรัฐปิดเร็ว 13:00 ET", svg: '<svg class="kt-krathong" viewBox="0 0 100 90" aria-hidden="true"><path d="M30 34 L24 84 L76 84 L70 34Z" fill="#111" stroke="#f5b301" stroke-width="2.5"/><path d="M38 34 C38 14 62 14 62 34" fill="none" stroke="#f5b301" stroke-width="3.5" stroke-linecap="round"/><circle cx="50" cy="58" r="15" fill="#e11d2e"/><text x="50" y="64" text-anchor="middle" font-size="17" font-weight="700" fill="#fff" font-family="sans-serif">%</text></svg>' }
+  ], th = null;
+  for (var k = 0; k < T.length; k++) if (now >= Date.parse(T[k].from) && now < Date.parse(T[k].to)) th = T[k];
+  var q = /[?&]fest=(kt|tg|bf)\b/.exec(location.search); if (q) for (k = 0; k < T.length; k++) if (T[k].cls === q[1]) th = T[k]; // ?fest=tg ใช้ดูตัวอย่าง
+  var logo = document.querySelector(".hero .logo"), hero = document.querySelector(".hero"); if (!th || !logo || !hero) return;
+  hero.classList.add("th-" + th.cls);
   var wrap = document.createElement("div"); wrap.className = "kt-wrap"; logo.parentNode.insertBefore(wrap, logo); wrap.appendChild(logo);
-  wrap.insertAdjacentHTML("beforeend", '<svg class="kt-krathong" viewBox="0 0 100 90" aria-hidden="true"><g fill="#2f8f4e"><ellipse cx="50" cy="70" rx="46" ry="14"/></g><g fill="#ff8fb8" stroke="#c2417a" stroke-width="1.5"><path d="M50 62 C38 58 30 46 34 36 C44 40 50 50 50 62Z"/><path d="M50 62 C62 58 70 46 66 36 C56 40 50 50 50 62Z"/><path d="M50 64 C28 64 14 56 12 48 C28 46 44 52 50 64Z"/><path d="M50 64 C72 64 86 56 88 48 C72 46 56 52 50 64Z"/></g><rect x="47" y="30" width="6" height="26" rx="2" fill="#fff6d6" stroke="#d9b45a"/><g class="kt-flame"><path d="M50 8 C58 18 56 26 50 29 C44 26 42 18 50 8Z" fill="#ffb300"/><path d="M50 16 C54 21 53 25 50 27 C47 25 46 21 50 16Z" fill="#fff3b0"/></g></svg>');
-  var tag = document.createElement("div"); tag.className = "kt-tag"; tag.textContent = "สุขสันต์วันลอยกระทง 24 พ.ย."; wrap.parentNode.insertBefore(tag, wrap);
+  wrap.insertAdjacentHTML("beforeend", th.svg);
+  var tag = document.createElement("div"); tag.className = "kt-tag"; tag.textContent = th.tag; wrap.parentNode.insertBefore(tag, wrap);
   for (var i = 0; i < 9; i++) { var l = document.createElement("i"); l.className = "kt-lantern"; l.style.left = (6 + i * 11) + "%"; l.style.animationDuration = (9 + (i * 7 % 6)) + "s"; l.style.animationDelay = (-i * 1.7) + "s"; hero.appendChild(l); }
 })();
 
