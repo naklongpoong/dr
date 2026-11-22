@@ -25,9 +25,9 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202611201818"></script>
-<script src="terms.js?v=202611201818"></script>
-<script src="gate.js?v=202611201818"></script>
+<script src="site.js?v=202611221319"></script>
+<script src="terms.js?v=202611221319"></script>
+<script src="gate.js?v=202611221319"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -294,6 +294,7 @@ var ICON = {
   earnings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4zM4 10h16M10 4v16"/></svg>',
   news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-8 4 16 3-8h6"/></svg>',
   fundflow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h13"/><path d="M13 3l4 4-4 4"/><path d="M20 17H7"/><path d="M11 13l-4 4 4 4"/></svg>',
+  stars: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>',
   map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="4.5" cy="5.5" r="2"/><circle cx="19.5" cy="5.5" r="2"/><circle cx="4.5" cy="18.5" r="2"/><circle cx="19.5" cy="18.5" r="2"/><path d="M6 7l4.2 3.6M18 7l-4.2 3.6M6 17l4.2-3.6M18 17l-4.2-3.6"/></svg>'
 };
 var PAGES = [
@@ -303,6 +304,7 @@ var PAGES = [
   { key: "earnings", href: "earnings.html", on: SITE.earnings, hidden: !SITE.earnings, title: "พรีวิวงบ & งบ", desc: "พรีวิวงบและงบหุ้นรายตัว กรองตามชื่อหุ้นได้", go: "เข้าดูงบ ›" },
   { key: "map", href: "map.html", on: SITE.map, hidden: !SITE.map, title: "Mind Map การลงทุน", desc: "แผนที่หุ้น 8 มุมมอง ห่วงโซ่ AI, Cyclical, SaaS, การเงิน, กลาโหม+โดรน, Space economy, สุขภาพ และหุ้นปันผล+ETF ปั้นพอร์ต ดูว่าแต่ละกลุ่มทำเงินยังไง", go: "เปิด Mind Map ›" },
   { key: "fundflow", href: "fundflow.html", on: SITE.fundflow, hidden: !SITE.fundflow, title: "เงินไหลไปไหน (Fund flow)", desc: "ตอนสินทรัพย์ถูกเทขายพร้อมกัน เงินออกจากอะไร หนีไปไหน ทำไม และใครเป็นคนทำ อ้างอิงสถานการณ์ตลาดล่าสุด", go: "เปิดแผนที่เงินไหล ›" },
+  { key: "stars", href: "stars.html", on: SITE.stars, hidden: !SITE.stars, title: "7 นางฟ้า ทำเงินยังไง", desc: "Apple, Microsoft, Alphabet, Amazon, Nvidia, Meta, Tesla บวก AVGO, SPCX, ANT รายได้มาจากอะไร ดูแบบการ์ดตัวละคร พร้อมโยงว่าใครได้ประโยชน์", go: "เปิดการ์ดตัวละคร ›" },
   { key: "basics", href: "basics.html", on: true, hidden: !SITE.basics, badge: SITE.basicsLive ? "" : "Coming Soon", title: "ความรู้พื้นฐาน", desc: "ความรู้เริ่มต้นสำหรับมือใหม่ อ่านเข้าใจง่าย", go: "ดูหน้าความรู้พื้นฐาน ›" },
   { key: "invest", href: "invest.html", on: true, hidden: !SITE.invest, title: "แนวทางการลงทุน", desc: "เกมตอบ 8 ข้อ ดูว่าสไตล์การลงทุนของคุณเป็นแบบไหน", go: "เล่นเกมเลย ›" },
   { key: "calc", href: "calc.html", on: true, hidden: !SITE.calc, title: "คำนวณดอกเบี้ยทบต้น", desc: "กรอกเงินต้น เงินออมต่อเดือน ผลตอบแทน ปันผล (Re-invest หรือไม่ Re-invest) แล้วดูว่าเงินโตแค่ไหน", go: "ลองคำนวณ ›" },
