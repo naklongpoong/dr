@@ -77,8 +77,18 @@ h1{font-size:clamp(1.55rem,4.6vw,2.2rem);font-weight:700;line-height:1.2;margin:
 .arr{display:grid;place-items:center;font-size:1.4rem;color:var(--c)}
 .note{margin-top:10px;font-size:.82rem;color:#9aa8c7}
 .foot{margin:22px 4px 0;color:var(--muted);font-size:.85rem}
+.ocard .sub{margin:12px 0 2px;font-size:.82rem;font-weight:700;color:var(--c)}
+.orow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;margin:9px 0}
+.orow .l{font-size:.9rem}.orow .v{font-weight:700;white-space:nowrap;font-size:.92rem}.orow .v.na{font-weight:400;color:#9aa8c7;font-size:.82rem}
+.orow .tr{grid-column:1/-1;height:8px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.orow .tr i{display:block;height:100%;border-radius:99px}
+.orow .n{grid-column:1/-1;font-size:.78rem;color:#9aa8c7;line-height:1.45}
+.ins{display:grid;gap:4px;margin:10px 0 0;padding:9px 11px;border-radius:12px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.12)}
+.ins div{display:flex;gap:8px;font-size:.88rem}.ins div span:last-child{margin-left:auto;font-weight:700;white-space:nowrap}.ins .ng{color:#ff9a9a}
+.ocard .sm{margin:10px 0 0;font-size:.88rem;color:#e9eefb}
+.gd{display:inline-block;font-size:.72rem;font-weight:600;padding:1px 9px;border-radius:999px;border:1px solid;margin-top:6px}
+.gd.o{color:#7be3b0;border-color:rgba(123,227,176,.6)}.gd.s{color:#ffd45e;border-color:rgba(255,212,94,.6)}
 @media (max-width:760px){.flow{grid-template-columns:1fr}.arr{transform:rotate(90deg);height:20px}}
-@media (max-width:640px){.wrap{padding:14px 12px 48px}.hero{padding:16px 16px 20px}.brand img{width:72px}.stage{padding:14px 12px}.grid{grid-template-columns:1fr}.tabs{display:grid;grid-template-columns:1fr 1fr 1fr}.tab{padding:8px 6px;font-size:.9rem}}
+@media (max-width:640px){.wrap{padding:14px 12px 48px}.hero{padding:16px 16px 20px}.brand img{width:72px}.stage{padding:14px 12px}.grid{grid-template-columns:1fr}.tabs{display:grid;grid-template-columns:1fr 1fr}.tab{padding:8px 6px;font-size:.9rem}}
 @media (prefers-reduced-motion:reduce){.card{animation:none}}
 </style>
 </head>
@@ -97,6 +107,7 @@ h1{font-size:clamp(1.55rem,4.6vw,2.2rem);font-weight:700;line-height:1.2;margin:
   <div class="tabs" role="group" aria-label="เลือกมุมมอง">
     <button class="tab" id="t-se" aria-pressed="true" type="button">7 นางฟ้า</button>
     <button class="tab" id="t-nw" aria-pressed="false" type="button">ตัวใหม่ 3 ตัว</button>
+    <button class="tab" id="t-ou" aria-pressed="false" type="button">เงินออกไปไหน</button>
     <button class="tab" id="t-fl" aria-pressed="false" type="button">ใครได้ประโยชน์</button>
   </div>
   <section id="v-se" class="stage">
@@ -107,8 +118,12 @@ h1{font-size:clamp(1.55rem,4.6vw,2.2rem);font-weight:700;line-height:1.2;margin:
     <div class="banner"><b>3 ตัวใหม่:</b> Broadcom (AVGO) รับทำชิป AI เฉพาะทางให้ยักษ์ใหญ่ · SpaceX (SPCX) เข้าตลาดเมื่อ 12 มิ.ย. 2026 · Anthropic (ANT) เพิ่งเข้าตลาดเมื่อ 19 พ.ย. 2026 (ตามข่าว CNBC) ตัวหลังใหม่มาก ตัวเลขที่มีตอนนี้มาจากเอกสาร S-1 ที่ยื่นก่อนเข้าตลาด</div>
     <div class="grid" id="g-nw"></div>
   </section>
+  <section id="v-ou" class="stage" hidden>
+    <div class="banner"><b>เงินออกไปไหน:</b> ทีละบริษัท ว่าเงินที่หาได้ในรอบล่าสุดถูกเอาไปสร้างอะไร วิจัยเท่าไหร่ คืนผู้ถือหุ้นเท่าไหร่ และจ่ายให้ใครบ้าง แถบเทียบขนาดกันเฉพาะในกลุ่มเดียวกัน แต่ละบริษัทปิดงบคนละช่วง (Amazon เป็นยอดย้อนหลัง 12 เดือน ที่เหลือเป็นไตรมาสเดียว) เลขเปรียบข้ามบริษัทตรงๆ ไม่ได้ ป้ายสีเขียว = ตัวเลขจากประกาศของบริษัท ป้ายสีเหลือง = จากบทความสรุปงบ ตรวจกับตัวเอกสารก่อนใช้ตัดสินใจ ช่อง "ประกาศไม่ระบุ" คือบริษัทไม่ได้แยกตัวเลขนี้ นักลงพุงจึงไม่ใส่ตัวเลขให้</div>
+    <div class="grid" id="g-ou"></div>
+  </section>
   <section id="v-fl" class="stage" hidden>
-    <div class="banner"><b>เงินไหลไปถึงใคร:</b> เงินที่ยักษ์ใหญ่จ่ายออกไปหรือหามาได้ จะไหลต่อไปถึงใครบ้าง ชื่อหุ้นในช่อง "ผู้รับ" คือห่วงโซ่ที่นักลงพุงอ่านเอง ไม่ได้ยืนยันว่าไตรมาสนี้ได้ตัวเลขเท่าไหร่ และไม่ใช่คำแนะนำซื้อขาย (ห่วงโซ่ชิป AI แบบละเอียดดูได้ในหน้า Mind Map)</div>
+    <div class="banner"><b>เงินไหลไปถึงใคร:</b> (ตัวเลขเงินออกของแต่ละบริษัทอยู่ที่แท็บ "เงินออกไปไหน") เงินที่ยักษ์ใหญ่จ่ายออกไปหรือหามาได้ จะไหลต่อไปถึงใครบ้าง ชื่อหุ้นในช่อง "ผู้รับ" คือห่วงโซ่ที่นักลงพุงอ่านเอง ไม่ได้ยืนยันว่าไตรมาสนี้ได้ตัวเลขเท่าไหร่ และไม่ใช่คำแนะนำซื้อขาย (ห่วงโซ่ชิป AI แบบละเอียดดูได้ในหน้า Mind Map)</div>
     <div id="quests"></div>
   </section>
   <p class="foot">ตัวเลขมาจากประกาศผลประกอบการและข่าวล่าสุด ณ 22 พ.ย. 2026 แต่ละบริษัทปิดงบคนละเดือน จึงเทียบกันตรงๆ ไม่ได้ทั้งหมด เนื้อหาเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน</p>
@@ -221,6 +236,144 @@ function card(d,isNew){
 }
 D.forEach(function(d){$("g-se").appendChild(card(d,false))});
 N.forEach(function(d){$("g-nw").appendChild(card(d,true))});
+
+var KC={capex:"#5ea8ff",rd:"#b48cff",buy:"#f5b301",div:"#5de0b0",inv:"#ff7a9c",com:"#ff9d4d"};
+/* ทุกตัวเลข = พันล้านดอลลาร์ ; rows: [ชนิด, ป้าย, ค่า|null, หมายเหตุ] */
+var O=[
+{id:"NVDA",ico:"🎮",c:"#76d34f",nm:"Nvidia",per:"ไตรมาสสิ้นสุด 25 ต.ค. 2026 (FY27 Q3)",g:"o",
+ ins:[["เงินที่ธุรกิจหาได้ (กระแสเงินสดจากการดำเนินงาน)",48.25],["เงินสดอิสระ (หลังหัก capex)",43.78]],
+ grp:[["เงินที่ออกไปในไตรมาสนี้",[
+  ["buy","ซื้อหุ้นคืน",22.12,"วงเงินซื้อคืนเหลือ 227.3B หลังบอร์ดอนุมัติเพิ่ม 150B เมื่อ ก.ย."],
+  ["inv","ซื้อหุ้นบริษัทอื่น",15.70,"ยอดลงทุนในหุ้นนอกตลาดรวม 65.5B (ต้นปี 22.3B) ประกาศไม่ระบุว่าซื้อบริษัทไหน"],
+  ["rd","วิจัยและพัฒนา",7.45,""],
+  ["div","ปันผล",6.03,"งวดถัดไป 0.25 ดอลลาร์/หุ้น"],
+  ["capex","ลงทุนทรัพย์สิน (capex)",4.42,"รวมสินทรัพย์ไม่มีตัวตน"]]]],
+ sm:"คืนผู้ถือหุ้น 28.1B (ซื้อคืน + ปันผล) กับซื้อหุ้นบริษัทอื่น 15.7B เทียบกับลงทุนทรัพย์สินของตัวเอง 4.4B",
+ gets:[],getn:"ผู้รับหลักคือผู้ถือหุ้น และบริษัทที่ NVDA เข้าไปถือหุ้น (ประกาศไม่ระบุชื่อ) ส่วนค่าผลิตชิปอยู่ในต้นทุนขาย ประกาศไม่ได้แยกว่าจ่ายใคร",
+ src:[["ประกาศผลงบ Nvidia Q3 FY27","https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-Financial-Results-for-Third-Quarter-Fiscal-2027/"]]},
+{id:"MSFT",ico:"🪟",c:"#5ea8ff",nm:"Microsoft",per:"ไตรมาสสิ้นสุด ก.ย. 2026 (FY27 Q1)",g:"s",
+ ins:[],
+ grp:[["เงินที่ออกไปในไตรมาสนี้",[
+  ["capex","ลงทุนทรัพย์สินและอุปกรณ์ (capex)",39.37,"ราวสองเท่าของปีก่อน แหล่งนี้ไม่ได้ระบุสัญญาเช่าการเงิน"],
+  ["buy","คืนผู้ถือหุ้น (ปันผล + ซื้อหุ้นคืน รวมกัน)",10.2,"แหล่งไม่แยกว่าเป็นปันผลเท่าไหร่ ซื้อคืนเท่าไหร่"],
+  ["rd","วิจัยและพัฒนา",null,"แหล่งที่อ่านไม่ระบุ"]]]],
+ sm:"ลงทุนสร้างมากกว่าที่คืนผู้ถือหุ้นเกือบ 4 เท่า (39.37 ÷ 10.2 นักลงพุงหารเอง)",
+ gets:[],getn:"ผู้รับค่าก่อสร้างและอุปกรณ์ แหล่งนี้ไม่ได้ระบุ ในมุม Anthropic Microsoft เป็นผู้ได้รับเงินค่าเช่า GPU อย่างน้อย 44.9B (ดูการ์ด ANT)",
+ src:[["สรุปงบ Microsoft FY27 Q1 (24/7 Wall St.)","https://247wallst.com/cards/microsoft-q1-2027-earnings-msft-01m6223bcjxyqzvby9cw8yzzqb"]]},
+{id:"GOOGL",ico:"🔎",c:"#f5b301",nm:"Alphabet (Google)",per:"ไตรมาสสิ้นสุด 30 ก.ย. 2026 (Q3)",g:"s",
+ ins:[["เงินที่ธุรกิจหาได้ (กระแสเงินสดจากการดำเนินงาน)",42.29],["เงินสดอิสระ (หลังหัก capex)",-9.07],["กู้ใหม่ (สุทธิ) ในไตรมาสนี้",29.0]],
+ grp:[["เงินที่ออกไปในไตรมาสนี้",[
+  ["capex","ซื้อทรัพย์สินถาวร (capex)",51.36,"ไตรมาสเดียวกันปีก่อน 24.0B"],
+  ["div","ปันผล",2.94,"รวมหุ้นบุริมสิทธิ์และหุ้นสามัญ"],
+  ["buy","ซื้อหุ้นคืน",0,"ไตรมาสนี้ไม่ซื้อเลย ปีก่อนซื้อ 11.5B"],
+  ["rd","วิจัยและพัฒนา",null,"แหล่งที่อ่านไม่ระบุ"]]]],
+ sm:"ลงทุนเกินเงินที่ธุรกิจหาได้ 9.07B ไตรมาสนี้หยุดซื้อหุ้นคืนและกู้ใหม่ราว 29.0B",
+ gets:[],getn:"ผู้รับเงิน capex แหล่งนี้ไม่ได้ระบุ ในมุม Anthropic Alphabet เป็นผู้ได้รับค่าเช่า TPU 121.3B (ดูการ์ด ANT)",
+ cav:"ตัวเลขกระแสเงินสดมาจากบทความ ppc.land ที่สรุปงบ ยังไม่ได้ตรวจกับ 10-Q",
+ src:[["ppc.land: กระแสเงินสด Alphabet Q3","https://ppc.land/alphabets-free-cash-flow-drops-to-negative-9-1bn-despite-26-2bn-profit/"]]},
+{id:"AMZN",ico:"📦",c:"#ff9d4d",nm:"Amazon",per:"12 เดือนย้อนหลังถึง 30 ก.ย. 2026 (ไม่ใช่ไตรมาสเดียว)",g:"o",
+ ins:[["เงินที่ธุรกิจหาได้ (กระแสเงินสดจากการดำเนินงาน)",168.30],["เงินสดอิสระ (หลังหัก capex)",-42.36],["กู้ยาวใหม่ (12 เดือน)",130.03]],
+ grp:[["เงินที่ออกไปใน 12 เดือน",[
+  ["capex","ซื้อทรัพย์สินและอุปกรณ์ (capex)",215.19,"ก่อนหักเงินคืนและสิ่งจูงใจ ปี 2026 บริษัทตั้งไว้ราว 220B"],
+  ["buy","ซื้อหุ้นคืน",0,"ไม่มีรายการซื้อคืนในงบ"],
+  ["inv","ลงทุนใน Anthropic",null,"ประกาศไม่เปิดจำนวนเงิน"]]]],
+ sm:"หาเงินสดได้ 168.3B แต่ลงทุนเกือบ 215B เงินสดอิสระจึงติดลบ 42.4B หนี้ยาวเพิ่มจาก 65.6B (ธ.ค. 2025) เป็น 173.1B",
+ gets:[],getn:"ผู้รับเงิน capex ประกาศไม่ระบุ ในมุม Anthropic Amazon เป็นผู้ได้รับค่าเช่าชิป Trainium 110.0B (ดูการ์ด ANT)",
+ src:[["ประกาศผลงบ Amazon Q3 2026","https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-Third-Quarter-Results/"]]},
+{id:"META",ico:"👍",c:"#5d8bff",nm:"Meta",per:"ไตรมาสสิ้นสุด 30 ก.ย. 2026 (Q3)",g:"o",
+ ins:[["เงินสดอิสระ (หลังหัก capex)",-2.12],["เงินสด+หลักทรัพย์ ณ สิ้นไตรมาส",82.45],["หนี้ระยะยาว",80.92]],
+ grp:[["เงินที่ออกไปในไตรมาสนี้",[
+  ["capex","ลงทุน (capex รวมเงินต้นสัญญาเช่าการเงิน)",34.91,"ปี 2026 คาด 135–145B"],
+  ["rd","วิจัยและพัฒนา",20.05,"ปีก่อน 15.14B"],
+  ["div","ปันผล",1.36,""],
+  ["buy","ซื้อหุ้นคืน",0,"ไตรมาสนี้ไม่ซื้อเลย ปีก่อนซื้อ 3.33B"]]]],
+ sm:"เงินสดอิสระติดลบ 2.12B ไตรมาสนี้ไม่ซื้อหุ้นคืน แต่ยังจ่ายปันผล",
+ gets:[],getn:"ผู้รับเงิน capex ประกาศไม่ระบุ นักลงพุงโยงปลายทางเองไว้ที่แท็บ ใครได้ประโยชน์ (โฆษณาในยุค AI)",
+ src:[["ประกาศผลงบ Meta Q3 2026","https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Third-Quarter-2026-Results/"]]},
+{id:"AAPL",ico:"🍎",c:"#c4d0ee",nm:"Apple",per:"ไตรมาสสิ้นสุด ก.ย. 2026 (FY26 Q4)",g:"o",
+ ins:[["เงินที่ธุรกิจหาได้ (กระแสเงินสดจากการดำเนินงาน)",28]],
+ grp:[["เงินที่ออกไปในไตรมาสนี้",[
+  ["buy","คืนผู้ถือหุ้น (ซื้อหุ้นคืน + ปันผล)",28,"ปันผล 0.27 ดอลลาร์/หุ้น ประกาศไม่แยกยอดซื้อคืน"],
+  ["capex","ลงทุนทรัพย์สิน (capex)",null,"ประกาศไม่ระบุ"],
+  ["rd","วิจัยและพัฒนา",null,"ประกาศไม่ระบุ"]]]],
+ sm:"คืนผู้ถือหุ้น 28B ใกล้เคียงกับเงินสดจากการดำเนินงานทั้งไตรมาส (28B ตัวเลขปัดทั้งคู่)",
+ gets:[],getn:"ผู้รับหลักคือผู้ถือหุ้น ส่วนค่าชิ้นส่วนและค่าผลิต ประกาศไม่ได้แยก",
+ src:[["ประกาศผลงบ Apple Q4 2026","https://apple.com/newsroom/2026/11/apple-reports-fourth-quarter-results"]]},
+{id:"TSLA",ico:"🚗",c:"#ff5d6c",nm:"Tesla",per:"ไตรมาสสิ้นสุด 30 ก.ย. 2026 (Q3)",g:"s",
+ ins:[["เงินที่ธุรกิจหาได้ (กระแสเงินสดจากการดำเนินงาน)",6.26],["เงินสดอิสระ (หลังหัก capex)",1.53],["เงินสดและเงินลงทุน ณ สิ้นไตรมาส",45.4]],
+ grp:[["เงินที่ออกไปในไตรมาสนี้",[
+  ["capex","ลงทุนทรัพย์สิน (capex)",4.73,"9 เดือนแรกใช้ไป 13.01B และมียอดบันทึกแล้วแต่ยังไม่จ่ายอีก 3.67B"],
+  ["rd","วิจัยและพัฒนา",null,"แหล่งที่อ่านไม่ระบุ"]]]],
+ sm:"เงินสดอิสระยังเป็นบวก 1.53B เป้า capex ปี 2026 ลดจากกว่า 25B เหลือกว่า 20B งบ 10-Q ระบุว่าใช้กับคอมพิวต์ ศูนย์ข้อมูล และโรงงาน",
+ gets:[],getn:"ผู้รับเงิน capex ประกาศไม่ระบุชื่อ",
+ src:[["Electrek: Tesla ลดเป้า capex ปี 2026","https://electrek.co/2026/10/22/tesla-cuts-2026-capex-guidance-q3-cash-flow/?extended-comments=1"]]},
+{id:"AVGO",ico:"🧩",c:"#ff6a3d",nm:"Broadcom",per:"ไตรมาสสิ้นสุด 2 ส.ค. 2026 (FY26 Q3)",g:"o",
+ ins:[["เงินที่ธุรกิจหาได้ (กระแสเงินสดจากการดำเนินงาน)",14.20],["เงินสดอิสระ (หลังหัก capex)",13.67],["เงินสด ณ สิ้นไตรมาส",23.98],["หนี้รวม",59.42]],
+ grp:[["เงินที่ออกไปในไตรมาสนี้",[
+  ["div","ปันผล",3.10,"0.65 ดอลลาร์/หุ้น"],
+  ["rd","วิจัยและพัฒนา",2.90,"ตามบัญชี GAAP"],
+  ["capex","ลงทุนทรัพย์สิน (capex)",0.53,"น้อยมากเทียบกับรายได้ เพราะบริษัทออกแบบชิป ไม่ได้ผลิตเอง"],
+  ["buy","ซื้อหุ้นคืน",0,"ไม่ซื้อในไตรมาสนี้"]]]],
+ sm:"เงินสดอิสระ 13.67B ปันผลไป 3.10B ส่วนหนี้รวม 59.42B ยังสูงกว่าเงินสด 23.98B",
+ gets:[],getn:"ผู้รับหลักคือผู้ถือหุ้น และผู้ผลิตชิปที่รับจ้างผลิตให้ (ประกาศไม่ระบุชื่อ) ในมุม Anthropic Broadcom เป็นผู้ได้รับค่าเช่าอุปกรณ์ TPU 161.2B (ดูการ์ด ANT)",
+ src:[["เอกสาร 8-K ผลงบ Broadcom Q3 FY26 (SEC)","https://www.sec.gov/Archives/edgar/data/0001730168/000173016826000076/avgo-08022026x8kxex99.htm"]]},
+{id:"SPCX",ico:"🚀",c:"#b48cff",nm:"SpaceX",per:"ไตรมาส 2 ปี 2026 (สิ้นสุด 30 มิ.ย.)",g:"s",
+ ins:[["เงินสด+หลักทรัพย์ ณ สิ้นไตรมาส",100],["เงินสุทธิจาก IPO",85.7],["ออกตราสารหนี้ (senior notes)",25]],
+ grp:[["เงินลงทุน (capex) แยกตามสายธุรกิจ รวม 18.37B",[
+  ["capex","AI (ศูนย์ข้อมูลและเครื่องประมวลผล)",15.83,"ประมาณ 86% ของ capex ทั้งหมด (นักลงพุงหารเอง)"],
+  ["capex","Connectivity (Starlink)",1.37,""],
+  ["capex","Space (จรวดและยานอวกาศ)",1.17,""]]],
+  ["ที่ผูกไว้แล้วแต่ยังไม่จ่ายเป็นเงินสด",[
+  ["inv","ซื้อ Cursor (Anysphere)",null,"ตกลงซื้อด้วยหุ้นมูลค่า 60B รอหน่วยงานอนุมัติ"]]]],
+ sm:"บริษัทบอกว่า 2 ไตรมาสถัดไป capex จะใกล้เคียงรอบนี้ และจะสร้างต่อบนสถาปัตยกรรม Vera Rubin ของ Nvidia อย่างเดียว",
+ gets:["NVDA"],getn:"NVDA = ผู้ขายสถาปัตยกรรมที่ SpaceX บอกว่าจะใช้ ส่วนผู้รับค่าก่อสร้างและอุปกรณ์รายอื่น ข่าวไม่ระบุ",
+ cav:"แยก capex ตามสายธุรกิจมาจากบทความของ Tom Tunguz ยอด 18.4B และ AI 15.8B ตรงกับสรุปของ Nasdaq ส่วนเรื่อง Cursor เป็นข้อมูลจากบทความเดียว",
+ src:[["Tom Tunguz: SpaceXAI","https://tomtunguz.com/the-newest-hyperscaler/"],["Nasdaq: สรุปประชุมงบ SpaceX Q2","https://www.nasdaq.com/articles/spacex-q2-earnings-call-highlights"]]},
+{id:"ANT",ico:"🐜",c:"#ffb3c7",nm:"Anthropic (Claude)",per:"ครึ่งแรกปี 2026 (ตาม S-1)",g:"s",
+ ins:[["เงินที่ธุรกิจหาได้ (กระแสเงินสดจากการดำเนินงาน)",3.9],["เงินสดอิสระ",3.4],["เงินสด+เงินลงทุนระยะสั้น ณ สิ้น มิ.ย.",131.7]],
+ grp:[["เงินที่ออกไปจริงในครึ่งปีแรก",[
+  ["com","ค่าประมวลผลและโครงสร้างพื้นฐาน",8.9,"ราว 55% ของรายได้ 16.3B (นักลงพุงหารเอง)"],
+  ["capex","ลงทุนทรัพย์สิน (capex)",0.48,""]]],
+  ["สัญญาเช่าประมวลผลล่วงหน้าที่ระบุตัวเลขใน S-1 รวม 643.8B",[
+  ["com","Broadcom (อุปกรณ์ TPU ของ Google)",161.2,"เช่า 5 ปี ยกเลิกไม่ได้ ยังไม่รวมดอกเบี้ย"],
+  ["com","Google (TPU)",121.3,"เม.ย. 2026 ถึง ก.ค. 2033 ต้องจ่ายไม่ว่าจะใช้หรือไม่"],
+  ["com","SpaceXAI (GPU Nvidia)",120.5,"สูงสุด ยกเลิกได้โดยแจ้งล่วงหน้า 90 วันหลังช่วงแรกจบ"],
+  ["com","Amazon (ชิป Trainium)",110.0,"พ.ค. 2026 ถึง เม.ย. 2036 ต้องจ่ายไม่ว่าจะใช้หรือไม่"],
+  ["com","Microsoft (GPU Nvidia)",44.9,"อย่างน้อย ยกเลิกไม่ได้ ยกเว้นผิดสัญญาหรือส่งของไม่ครบ"],
+  ["com","Nscale (GPU Nvidia)",44.6,"สูงสุด ค่าเช่าเริ่มนับเมื่อส่งมอบกำลังประมวลผลแล้ว"],
+  ["com","Lambda (GPU Nvidia)",41.3,"ประมาณ สัญญา ส.ค. 2026 ยกเลิกได้ถ้าหาสถานที่ไม่ได้"]]]],
+ sm:"ครึ่งปีแรกจ่ายค่าประมวลผลจริง 8.9B แต่สัญญาที่ผูกไว้ล่วงหน้าใหญ่กว่านั้นหลายสิบเท่า (643.8 ÷ 8.9 ≈ 72 เท่า นักลงพุงหารเอง)",
+ gets:["AVGO","GOOGL","SPCX","AMZN","MSFT"],getn:"ผู้รับตามสัญญา: Broadcom, Google, SpaceXAI, Amazon, Microsoft ส่วน Nscale กับ Lambda ไม่อยู่ในรายชื่อหุ้นของเว็บนี้",
+ cav:"ตัวเลขสัญญามาจากบทความสรุป S-1 ฉบับแก้ครั้งที่ 1 ยังไม่ใช่ตัวเอกสาร และแต่ละสำนักนับไม่เท่ากัน: 9fin รายงานรวมสูงสุด 807B (ยกเลิกไม่ได้อย่างน้อย 430B) Equibles รวมสัญญาที่ระบุชื่อราว 657B (นับ AMD ด้วย) และ AMD ยังมีแผนซื้อเกิน 20B ที่ไม่มีวงเงินตายตัว",
+ src:[["FourWeekMBA: สัญญาประมวลผล 643.8B ของ Anthropic","https://fourweekmba.com/ai-google-tpus-are-44-of-anthropics-644b-named-compute-deals/"],["9fin: ภาระโครงสร้างพื้นฐานของ Anthropic","https://www.9fin.com/insights/anthropic-s-1-revenue-gains-looming-infrastructure-bill"],["Equibles: เทียบ S-1 กับเอกสารของคู่สัญญา","https://equibles.com/research/anthropics-s-1-checked-against-amazon-google-microsoft-and-broadcom-filings"]]}
+];
+function money(v){var a=Math.abs(v);return (v<0?"−":"")+"$"+(a>=100?a.toFixed(1):a>=10?a.toFixed(1):a.toFixed(2))+"B"}
+function ocard(d){
+  var c=el("article","card ocard");c.style.setProperty("--c",d.c);
+  var hd=el("div","hd");hd.appendChild(el("div","ico",d.ico));
+  var t=el("div");t.appendChild(el("div","tkr",d.id));t.appendChild(el("div","nm",d.nm));t.appendChild(el("div","per",d.per));
+  t.appendChild(el("span","gd "+d.g,d.g==="o"?"ตัวเลขจากประกาศบริษัท":"จากบทความสรุปงบ"));hd.appendChild(t);c.appendChild(hd);
+  d.grp.forEach(function(g){
+    c.appendChild(el("div","sub",g[0]));
+    var mx=0;g[1].forEach(function(r){if(r[2]>mx)mx=r[2]});
+    g[1].forEach(function(r){
+      var row=el("div","orow");row.appendChild(el("span","l",r[1]));
+      if(r[2]==null){row.appendChild(el("span","v na","ประกาศไม่ระบุ"))}
+      else{row.appendChild(el("span","v",money(r[2])));
+        var tr=el("div","tr");var b=el("i");b.style.width=(mx?Math.max(r[2]/mx*100,r[2]>0?2:0):0)+"%";b.style.background=KC[r[0]];tr.appendChild(b);row.appendChild(tr)}
+      if(r[3])row.appendChild(el("span","n",r[3]));
+      c.appendChild(row)});
+  });
+  if(d.ins.length){var w=el("div","ins");d.ins.forEach(function(x){var r=el("div");r.appendChild(el("span",null,x[0]));r.appendChild(el("span",x[1]<0?"ng":null,money(x[1])));w.appendChild(r)});c.appendChild(w)}
+  c.appendChild(el("p","sm","สรุป: "+d.sm));
+  c.appendChild(el("h4",null,"ไปถึงใคร")).style.cssText="margin:12px 0 3px;font-size:.85rem;color:var(--c)";
+  if(d.gets.length)c.appendChild(chips(d.gets));
+  c.appendChild(el("p",null,d.getn)).style.cssText="font-size:.84rem;margin:4px 0 0";
+  if(d.cav)c.appendChild(el("p","note","หมายเหตุ: "+d.cav));
+  var s=el("div","srcs");s.appendChild(document.createTextNode("แหล่งข้อมูล: "));d.src.forEach(function(x,i){if(i)s.appendChild(document.createTextNode(" · "));var a=el("a",null,x[0]);a.href=x[1];a.target="_blank";a.rel="noopener";s.appendChild(a)});c.appendChild(s);
+  return c;
+}
+O.forEach(function(d){$("g-ou").appendChild(ocard(d))});
 var Q=[
 {c:"#76d34f",h:"ศึกสร้างศูนย์ข้อมูล AI",why:"ยักษ์ใหญ่ทุ่มงบลงทุนมหาศาล เงินก้อนนี้กลายเป็นรายได้ของผู้ขายชิปและอุปกรณ์",
  a:"<b>ใครจ่าย</b>Alphabet (ไตรมาสเดียว $51.4B) · Amazon (ทั้งปี 2026 ราว $220B) · Meta (ทั้งปี $135–145B) · SpaceX ($18.4B ในไตรมาสเดียว) · Tesla ($4.73B)",
@@ -250,7 +403,7 @@ Q.forEach(function(q){
   f.appendChild(c1);f.appendChild(el("div","arr","➜"));f.appendChild(c2);f.appendChild(el("div","arr","➜"));f.appendChild(c3);
   d.appendChild(f);d.appendChild(el("p","note",q.n));$("quests").appendChild(d);
 });
-var TABS=["se","nw","fl"],HASH={se:"#seven",nw:"#new",fl:"#flow"};
+var TABS=["se","nw","ou","fl"],HASH={se:"#seven",nw:"#new",ou:"#out",fl:"#flow"};
 function tab(w){TABS.forEach(function(k){$("v-"+k).hidden=(k!==w);$("t-"+k).setAttribute("aria-pressed",k===w?"true":"false")});try{history.replaceState(null,"",HASH[w])}catch(e){}}
 TABS.forEach(function(k){$("t-"+k).addEventListener("click",function(){tab(k)})});
 Object.keys(HASH).forEach(function(k){if(location.hash===HASH[k])tab(k)});
