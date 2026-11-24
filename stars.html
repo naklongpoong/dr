@@ -87,7 +87,18 @@ h1{font-size:clamp(1.55rem,4.6vw,2.2rem);font-weight:700;line-height:1.2;margin:
 .ocard .sm{margin:10px 0 0;font-size:.88rem;color:#e9eefb}
 .gd{display:inline-block;font-size:.72rem;font-weight:600;padding:1px 9px;border-radius:999px;border:1px solid;margin-top:6px}
 .gd.o{color:#7be3b0;border-color:rgba(123,227,176,.6)}.gd.s{color:#ffd45e;border-color:rgba(255,212,94,.6)}
-@media (max-width:760px){.flow{grid-template-columns:1fr}.arr{transform:rotate(90deg);height:20px}}
+#cf-src a{color:#8fb8ff}
+.cfh{margin:22px 4px 6px;font-size:1.05rem}
+.cfs{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:14px 0}
+.cfs .st{position:relative;padding:14px 12px 12px;border-radius:16px;background:rgba(118,211,79,.08);border:1px solid rgba(118,211,79,.4)}
+.cfs .st b.n{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#76d34f;color:#0b1220;font-weight:800;margin-bottom:6px}
+.cfs .st h4{margin:0 0 4px;font-size:.95rem}.cfs .st p{margin:0;font-size:.82rem;color:#c9d4ee;line-height:1.5}
+.cfs .st:not(:last-child)::after{content:"➜";position:absolute;right:-13px;top:50%;transform:translateY(-50%);color:#76d34f;font-size:1.1rem;z-index:1}
+.cfret{text-align:center;font-size:.85rem;color:#76d34f;margin:-4px 0 6px}
+.cfq{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0}
+.cfq>div{padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.22);font-size:.88rem;line-height:1.55}
+.cfq h4{margin:0 0 6px;font-size:.95rem}.cfq ul{margin:0;padding-left:18px}.cfq li{margin:4px 0}
+@media (max-width:760px){.cfs{grid-template-columns:1fr}.cfs .st:not(:last-child)::after{content:"⬇";right:auto;left:50%;top:auto;bottom:-15px;transform:translateX(-50%)}.cfq{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.arr{transform:rotate(90deg);height:20px}}
 @media (max-width:640px){.wrap{padding:14px 12px 48px}.hero{padding:16px 16px 20px}.brand img{width:72px}.stage{padding:14px 12px}.grid{grid-template-columns:1fr}.tabs{display:grid;grid-template-columns:1fr 1fr}.tab{padding:8px 6px;font-size:.9rem}}
 @media (prefers-reduced-motion:reduce){.card{animation:none}}
 </style>
@@ -108,6 +119,7 @@ h1{font-size:clamp(1.55rem,4.6vw,2.2rem);font-weight:700;line-height:1.2;margin:
     <button class="tab" id="t-se" aria-pressed="true" type="button">7 นางฟ้า</button>
     <button class="tab" id="t-nw" aria-pressed="false" type="button">ตัวใหม่ 3 ตัว</button>
     <button class="tab" id="t-ou" aria-pressed="false" type="button">เงินออกไปไหน</button>
+    <button class="tab" id="t-cf" aria-pressed="false" type="button">วงจร Circular Financing</button>
     <button class="tab" id="t-fl" aria-pressed="false" type="button">ใครได้ประโยชน์</button>
   </div>
   <section id="v-se" class="stage">
@@ -121,6 +133,21 @@ h1{font-size:clamp(1.55rem,4.6vw,2.2rem);font-weight:700;line-height:1.2;margin:
   <section id="v-ou" class="stage" hidden>
     <div class="banner"><b>เงินออกไปไหน:</b> ทีละบริษัท ว่าเงินที่หาได้ในรอบล่าสุดถูกเอาไปสร้างอะไร วิจัยเท่าไหร่ คืนผู้ถือหุ้นเท่าไหร่ และจ่ายให้ใครบ้าง แถบเทียบขนาดกันเฉพาะในกลุ่มเดียวกัน แต่ละบริษัทปิดงบคนละช่วง (Amazon เป็นยอดย้อนหลัง 12 เดือน ที่เหลือเป็นไตรมาสเดียว) เลขเปรียบข้ามบริษัทตรงๆ ไม่ได้ ป้ายสีเขียว = ตัวเลขจากประกาศของบริษัท ป้ายสีเหลือง = จากบทความสรุปงบ ตรวจกับตัวเอกสารก่อนใช้ตัดสินใจ ช่อง "ประกาศไม่ระบุ" คือบริษัทไม่ได้แยกตัวเลขนี้ นักลงพุงจึงไม่ใส่ตัวเลขให้</div>
     <div class="grid" id="g-ou"></div>
+  </section>
+  <section id="v-cf" class="stage" hidden>
+    <div class="banner"><b>Circular Financing ของ Nvidia คืออะไร:</b> Nvidia เอาเงินที่ขายชิปได้ ไปลงทุนหรือค้ำประกันให้ลูกค้า แล้วลูกค้าก็เอาเงินนั้นกลับมาซื้อหรือเช่าชิป Nvidia ยอดขายที่ได้ก็ไปหนุนให้ Nvidia มีเงินลงทุนรอบต่อไป คนที่กังวลเรียกว่าเงินวนเป็นวง ส่วน Nvidia บอกว่ามองต่างออกไป หน้านี้วางตัวเลขและข้อโต้แย้งทั้งสองฝั่งให้ดู นักลงพุงไม่ได้ฟันธงว่าวงจรนี้ดีหรือแย่ ป้ายสีเหลืองคือตัวเลขจากบทความสรุปเอกสาร ยังไม่ได้เทียบกับตัวเอกสารเต็ม</div>
+    <h3 class="cfh">วงจรหมุนยังไง</h3>
+    <div class="cfs" id="cf-steps"></div>
+    <div class="cfret">แล้วกลับไปข้อ 1 อีกรอบ</div>
+    <h3 class="cfh">เงินออกจาก Nvidia ไปทางไหนบ้าง (3 เส้นทาง)</h3>
+    <div class="grid" id="g-cf"></div>
+    <h3 class="cfh">ตัวเลขรวมที่ Nvidia แถลงไตรมาสล่าสุด (สิ้นสุด 25 ต.ค. 2026)</h3>
+    <div class="grid" id="g-cf2"></div>
+    <h3 class="cfh">สองฝั่งเถียงกันเรื่องอะไร</h3>
+    <div class="cfq" id="cf-q"></div>
+    <h3 class="cfh">สิ่งที่ยังไม่รู้ และสิ่งที่ควรตามต่อ</h3>
+    <div class="cfq" id="cf-u"></div>
+    <p class="note" style="margin:12px 4px">แหล่งข้อมูล: <span id="cf-src"></span></p>
   </section>
   <section id="v-fl" class="stage" hidden>
     <div class="banner"><b>เงินไหลไปถึงใคร:</b> (ตัวเลขเงินออกของแต่ละบริษัทอยู่ที่แท็บ "เงินออกไปไหน") เงินที่ยักษ์ใหญ่จ่ายออกไปหรือหามาได้ จะไหลต่อไปถึงใครบ้าง ชื่อหุ้นในช่อง "ผู้รับ" คือห่วงโซ่ที่นักลงพุงอ่านเอง ไม่ได้ยืนยันว่าไตรมาสนี้ได้ตัวเลขเท่าไหร่ และไม่ใช่คำแนะนำซื้อขาย (ห่วงโซ่ชิป AI แบบละเอียดดูได้ในหน้า Mind Map)</div>
@@ -374,6 +401,87 @@ function ocard(d){
   return c;
 }
 O.forEach(function(d){$("g-ou").appendChild(ocard(d))});
+
+/* ===== Circular Financing (ทุกตัวเลข $B) ===== */
+var CFS=[["1","Nvidia ขายชิปได้มหาศาล","ไตรมาสล่าสุดรายได้ $115.8B เงินสดอิสระ $43.78B (ประกาศบริษัท)"],
+["2","เอาเงินไปลงทุนหรือค้ำประกันให้ลูกค้า","ไตรมาสนี้ซื้อหุ้นบริษัทอื่น $15.7B และรับภาระค้ำประกันสูงสุด $118.0B (ยังไม่เคยจ่ายค้ำเลย)"],
+["3","ลูกค้ามีทุนหรือเครดิต แล้วสั่งหรือเช่าชิป","ห้องแล็บ AI และบริษัทเช่า GPU (neocloud) เอาเงินไปสร้างศูนย์ข้อมูลที่ใช้ชิป Nvidia"],
+["4","ยอดสั่งกลายเป็นรายได้รอบหน้า","รายได้ที่โตทำให้มีเงินให้ลงทุนต่อ วนกลับไปข้อ 1"]];
+CFS.forEach(function(x){var d=el("div","st");d.appendChild(el("b","n",x[0]));d.appendChild(el("h4",null,x[1]));d.appendChild(el("p",null,x[2]));$("cf-steps").appendChild(d)});
+var CF=[
+{id:"AI",ico:"🧠",c:"#b48cff",nm:"เส้นทางที่ 1: ห้องแล็บ AI",per:"OpenAI · Anthropic · xAI (ตอนนี้อยู่ใน SpaceX)",g:"s",
+ rows:[["inv","OpenAI: ลงทุนซื้อหุ้น",30,"ปลาย ก.พ. 2026 ควบกับสัญญาใช้คอมพิวต์หลายปี (The Next Web อ้าง CNBC)"],
+  ["capex","OpenAI: ค้ำเครดิตศูนย์ข้อมูลที่โอไฮโอ (สูงสุด)",105,"ศูนย์ข้อมูล PORTS-Pike ราว 4.25 GW เช่าให้ OpenAI 20 ปี ภาระค้ำสูงสุดตอนนี้แล้วค่อยลดตามค่าเช่าที่ OpenAI จ่าย มีผลเมื่ออาคารสร้างเสร็จ ยังไม่เคยจ่ายค้ำ"],
+  ["inv","Anthropic: ลงทุน (วงเงินสูงสุดที่ประกาศ)",10,"ประกาศ 18 พ.ย. 2025 ฝั่ง Anthropic ผูกพันใช้ระบบ Nvidia เริ่มที่ 1 GW ยังไม่พบยอดที่จ่ายจริง"],
+  ["inv","xAI (ตอนนี้ถือผ่าน SpaceX): ลงทุน",10,"ม.ค. 2026 มูลค่าหุ้นที่ถืออยู่ราว 20.98 ณ 30 มิ.ย. (รายงาน 13F จาก TechSpot)"]],
+ back:"เงินกลับมาหา Nvidia ยังไง: ห้องแล็บเอาทุนไปซื้อหรือเช่าระบบ Nvidia (Anthropic ผูกพัน 1 GW, ศูนย์ข้อมูลโอไฮโอติดตั้งโครงสร้างพื้นฐาน Nvidia ให้ OpenAI เช่า)",
+ gets:["SPCX"],getn:"ตัวเลข OpenAI และ Anthropic มาจากข่าว เพราะประกาศงบไม่แจกแจงยอดลงทุนรายบริษัทที่ไม่จดทะเบียน"},
+{id:"NEO",ico:"☁️",c:"#5ea8ff",nm:"เส้นทางที่ 2: บริษัทเช่า GPU (neocloud)",per:"neocloud = บริษัทที่ซื้อ GPU แล้วปล่อยเช่า เช่น CoreWeave",g:"s",
+ rows:[["inv","CoreWeave: ซื้อหุ้น",2.0,"26 ม.ค. 2026 ราคา 87.20 ดอลลาร์/หุ้น (10-Q ไตรมาสก่อน ผ่านบทความ Unite.AI)"],
+  ["com","CoreWeave: Nvidia ซื้อความจุกลับ",6.3,"สัญญาซื้อความจุ 6.3 (The Next Web) นี่คือวงจรสองทาง Nvidia เป็นทั้งผู้ถือหุ้นและลูกค้าของ CoreWeave"],
+  ["inv","Nebius: ซื้อหุ้น",2.0,"มี.ค. 2026 พร้อมข้อตกลงติดตั้งกำลังประมวลผล 5 GW"],
+  ["inv","IREN: ลงทุน (สูงสุด)",2.1,"โครงสร้างแบบวอร์แรนต์ Nvidia เลือกจังหวะจ่ายเงินสดได้"],
+  ["com","ผูกพันซื้อบริการ neocloud ในอนาคต (สูงสุด)",32,"มีผลต่อเมื่อบริษัทนั้นหาเงินทุนได้ ซื้อโครงสร้างพื้นฐาน Nvidia และเปิดใช้งานจริง"],
+  ["capex","ค้ำประกันที่ดิน ไฟฟ้า อาคารให้ neocloud (สูงสุด)",3.5,""]],
+ back:"เงินกลับมาหา Nvidia ยังไง: บริษัทเหล่านี้ซื้อ GPU Nvidia มาปล่อยเช่า ดังนั้นเงินที่ Nvidia ใส่ให้กลับมาเป็นยอดขายตรงๆ",
+ gets:["CRWV","NBIS","IREN"],getn:"Nvidia ยังจับมือ Apollo, BlackRock, Blackstone, Brookfield, Goldman Sachs และ KKR เพื่อระดมเงินจากสถาบันสูงสุดกว่า 500 พันล้านดอลลาร์ให้คนซื้อชิป Nvidia (ประกาศ 10 ส.ค. 2026 ต้องรอสัญญาฉบับจริง)"},
+{id:"SUP",ico:"🔌",c:"#ff9d4d",nm:"เส้นทางที่ 3: ซัพพลายเออร์ของ Nvidia เอง",per:"ลงทุนในคนที่ผลิตชิ้นส่วนหรือซอฟต์แวร์ให้ Nvidia",g:"s",
+ rows:[["inv","Intel: ซื้อหุ้น",5.0,"ธ.ค. 2025 (13F จาก TechSpot) บทความจัดเป็นแหล่งผลิต/CPU สำรอง"],
+  ["inv","Synopsys: ซื้อหุ้น",2.0,"ธ.ค. 2025 ซอฟต์แวร์ออกแบบชิป"],
+  ["inv","Coherent: ซื้อหุ้น",2.0,"มี.ค. 2026 อุปกรณ์ออปติกเชื่อมต่อ GPU"],
+  ["inv","Corning: ลงทุน (สูงสุด)",3.2,"โครงสร้างแบบวอร์แรนต์ เกี่ยวกับสายใยแก้วนำแสง"],
+  ["inv","Nokia: ซื้อหุ้น",1.0,"ต.ค. 2025 อุปกรณ์เครือข่าย"]],
+ back:"ต่างจากสองเส้นทางแรก: ผู้รับเงินกลุ่มนี้ไม่ได้ซื้อชิป Nvidia กลับมา แต่ช่วยให้ห่วงโซ่ผลิตและส่งมอบของ Nvidia มั่นคง จึงนับเป็นวงจรอีกแบบ ไม่ใช่วงจรเงินวนกลับตรงๆ",
+ gets:["INTC","SNPS","COHR","GLW","NOK"],getn:"ยอดและวันที่ของ Intel, Synopsys, Coherent, Nokia มาจากรายงาน 13F ที่ TechSpot สรุป ส่วน Corning มาจาก The Next Web"}
+];
+function cfcard(d){
+  var c=el("article","card ocard");c.style.setProperty("--c",d.c);
+  var hd=el("div","hd");hd.appendChild(el("div","ico",d.ico));
+  var t=el("div");t.appendChild(el("div","nm",d.nm));t.appendChild(el("div","per",d.per));
+  t.appendChild(el("span","gd "+d.g,"จากข่าวและบทความสรุปเอกสาร"));hd.appendChild(t);c.appendChild(hd);
+  var mx=0;d.rows.forEach(function(r){if(r[2]>mx)mx=r[2]});
+  d.rows.forEach(function(r){var row=el("div","orow");row.appendChild(el("span","l",r[1]));row.appendChild(el("span","v",money(r[2])));
+    var tr=el("div","tr");var b=el("i");b.style.width=Math.max(r[2]/mx*100,2)+"%";b.style.background=KC[r[0]];tr.appendChild(b);row.appendChild(tr);
+    if(r[3])row.appendChild(el("span","n",r[3]));c.appendChild(row)});
+  c.appendChild(el("p","sm",d.back));
+  c.appendChild(chips(d.gets));
+  c.appendChild(el("p","note",d.getn));
+  return c;
+}
+CF.forEach(function(d){$("g-cf").appendChild(cfcard(d))});
+var CF2=[
+{ico:"📜",c:"#76d34f",nm:"ผูกพันรวมในอนาคต",per:"รวม 518",g:"s",rows:[["com","ซื้อของและจองกำลังผลิต (supply)",390,"ส่วนใหญ่เป็นการจัดซื้อหน่วยความจำหลายปี เพิ่มจาก 279 ไตรมาสก่อน"],["capex","เช่าศูนย์ข้อมูลที่ยังไม่เริ่มสัญญา",74,""],["com","สัญญาบริการคลาวด์",28,""],["inv","ลงทุนในหุ้นบริษัทอื่นที่ผูกไว้แล้ว",20,"ยังไม่จ่าย"],["capex","ลงทุนทรัพย์สิน",6,""]],
+  sm:"นักลงพุงอ่านว่าที่เกี่ยวกับวงจรนี้โดยตรงมีแค่ 20 (หุ้นที่ผูกไว้) บวกเงินสูงสุด 32 ที่ผูกกับ neocloud ซึ่งรายงานแยกต่างหาก ส่วนที่เหลือเป็นการสั่งของจากซัพพลายเออร์"},
+{ico:"🛡️",c:"#ff7a9c",nm:"ภาระค้ำประกัน (สูงสุด)",per:"รวม 118.0 ยังไม่เคยจ่ายเลย",g:"s",rows:[["inv","ศูนย์ข้อมูลโอไฮโอ (OpenAI เช่า 20 ปี)",105,"ภาระสูงสุดเมื่อแต่ละอาคารพร้อมใช้ แล้วลดลงตามค่าเช่าที่ OpenAI จ่าย อาคารแรกคาดภายในปีงบ 2029"],["inv","ไฟฟ้าและระบบ",9.5,""],["inv","ที่ดิน ไฟฟ้า อาคารให้ neocloud",3.5,""]],
+  sm:"ค้ำแต่ละก้อนมีผลก็ต่อเมื่ออาคารสร้างเสร็จและพร้อมให้บริการ ณ 25 ต.ค. Nvidia ยังไม่เคยจ่ายเงินตามการค้ำเลย นักวิเคราะห์ที่ Data Center Knowledge อ้างเตือนว่า 105 ของ 118 ผูกกับที่ดิน ไฟฟ้า และอาคารของแคมปัสเดียว จึงไม่ควรอ่านว่าเป็นความเสี่ยงของระบบเงินกู้ neocloud ทั้งหมด"},
+{ico:"🏦",c:"#f5b301",nm:"หุ้นบริษัทอื่นที่ Nvidia ถือ ณ 25 ต.ค.",per:"ประกาศบริษัท (ตัวเลขเดียวกับการ์ด Nvidia ในแท็บ เงินออกไปไหน)",g:"s",rows:[["inv","หุ้นไม่จดทะเบียน (non-marketable)",65.53,"ต้นปี (25 ม.ค. 2026) 22.25"],["inv","หุ้นจดทะเบียน",44.22,"ต้นปี 12.89 ในนี้ 21.0 ถูกล็อกห้ามขายระยะสั้น"]],
+  sm:"ซื้อหุ้นบริษัทอื่น 9 เดือนแรกรวม 58.1 เทียบ 4.95 ปีก่อน (ราว 12 เท่า) ไตรมาสนี้มีผลกำไรสุทธิจากหุ้นเหล่านี้ 1.8 รวมขาดทุน 1.0 จากหุ้นไม่จดทะเบียน (ตัวเลข 9 เดือนจาก Fortune/TNW)"}
+];
+CF2.forEach(function(d){var c=el("article","card ocard");c.style.setProperty("--c",d.c);
+  var hd=el("div","hd");hd.appendChild(el("div","ico",d.ico));var t=el("div");t.appendChild(el("div","nm",d.nm));t.appendChild(el("div","per",d.per));t.appendChild(el("span","gd "+d.g,"จากบทความสรุปเอกสารที่ Nvidia แถลง"));hd.appendChild(t);c.appendChild(hd);
+  var mx=0;d.rows.forEach(function(r){if(r[2]>mx)mx=r[2]});
+  d.rows.forEach(function(r){var row=el("div","orow");row.appendChild(el("span","l",r[1]));row.appendChild(el("span","v",money(r[2])));var tr=el("div","tr");var b=el("i");b.style.width=Math.max(r[2]/mx*100,2)+"%";b.style.background=KC[r[0]];tr.appendChild(b);row.appendChild(tr);if(r[3])row.appendChild(el("span","n",r[3]));c.appendChild(row)});
+  c.appendChild(el("p","sm",d.sm));$("g-cf2").appendChild(c)});
+function li(box,h,arr){var d=el("div");d.appendChild(el("h4",null,h));var u=el("ul");arr.forEach(function(x){u.appendChild(el("li",null,x))});d.appendChild(u);box.appendChild(d)}
+li($("cf-q"),"Nvidia (CFO Colette Kress) บอกว่า",[
+ "ห้องแล็บ AI โตเร็วกว่างบดุลและเครดิตของตัวเองจะรับไหว การเติบโตจึงติดที่หาคอมพิวต์ไม่ได้ ไม่ใช่ลูกค้าไม่ต้องการ (ประโยค \"We see it differently\" ตอบคำถามเรื่อง circular financing หลังงบไตรมาส 2 ตามที่ Stocktwits รายงาน)",
+ "เงินที่ลงห้องแล็บ AI (ใกล้ 50 พันล้านดอลลาร์ ณ ตอนนั้น) เป็นส่วนเล็กของเงินสดอิสระช่วงเดียวกัน และการลงทุนช่วยดึงเงินสถาบันก้อนใหญ่เข้ามา",
+ "ค้ำประกันมีผลเมื่อโครงการเสร็จและลูกค้าหาเงินทุนได้ ถ้าโครงการล่าช้า \"our guarantee doesn't exist anymore\" (Fortune)"]);
+li($("cf-q"),"ฝั่งที่เป็นห่วงบอกว่า",[
+ "Nvidia \"เสี่ยงซ้อน\" (double exposed): ถ้าการใช้จ่ายด้าน AI ชะลอ จะเสียทั้งยอดขายชิปและมูลค่าหุ้นที่ถือไว้ (James Kisner, Water Tower Research ใน Fortune)",
+ "เงินลงทุนของ Nvidia อาจกำลังสร้างความต้องการชิปของตัวเอง Fortune ระบุว่ามีคำเตือนเรื่องดีลแนวนี้จาก IMF",
+ "ความเข้มข้นของลูกค้าสูง: ลูกค้าตรง 3 ราย คิดเป็น 14%, 11%, 11% ของรายได้ไตรมาสล่าสุด (รวม 36% นักลงพุงบวกเอง) และลูกหนี้ 2 รายถือ 18% กับ 17% ณ 25 ต.ค. (จากเอกสารแนบงบ ผ่านบทความ CrowdfundedWealth)"]);
+li($("cf-u"),"ที่ยังไม่รู้",[
+ "ไม่พบตัวเลขว่ารายได้ของ Nvidia กี่ % มาจากบริษัทที่ตัวเองลงทุนไว้ ในแหล่งที่นักลงพุงอ่าน จึงไม่ใส่ตัวเลขนี้ให้",
+ "ลูกค้าตรงรายใหญ่ 3 รายไม่ได้ระบุชื่อ จึงบอกไม่ได้ว่าตรงกับบริษัทที่ Nvidia ถือหุ้นไหม",
+ "ยอดลงทุนที่จ่ายจริงใน OpenAI และ Anthropic ไม่อยู่ในประกาศงบ ตัวเลข 30 และ 10 มาจากข่าวและประกาศความร่วมมือ โดย 10 เป็นวงเงินสูงสุด"]);
+li($("cf-u"),"ที่ควรตามต่อ",[
+ "ค้ำประกันเริ่มมีผลเมื่อมีอาคารแรกพร้อมใช้ (คาดปีงบ 2029) และต้องดูว่าถึงตอนนั้นจะมีการจ่ายค้ำไหม",
+ "neocloud ที่ผูกไว้ 32 พันล้านดอลลาร์ หาเงินทุนได้จริงหรือไม่",
+ "ผลกำไรหรือขาดทุนจากหุ้นไม่จดทะเบียนรอบถัดไป (ไตรมาสนี้ขาดทุน 1.0 จากส่วนนี้)",
+ "10-Q ฉบับเต็มของไตรมาสนี้ ซึ่งตอนเขียนหน้านี้แหล่งที่อ่านยังบอกว่าไม่ได้ยื่น ตัวเลขในแท็บนี้ควรเทียบซ้ำเมื่อออก"]);
+var CFSRC=[["Nvidia Q3 FY27 (ประกาศบริษัท)","https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-Financial-Results-for-Third-Quarter-Fiscal-2027/"],["Fortune: Nvidia ลงทุนหุ้น 58 พันล้านดอลลาร์","https://fortune.com/2026/11/18/nvidia-poured-58-billion-equities-risk-if-boom-slows/"],["The Next Web: Nvidia ซื้อหุ้น 58.1 พันล้านใน 9 เดือน","https://thenextweb.com/news/nvidia-58-1bn-stakes-ai-companies-buybacks-guarantees"],["The Next Web: ลงทุนหุ้น AI ปี 2026","https://thenextweb.com/news/nvidia-40bn-ai-equity-investments-2026"],["Data Center Knowledge: ค้ำประกัน 118 พันล้านดอลลาร์","https://www.datacenterknowledge.com/data-center-chips/nvidia-ai-surge-comes-with-118-billion-in-guarantees"],["CrowdfundedWealth: สรุป 8-K Q3 FY27","https://www.crowdfundedwealth.com/articles/nvidia-q3-fiscal-2027-results-8-k-what-the-filing-says"],["Unite.AI: สรุป 10-Q ไตรมาส 2","https://unite.ai/nvidias-ai-sector-equity-stakes-grow-sec-filing-shows"],["TechSpot: พอร์ตหุ้น 13F ของ Nvidia","https://techspot.com/community/topics/nvidias-63-billion-stock-portfolio-is-a-map-of-its-own-supply-chain.298645"],["Stocktwits: \"We see it differently\"","https://stocktwits.com/news-articles/markets/equity/nvidia-brushes-off-circular-financing-fears-after-massive-sales-beat-we-see-it-differently/cZY8N3lRJpQ"],["Nvidia: ความร่วมมือกับ Microsoft และ Anthropic","https://blogs.nvidia.com/blog/microsoft-nvidia-anthropic-announce-partnership"]];
+CFSRC.forEach(function(x,i){if(i)$("cf-src").appendChild(document.createTextNode(" · "));var a=el("a",null,x[0]);a.href=x[1];a.target="_blank";a.rel="noopener";$("cf-src").appendChild(a)});
 var Q=[
 {c:"#76d34f",h:"ศึกสร้างศูนย์ข้อมูล AI",why:"ยักษ์ใหญ่ทุ่มงบลงทุนมหาศาล เงินก้อนนี้กลายเป็นรายได้ของผู้ขายชิปและอุปกรณ์",
  a:"<b>ใครจ่าย</b>Alphabet (ไตรมาสเดียว $51.4B) · Amazon (ทั้งปี 2026 ราว $220B) · Meta (ทั้งปี $135–145B) · SpaceX ($18.4B ในไตรมาสเดียว) · Tesla ($4.73B)",
@@ -403,7 +511,7 @@ Q.forEach(function(q){
   f.appendChild(c1);f.appendChild(el("div","arr","➜"));f.appendChild(c2);f.appendChild(el("div","arr","➜"));f.appendChild(c3);
   d.appendChild(f);d.appendChild(el("p","note",q.n));$("quests").appendChild(d);
 });
-var TABS=["se","nw","ou","fl"],HASH={se:"#seven",nw:"#new",ou:"#out",fl:"#flow"};
+var TABS=["se","nw","ou","cf","fl"],HASH={se:"#seven",nw:"#new",ou:"#out",cf:"#circle",fl:"#flow"};
 function tab(w){TABS.forEach(function(k){$("v-"+k).hidden=(k!==w);$("t-"+k).setAttribute("aria-pressed",k===w?"true":"false")});try{history.replaceState(null,"",HASH[w])}catch(e){}}
 TABS.forEach(function(k){$("t-"+k).addEventListener("click",function(){tab(k)})});
 Object.keys(HASH).forEach(function(k){if(location.hash===HASH[k])tab(k)});
