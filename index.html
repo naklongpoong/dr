@@ -25,9 +25,9 @@
   if (["q", "theme", "sector", "country", "issuer"].some(function (k) { return sp.has(k); })) location.replace("dr.html" + location.search);
 })();
 </script>
-<script src="site.js?v=202611221319"></script>
-<script src="terms.js?v=202611221319"></script>
-<script src="gate.js?v=202611221319"></script>
+<script src="site.js?v=202611262149"></script>
+<script src="terms.js?v=202611262149"></script>
+<script src="gate.js?v=202611262149"></script>
 <style>
 :root {
   --navy: #0f1e46;
@@ -214,7 +214,7 @@ a.card:hover .go { text-decoration: underline; }
   </header>
 
   <section class="macro" id="macro" hidden aria-label="ตัวเลขเศรษฐกิจสหรัฐที่ตลาดจับตา">
-  <div class="macro-tabs" id="macroTabs" role="tablist" aria-label="เลือกดู FOMC เลือกตั้ง CPI หรือ PPI"></div>
+  <div class="macro-tabs" id="macroTabs" role="tablist" aria-label="เลือกดู FOMC เลือกตั้ง CPI PPI หรือ PCE"></div>
 
   <div class="fomc" id="fomc" hidden role="tabpanel" aria-label="นับถอยหลังถึงการประกาศผลประชุม FOMC">
     <span class="tag">FOMC</span>
@@ -264,6 +264,16 @@ a.card:hover .go { text-decoration: underline; }
     </div>
     <p class="cpi-note" id="ppiNote" hidden></p>
     <p class="cpi-src" id="ppiSrc"></p>
+  </div>
+
+  <div class="cpi" id="pce" hidden role="tabpanel" aria-label="เงินเฟ้อ PCE สหรัฐ ตัวที่ Fed ใช้ ล่าสุด">
+    <div class="cpi-head"><span class="cpi-t">เงินเฟ้อสหรัฐ (PCE)</span><span class="cpi-m" id="pceMonth"></span></div>
+    <div class="cpi-grid">
+      <div class="cpi-box"><span class="cpi-l">ทั่วไป<br>&nbsp;</span><b id="qH"></b><div class="cpi-mom" id="qHm"></div><span class="cpi-chip" id="qHc"></span><p id="qHs"></p></div>
+      <div class="cpi-box"><span class="cpi-l">Core<br>ไม่รวมอาหาร-พลังงาน</span><b id="qC"></b><div class="cpi-mom" id="qCm"></div><span class="cpi-chip" id="qCc"></span><p id="qCs"></p></div>
+    </div>
+    <p class="cpi-note" id="pceNote" hidden></p>
+    <p class="cpi-src" id="pceSrc"></p>
   </div>
 
   <p class="macro-next" id="macroNext" hidden></p>
@@ -416,7 +426,7 @@ function inflCard(c, p, src) {   // p = ตัวอักษรนำหน้�
   var rel = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short" }).format(new Date(c.release + "T12:00:00+07:00"));
   var s = document.getElementById(src + "Src");
   s.textContent = (c.srcText || "BLS") + " · ประกาศ " + rel + (c.nextRelease ? " · ครั้งหน้า " + c.nextRelease : "");
-  if (window.SITE && SITE.basicsLive) {   // ลิงก์ไปคลังศัพท์: CPI -> Core CPI, PPI -> PPI (มีอธิบายว่า Core ของ PPI ไม่รวมบริการการค้า)
+  if (window.SITE && SITE.basicsLive && src !== "pce") {   // ลิงก์ไปคลังศัพท์: CPI -> Core CPI, PPI -> PPI (มีอธิบายว่า Core ของ PPI ไม่รวมบริการการค้า)
     var a = document.createElement("a"); a.href = "basics.html#" + (src === "cpi" ? "core-cpi" : "ppi"); a.textContent = src === "cpi" ? "Core คืออะไร ›" : "PPI และ Core คืออะไร ›";
     s.appendChild(document.createTextNode(" · ")); s.appendChild(a);
   }
@@ -424,11 +434,12 @@ function inflCard(c, p, src) {   // p = ตัวอักษรนำหน้�
 }
 inflCard(window.CPI_LATEST, "c", "cpi");
 inflCard(window.PPI_LATEST, "p", "ppi");
+inflCard(window.PCE_LATEST, "q", "pce");
 
 // รวมเป็นการ์ดมหภาคใบเดียว: แท็บ FOMC / CPI / PPI (โผล่เฉพาะแท็บที่มีข้อมูล) + บรรทัดวันประกาศรอบหน้า
 (function () {
   var wrap = document.getElementById("macro"), tabs = document.getElementById("macroTabs"); if (!wrap || !tabs) return;
-  var defs = [["fomc", "FOMC"], ["elec", "เลือกตั้ง"], ["cpi", "CPI"], ["ppi", "PPI"]].filter(function (d) { var el = document.getElementById(d[0]); return el && el.dataset.ready === "1"; });
+  var defs = [["fomc", "FOMC"], ["elec", "เลือกตั้ง"], ["cpi", "CPI"], ["ppi", "PPI"], ["pce", "PCE"]].filter(function (d) { var el = document.getElementById(d[0]); return el && el.dataset.ready === "1"; });
   if (!defs.length) return;
   var keep = ""; try { keep = localStorage.getItem("macroTab") || ""; } catch (e) {}
   var cur = defs.some(function (d) { return d[0] === keep; }) ? keep : defs[0][0];
@@ -448,7 +459,7 @@ inflCard(window.PPI_LATEST, "p", "ppi");
   var ev = [], now = Date.now();
   if (window.FOMC) for (var i = 0; i < FOMC.length; i++) if (Date.parse(FOMC[i].at) > now) { ev.push([Date.parse(FOMC[i].at), "FOMC " + FOMC[i].d]); break; }
   if (window.ELECTION && Date.parse(ELECTION.at) > now) ev.push([Date.parse(ELECTION.at), "เลือกตั้งสหรัฐ 3 พ.ย."]);
-  [["CPI", window.CPI_LATEST], ["PPI", window.PPI_LATEST]].forEach(function (x) {
+  [["CPI", window.CPI_LATEST], ["PPI", window.PPI_LATEST], ["PCE", window.PCE_LATEST]].forEach(function (x) {
     var c = x[1]; if (c && c.nextRelease && c.hideAfter && Date.parse(c.hideAfter) > now) ev.push([Date.parse(c.hideAfter), x[0] + " " + c.nextRelease]);
   });
   ev.sort(function (a, b) { return a[0] - b[0]; });
@@ -570,7 +581,7 @@ inflCard(window.PPI_LATEST, "p", "ppi");
       c.fillStyle = MUTED; c.font = "400 28px " + FONT; wrap(c, "จัดกลางวาระ 4 ปีของประธานาธิบดี ไม่ได้เลือกประธานาธิบดี ตลาดจับตาเพราะสองสภานี้ผ่านกฎหมายงบประมาณ ภาษี และเพดานหนี้", 60, 1192, W - 120, 36, "center");
       footer(c); return cv;
     }
-    var pre = tab === "ppi" ? "p" : "c", root = document.getElementById(tab);
+    var pre = tab === "ppi" ? "p" : tab === "pce" ? "q" : "c", root = document.getElementById(tab);
     titleBlock(c, "ตัวเลขเงินเฟ้อ", root.querySelector(".cpi-t").textContent, txt(tab + "Month"));
     [pre + "H", pre + "C"].forEach(function (k, i) {
       var box = document.getElementById(k).parentNode, x = 60 + i * 490, bw = 470, y = 460;

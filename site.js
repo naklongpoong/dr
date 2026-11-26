@@ -80,6 +80,17 @@ window.PPI_LATEST = {
   srcText: "BLS"
 };
 
+// เงินเฟ้อ PCE สหรัฐ (ตัวที่ Fed ใช้) จาก BEA (อัปเดตเอง) รูปแบบเดียวกับ CPI_LATEST ตัวเลขจริงจากหน้า BEA ต.ค. 2026 ประกาศ 25 พ.ย. 08:30 น. นิวยอร์ก (BEA ให้รายเดือน+เทียบปีก่อน)
+// prev = yoy เดือนก่อน (BEA ประกาศ ก.ย. 29 ต.ค.: 3.6 / 3.1) exp = ค่าคาด yoy จากปฏิทินเศรษฐกิจ (Unusual Whales: ทั่วไป 3.8 Core 3.2, Seeking Alpha: Core 3.2) expMom ของ Core 0.3 (Seeking Alpha) ทั่วไปไม่มีค่าคาดรายเดือนจึงไม่ใส่
+// hideAfter = BEA ประกาศ PCE พ.ย. ครั้งหน้า 23 ธ.ค. 8:30 น. นิวยอร์ก = 13:30Z (ตามตาราง bea.gov/news/schedule)
+window.PCE_LATEST = {
+  month: "ต.ค. 2026", release: "2026-11-25", nextRelease: "23 ธ.ค.", hideAfter: "2026-12-23T13:30:00Z",
+  headline: { yoy: 3.8, mom: 0.3, exp: 3.8, prev: 3.6 },
+  core: { yoy: 3.3, mom: 0.3, exp: 3.2, expMom: 0.3, prev: 3.1 },
+  note: "PCE คือมาตรวัดเงินเฟ้อที่ Fed ใช้ติดตามเป้า 2% เดือนนี้รายได้ส่วนบุคคลเพิ่ม 0.7% แต่การใช้จ่ายจริงแทบไม่ขยับ",
+  srcText: "BEA"
+};
+
 // สร้างเมนูบนหัวหน้า ใช้กับทุกหน้าที่มี <nav id="nav">
 window.buildNav = function (current) {
   var el = document.getElementById("nav");
