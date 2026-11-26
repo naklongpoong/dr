@@ -107,6 +107,7 @@ h1 { font-size: clamp(1.55rem, 4.6vw, 2.2rem); font-weight: 700; line-height: 1.
 .tab:focus-visible, .chip:focus-visible, .linkbtn:focus-visible, .ntk:focus-visible, .read:focus-visible, .acard h3 a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .countbar { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 16px 0 12px; }
 .count { color: var(--muted); font-size: 0.9rem; }
+.more { display: block; margin: 18px auto 6px; padding: 10px 20px; font-size: 0.95rem; }
 .linkbtn { font: inherit; font-size: 0.88rem; background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-decoration: underline; white-space: nowrap; }
 
 .alist { display: flex; flex-direction: column; gap: 12px; }
@@ -205,6 +206,7 @@ h1 { font-size: clamp(1.55rem, 4.6vw, 2.2rem); font-weight: 700; line-height: 1.
 
   <div class="alist" id="list"></div>
   <div class="empty" id="empty" hidden></div>
+  <button class="linkbtn more" id="moreA" type="button" hidden></button>
   <article class="reader" id="reader" hidden></article>
 </main>
 
@@ -221,6 +223,29 @@ const viewsHtml = p => { if (window.SITE && SITE.countViews === false) return ""
 const fmtDate = iso => { const d = new Date(String(iso) + "T00:00:00"); return isNaN(d) ? "" : d.toLocaleDateString("th-TH", { dateStyle: "medium" }); };
 
 let N = null, items = [];
+// โหลดบทความเก่าเพิ่ม: ครั้งแรกดึง 50 เรื่องล่าสุด (กฎ Firestore จำกัด 50 ต่อครั้ง) เรื่องที่เก่ากว่านั้นดึงต่อด้วยปุ่ม ไล่ตาม createdAt
+const PAGE_N = 50, more = { cur: null, done: true, busy: false, err: false };
+const msOf = ts => ts && ts.toDate ? ts.toDate().getTime() : 0;
+function setCursor(rows) {
+  const t = rows.map(r => msOf(r.createdAt)).filter(x => x > 0);
+  more.cur = t.length ? Math.min(...t) : null; more.done = rows.length < PAGE_N || more.cur == null;
+}
+async function loadMore() {
+  if (more.busy || more.done) return;
+  more.busy = true; more.err = false; renderList();
+  try {
+    const F = N.F, got = (await F.getDocs(F.query(F.collection(N.db, "articles"), F.orderBy("createdAt", "desc"), F.startAfter(F.Timestamp.fromMillis(more.cur)), F.limit(PAGE_N)))).docs.map(d => ({ id: d.id, ...d.data() }));
+    const have = new Set(items.map(x => x.id));
+    items = items.concat(got.filter(x => !have.has(x.id))).sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+    const t = got.map(r => msOf(r.createdAt)).filter(x => x > 0);
+    if (t.length) more.cur = Math.min(more.cur, ...t);
+    if (got.length < PAGE_N || !t.length) more.done = true;
+  } catch (e) {
+    if (e && e.code === "permission-denied") return NLP.relock();
+    more.err = true;
+  }
+  more.busy = false; renderList();
+}
 const state = { tab: "all", ticker: "", q: "", id: "" };
 window.SITE_MENU = { here: "articles", onHere: t => {
   if (state.id) { location.href = "articles.html?ticker=" + encodeURIComponent(t); return; }   // อยู่ในหน้าอ่านบทความ -> กลับไปรายการที่กรองหุ้นตัวนี้
@@ -301,7 +326,9 @@ function renderList() {
   $("list").hidden = !list.length;
   $("empty").hidden = list.length > 0;
   $("empty").textContent = !items.length ? "ยังไม่มีบทความ" : "ไม่พบบทความที่ตรงกับตัวกรอง ลองเอาตัวกรองออก";
-  $("count").textContent = items.length ? `พบ ${list.length} จาก ${items.length} เรื่อง` : "";
+  $("count").textContent = items.length ? `พบ ${list.length} จาก ${items.length} เรื่อง` + (more.done ? "" : " (ยังมีเรื่องเก่ากว่านี้ กดโหลดเพิ่มด้านล่าง)") : "";
+  const mb = $("moreA"); mb.hidden = more.done || !items.length || !!state.id;
+  mb.disabled = more.busy; mb.textContent = more.busy ? "กำลังโหลด..." : more.err ? "โหลดไม่สำเร็จ กดลองอีกครั้ง" : "โหลดบทความเก่าเพิ่ม";
   $("copyLink").hidden = !items.length;
 }
 
@@ -311,7 +338,7 @@ async function showReader(id) {
     if (!a) { const s = await N.F.getDoc(N.F.doc(N.db, "articles", id)); if (s.exists()) a = { id, ...s.data() }; }
   } catch (e) { if (e && e.code === "permission-denied") return NLP.relock(); }
   const r = $("reader");
-  $("filters").hidden = true; $("list").hidden = true; $("empty").hidden = true; document.querySelector(".countbar").hidden = true; document.querySelector(".search").hidden = true;
+  $("filters").hidden = true; $("list").hidden = true; $("empty").hidden = true; $("moreA").hidden = true; document.querySelector(".countbar").hidden = true; document.querySelector(".search").hidden = true;
   r.hidden = false; window.scrollTo(0, 0);
   if (!a) { r.innerHTML = `<button class="linkbtn back" type="button" data-back>‹ กลับไปรายการ</button><p>ไม่พบบทความนี้</p>`; return; }
   r.innerHTML = `<button class="linkbtn back" type="button" data-back>‹ กลับไปรายการ</button><p class="sum">กำลังโหลด...</p>`;
@@ -348,6 +375,7 @@ function hideReader() {
 }
 function route() { readParams(); if (state.id) showReader(state.id); else hideReader(); }
 
+$("moreA").addEventListener("click", loadMore);
 document.addEventListener("click", e => {
   const open = e.target.closest("[data-open]");
   if (open) { e.preventDefault(); let ok = true; try { history.pushState(null, "", "articles.html?id=" + encodeURIComponent(open.dataset.open)); } catch (x) { ok = false; } if (ok) route(); else { state.id = open.dataset.open; showReader(state.id); } return; }
@@ -383,6 +411,7 @@ async function boot() {
       const snap = await N.F.getDocs(N.F.query(N.F.collection(N.db, "articles"), N.F.orderBy("createdAt", "desc"), N.F.limit(50)));
       rows = snap.docs.map(d => ({ id: d.id, ...d.data() })); if (window.cachePut) cachePut("articles", rows);
     }
+    setCursor(rows);
     items = rows.sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
   } catch (e) {
     if (e && e.code === "permission-denied") return NLP.relock();
