@@ -135,6 +135,8 @@ h2 { font-size: 1.2rem; font-weight: 700; margin: 0; padding-left: 10px; border-
 .sec { margin-top: 30px; }
 .off { margin-top: 20px; padding: 28px 20px; text-align: center; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
 .btn { font-weight: 600; cursor: pointer; padding: 7px 18px; border: 0; border-radius: 10px; background: var(--gold); color: var(--gold-ink); }
+.morebar { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 18px 0 6px; color: var(--muted); font-size: .85rem; text-align: center; }
+.morebar .linkbtn { font-size: .95rem; padding: 10px 20px; }
 .linkbtn { font-size: .88rem; background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-decoration: underline; }
 .seg { display: inline-flex; padding: 3px; gap: 2px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; }
 .seg button { font-size: .88rem; cursor: pointer; border: 0; background: transparent; color: var(--ink); padding: 3px 14px; border-radius: 999px; }
@@ -318,6 +320,7 @@ h2 { font-size: 1.2rem; font-weight: 700; margin: 0; padding-left: 10px; border-
       <div id="tlSkel"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
       <ol class="rail" id="rail" hidden></ol>
       <div class="empty" id="tlEmpty" hidden></div>
+      <div class="morebar" id="moreBar" hidden><span id="covTxt"></span><button class="linkbtn" id="moreF" type="button"></button></div>
     </section>
   </div>
 </main>
@@ -369,12 +372,45 @@ async function loadWatch() {
 }
 const inW = t => watch.some(w => (window.tkAlias ? tkAlias(w) : [w]).includes(t));   // GOOGL กับ GOOG นับเป็นหุ้นเดียวกัน
 const hitW = (p, w) => (p.tickers || []).some(t => (window.tkAlias ? tkAlias(w) : [w]).includes(t));
+// โหลดโพสต์เก่าเพิ่ม: ครั้งแรกดึงอย่างละ 50 เรื่องล่าสุด (กฎ Firestore จำกัด 50 ต่อครั้ง) ที่เก่ากว่านั้นดึงต่อด้วยปุ่ม ไล่ตาม createdAt ของแต่ละหมวด
+const PAGE_N = 50, cols = {}; let moreBusy = false, moreErr = false;
+const rowCur = rows => { const t = rows.map(r => ms(r.createdAt)).filter(x => x > 0); return t.length ? Math.min(...t) : null; };
+const trackCol = (name, rows) => { const cu = rowCur(rows); cols[name] = { rows, cur: cu, done: rows.length < PAGE_N || cu == null }; return rows; };
+const moreLeft = () => Object.keys(cols).filter(n => !cols[n].done);
+function updateMore() {
+  const nd = moreLeft(), bar = $("moreBar"); bar.hidden = !watch.length || !nd.length;
+  if (bar.hidden) return;
+  const cov = Math.max(...nd.map(n => cols[n].cur));
+  $("covTxt").textContent = "ค้นครบตั้งแต่ " + dateTh(cov) + " ถึงปัจจุบัน";
+  $("moreF").disabled = moreBusy; $("moreF").textContent = moreBusy ? "กำลังโหลด..." : moreErr ? "โหลดไม่สำเร็จ กดลองอีกครั้ง" : "โหลดโพสต์เก่าเพิ่ม";
+}
+async function loadMore() {
+  if (moreBusy || !moreLeft().length) return;
+  moreBusy = true; moreErr = false; updateMore();
+  const F = NLP.F;
+  try {
+    await Promise.all(moreLeft().map(async n => {
+      const c = cols[n];
+      const s = await F.getDocs(F.query(F.collection(NLP.db, n), F.orderBy("createdAt", "desc"), F.startAfter(F.Timestamp.fromMillis(c.cur)), F.limit(PAGE_N)));
+      const got = s.docs.map(d => { const o = d.data(); delete o.body; delete o.thumb; o.id = d.id; return o; });
+      const have = new Set(c.rows.map(x => x.id)), cu = rowCur(got);
+      c.rows = c.rows.concat(got.filter(x => !have.has(x.id)));
+      if (cu != null) c.cur = Math.min(c.cur, cu);
+      if (got.length < PAGE_N || cu == null) c.done = true;
+    }));
+  } catch (err) {
+    if (err && err.code === "permission-denied") return NLP.relock();
+    moreErr = true;
+  }
+  items = build(cols.news.rows, cols.earnings.rows, cols.articles.rows);
+  moreBusy = false; render();
+}
 async function loadCol(name) {   // ใช้แคชชุดเดียวกับปุ่มค้นหา (ลดการอ่านซ้ำ)
   const c = window.cacheGet && cacheGet("srch_" + name, CACHE_MIN);
-  if (c) return c;
+  if (c) return trackCol(name, c);
   const F = NLP.F, s = await F.getDocs(F.query(F.collection(NLP.db, name), F.orderBy("createdAt", "desc"), F.limit(50)));
   const r = s.docs.map(d => { const o = d.data(); delete o.body; delete o.thumb; o.id = d.id; return o; });
-  if (window.cachePut) cachePut("srch_" + name, r); return r;
+  if (window.cachePut) cachePut("srch_" + name, r); return trackCol(name, r);
 }
 function build(news, earn, arts) {
   const out = [];
@@ -397,6 +433,7 @@ function evHtml(e) {
     <div class="pfoot"><button class="linkbtn" type="button" data-read hidden>อ่านต่อ</button>${safeUrl(p.link) ? `<a href="${esc(safeUrl(p.link))}" target="_blank" rel="noopener noreferrer">อ่านต้นฉบับ</a>` : ""}<button class="linkbtn" type="button" data-copytext>คัดลอกข้อความ</button></div></li>`;
 }
 function render() {
+  updateMore();
   const n = { all: 0, news: 0, earn: 0, art: 0 }, base = items.filter(e => !pick || hitW(e.p, pick));
   base.forEach(e => { n.all++; n[group(e.k)]++; });
   $("chips").innerHTML = KINDS.map(([k, v]) => `<button type="button" data-f="${k}" aria-pressed="${kind === k}">${v}<small>${n[k]}</small></button>`).join("");
@@ -412,9 +449,10 @@ function render() {
   if (!list.length) em.innerHTML = !watch.length
     ? '<p>ยังไม่มีหุ้นใน Watchlist</p><p>เปิดหน้า dashboard ของหุ้นที่สนใจ แล้วกด "+ Watchlist" ก่อนกลับมาดูหน้านี้</p><a class="linkbtn" href="stock.html">ไปค้นหาหุ้น</a>'
     : items.length ? '<p>ไม่พบโพสต์ที่ตรงกับตัวกรอง</p><button class="linkbtn" type="button" data-clear>ล้างตัวกรอง</button>'
-    : `<p>ยังไม่พบข่าว งบ หรือบทความของหุ้นใน Watchlist ในโพสต์ล่าสุด</p><p>ค้นเฉพาะข่าว งบ และบทความล่าสุดอย่างละ 50 เรื่อง ถ้าอยากดูย้อนหลัง เปิด dashboard ของหุ้นแต่ละตัว</p>`;
+    : `<p>ยังไม่พบข่าว งบ หรือบทความของหุ้นใน Watchlist ในโพสต์ล่าสุด</p>${moreLeft().length ? "<p>ตอนนี้ค้นย้อนไปแค่ข่าว งบ และบทความล่าสุดอย่างละ 50 เรื่อง กดโหลดโพสต์เก่าเพิ่มด้านล่างเพื่อค้นย้อนหลัง</p>" : "<p>ค้นครบทุกโพสต์ที่มีในระบบแล้ว ถ้าอยากดูข้อมูลของหุ้น เปิด dashboard ของหุ้นแต่ละตัว</p>"}`;
   document.querySelectorAll(".ev").forEach(c => { const t = c.querySelector(".ptext"), b = c.querySelector("[data-read]"); if (t && b) b.hidden = !(t.scrollHeight > t.clientHeight + 2); });
 }
+$("moreF").addEventListener("click", loadMore);
 document.addEventListener("click", e => {
   const t = e.target; let b;
   if ((b = t.closest("[data-f]"))) { kind = b.dataset.f; render(); return; }
